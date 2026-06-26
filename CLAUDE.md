@@ -24,7 +24,6 @@ agentic-collections-catalog/
 │   ├── mcp.json                 # MCP server metadata
 │   └── collections/             # Generated per-pack HTML pages
 ├── scripts/                     # Catalog build and maintenance scripts
-
 ├── README.md
 └── LICENSE
 ```
