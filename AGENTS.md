@@ -40,6 +40,8 @@ agentic-collections-catalog/
 
 The clones are ephemeral (deleted after each build). Nothing from external repos is committed here.
 
+> **Eval data lives in source repos, not here.** `eval_site_enrichment.py` reads `eval/<pack>/<skill>/report.json` from the *cloned* source repo (e.g. `agentic-collections-skills/eval/rh-sre/remediation/report.json`). There is no `eval/` directory in this catalog repo — looking for eval files here will always find nothing.
+
 ## Marketplace File
 
 `marketplace/rh-agentic-collection.yml` is the **only** place that controls which packs appear on the site. Each module entry carries:

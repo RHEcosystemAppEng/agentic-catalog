@@ -299,14 +299,21 @@ def apply_eval_enrichment(packs: List[Dict[str, Any]], root: Path) -> None:
     """
     Mutate each pack: attach skill['evaluation'] for catalog-listed skills when
     eval/<pack>/<skill>/report.json exists; set pack['evaluation_summary'] rollup.
+
+    Eval reports live in the SOURCE repo (read from the clone at build time), not in
+    the catalog repo. The root argument must point to the cloned source repo root.
+
+    Falls back to pack['skills'] (from SKILL.md frontmatter) when no catalog is present.
     """
     root = root.resolve()
     for pack in packs:
         coll = pack.get("collection")
-        if not isinstance(coll, dict):
-            continue
+        if isinstance(coll, dict):
+            skills_ref = _iter_catalog_skills(coll)
+        else:
+            # No catalog: use raw skills parsed from SKILL.md frontmatter
+            skills_ref = [s for s in (pack.get("skills") or []) if isinstance(s, dict)]
 
-        skills_ref = _iter_catalog_skills(coll)
         catalog_skill_count = len(skills_ref)
         attached: List[Optional[Dict[str, Any]]] = []
 
