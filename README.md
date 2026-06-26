@@ -4,6 +4,8 @@ Unified marketplace and website for Red Hat agentic skill collections. This repo
 
 **This is not a skills development repository.** Skills are authored in source repositories like [agentic-collections-skills](https://github.com/RHEcosystemAppEng/agentic-collections-skills). An internal process fetches, evaluates, and assembles the catalog automatically.
 
+> **Note:** Evaluation reports (`eval/<pack>/<skill>/report.json`) live in the **source skills repos**, not here. This catalog repo contains no `eval/` directory — eval data is read from the temporary clones at build time.
+
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Validate Catalog](https://github.com/RHEcosystemAppEng/agentic-collections-catalog/actions/workflows/validate.yml/badge.svg)](https://github.com/RHEcosystemAppEng/agentic-collections-catalog/actions/workflows/validate.yml)
 [![Deploy GitHub Pages](https://github.com/RHEcosystemAppEng/agentic-collections-catalog/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/RHEcosystemAppEng/agentic-collections-catalog/actions/workflows/deploy-pages.yml)

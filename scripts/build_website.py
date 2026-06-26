@@ -11,7 +11,6 @@ from pathlib import Path
 
 # Import our data generators
 from catalog_site_bundle import bundle_catalog_for_site
-from eval_site_enrichment import apply_eval_enrichment
 from generate_collection_pages import generate_collection_pages
 from generate_pack_data import generate_pack_data
 from generate_mcp_data import generate_mcp_data
@@ -43,10 +42,6 @@ def build_website():
 
     # Keep pack cards deterministic and alphabetically ordered.
     pack_data = sorted(pack_data, key=lambda p: p['name'])
-
-    print("📊 Enriching packs with eval/reports (eval/<pack>/<skill>/report.json)...")
-    apply_eval_enrichment(pack_data, root)
-    print()
 
     # Generate MCP server data
     print("🔌 Parsing MCP servers...")
