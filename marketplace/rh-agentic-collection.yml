@@ -5,6 +5,7 @@ version: "0.1.0"
 
 modules:
   - name: "ocp-admin"
+    title: "Agentic skill pack for Red Hat OpenShift"
     description: "Automation capabilities for OpenShift Container Platform cluster management, workload orchestration, security policies, and operational tasks."
     version: "0.1.0"
     repository: "https://github.com/RHEcosystemAppEng/agentic-collections-skills"
@@ -24,6 +25,7 @@ modules:
       - "vulnerability-management"
 
   - name: "rh-developer"
+    title: "Agentic skill pack for Software Developers"
     description: "Plugins for building and deploying applications on Red Hat platforms."
     version: "0.1.0"
     repository: "https://github.com/RHEcosystemAppEng/agentic-collections-skills"
@@ -40,6 +42,7 @@ modules:
       - "podman"
 
   - name: "rh-sre"
+    title: "Agentic skill pack for Security Reliability Engineers"
     description: "Site reliability engineering tools and automation for managing Red Hat platforms and infrastructure."
     version: "0.1.0"
     repository: "https://github.com/RHEcosystemAppEng/agentic-collections-skills"
@@ -53,6 +56,7 @@ modules:
       - "automation"
 
   - name: "rh-ai-engineer"
+    title: "Agentic skill pack for OpenShift AI Engineers"
     description: "Red Hat OpenShift AI Engineering Agentic Collection"
     version: "0.1.0"
     repository: "https://github.com/RHEcosystemAppEng/agentic-collections-skills"
@@ -70,6 +74,7 @@ modules:
       - "gpu"
 
   - name: "rh-virt"
+    title: "Agentic skill pack for Red Hat OpenShift Virtualization"
     description: "Virtual machine management and automation for OpenShift Virtualization and KubeVirt workloads."
     version: "0.1.0"
     repository: "https://github.com/RHEcosystemAppEng/agentic-collections-skills"
@@ -83,6 +88,7 @@ modules:
       - "virt"
 
   - name: "rh-basic"
+    title: "Agentic skill pack for Red Hat customers"
     description: "Essential Red Hat skills for IT professionals: CVE explanation, diagnostics, product lifecycle, RHEL patch planning, and support severity guidance."
     version: "0.1.0"
     repository: "https://github.com/RHEcosystemAppEng/agentic-collections-skills"
@@ -98,6 +104,7 @@ modules:
       - "patching"
 
   - name: "rh-automation"
+    title: "Agentic skill pack for Automation Engineers"
     description: "Ansible Automation Platform governance, execution safety, and forensic troubleshooting tools for Red Hat automation engineers."
     version: "0.1.0"
     repository: "https://github.com/RHEcosystemAppEng/agentic-collections-skills"

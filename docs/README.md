@@ -36,26 +36,18 @@ When present under the repository root, **`eval/<pack_name>/<skill_name>/report.
 
 The **`name`** of each skill in **`collection.yaml`** must match the **`skills/<name>/`** directory and the **`eval/<pack>/<name>/`** folder segment so lookups resolve correctly.
 
-## Manual Updates
-
-To manually update the site:
-1. Run `make generate` from the root directory (runs `make validate` first when using `make test`).
-2. Commit the updated `docs/data.json`.
-3. Push to trigger GitHub Pages deployment.
-
 ## Validation for Docs Metadata
 
-When changing docs presentation metadata (`styles.css`, `app.js`, `plugins.json`, `mcp.json`):
+When changing docs presentation metadata (`styles.css`, `app.js`, `mcp.json`):
 
 1. Prefer canonical tokens from `styles.css` over hardcoded values.
-2. Ensure every in-scope pack has icon/title mappings in `plugins.json`.
-3. Run validation checks:
+2. Run validation checks:
 
 ```bash
 make validate
 ```
 
-4. Review validation output before merge.
+3. Review validation output before merge.
 
 ## Security
 

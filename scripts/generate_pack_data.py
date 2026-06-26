@@ -4,7 +4,6 @@ Parse agentic packs and extract plugin metadata, skills, and agents.
 """
 
 import json
-import os
 import re
 from pathlib import Path
 from typing import Dict, List, Any
@@ -14,7 +13,7 @@ import pack_registry
 from catalog_site_bundle import bundle_catalog_for_site
 from generate_mcp_data import parse_mcp_file
 
-# Union registry (marketplace ∪ plugins.json); docs site uses subset helper
+# Pack dirs from marketplace (single source of truth); docs site uses maturity-gated subset
 PACK_DIRS = pack_registry.get_union_pack_dirs()
 DOCS_PACK_DIRS = pack_registry.get_docs_pack_dirs()
 
@@ -46,81 +45,37 @@ def parse_yaml_frontmatter(file_path: Path) -> Dict[str, Any]:
         return {}
 
 
-def load_plugin_titles() -> Dict[str, str]:
+def parse_plugin_json(pack_dir: str) -> Dict[str, Any]:
     """
-    Load plugin title mappings from docs/plugins.json.
-
-    Returns:
-        Dictionary mapping plugin names to display titles
-    """
-    plugins_file = Path('docs/plugins.json')
-
-    if not plugins_file.exists():
-        print("Warning: docs/plugins.json not found, using default titles")
-        return {}
-
-    try:
-        with open(plugins_file, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-        
-        # Extract just the titles into a simple mapping
-        return {name: info['title'] for name, info in data.items()}
-
-    except Exception as e:
-        print(f"Warning: Failed to load docs/plugins.json: {e}")
-        return {}
-
-
-def parse_plugin_json(pack_dir: str, plugin_titles: Dict[str, str]) -> Dict[str, Any]:
-    """
-    Parse optional plugin.json from a pack directory and merge with title from docs/plugins.json.
-
-    Args:
-        pack_dir: Name of the pack directory
-        plugin_titles: Dictionary mapping plugin names to display titles
-
-    Returns:
-        Dictionary with plugin metadata, or defaults if file doesn't exist
+    Parse optional plugin.json from a pack directory. Title falls back to
+    the marketplace module's ``title`` field, then a humanized pack name.
     """
     plugin_path = Path(pack_dir) / '.claude-plugin' / 'plugin.json'
+    mod = pack_registry.load_marketplace_module_by_path(pack_dir) or {}
+    default_title = mod.get("title") or pack_dir.replace("-", " ").title()
 
-    # Default values if plugin.json doesn't exist
     defaults = {
         'name': pack_dir,
         'version': '0.0.0',
         'description': f'{pack_dir} agentic collection',
         'author': {'name': 'Red Hat'},
         'license': 'Apache-2.0',
-        'keywords': []
+        'keywords': [],
+        'title': default_title,
     }
 
     if not plugin_path.exists():
-        # Use title from plugins.json if available
-        if pack_dir in plugin_titles:
-            defaults['title'] = plugin_titles[pack_dir]
         return defaults
 
     try:
         with open(plugin_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
-
-        # Merge with defaults (in case some fields are missing)
         result = {**defaults, **data}
-        
-        # Override with title from docs/plugins.json if available
-        if pack_dir in plugin_titles:
-            result['title'] = plugin_titles[pack_dir]
-        elif 'title' not in result:
-            # Fallback: use name as title if not set
-            result['title'] = result['name']
-
+        if 'title' not in result:
+            result['title'] = default_title
         return result
-
     except Exception as e:
         print(f"Warning: Failed to parse {plugin_path}: {e}")
-        # Use title from plugins.json if available even on error
-        if pack_dir in plugin_titles:
-            defaults['title'] = plugin_titles[pack_dir]
         return defaults
 
 
@@ -317,17 +272,12 @@ def detect_repo_license(repo_root: Path, pack_path: str = ".") -> str:
     return "Unknown"
 
 
-def load_federated_packs(plugin_titles: Dict[str, str] | None = None) -> List[Dict[str, Any]]:
-    """
-    Fetch federated modules and return them as standalone pack entries.
-
-    Fetch modules listed in the marketplace and return them as standalone pack entries.
-    """
+def load_federated_packs() -> List[Dict[str, Any]]:
+    """Clone each marketplace module and return it as a standalone pack entry."""
     import shutil
     import subprocess
     import tempfile
 
-    titles = plugin_titles if plugin_titles is not None else load_plugin_titles()
     modules = pack_registry.load_federated_modules()
     if not modules:
         return []
@@ -395,7 +345,7 @@ def load_federated_packs(plugin_titles: Dict[str, str] | None = None) -> List[Di
                 "icon": mod.get("icon", ""),
                 "plugin": {
                     "name": name,
-                    "title": titles.get(name, name.replace("-", " ").title()),
+                    "title": mod.get("title") or name.replace("-", " ").title(),
                     "version": version,
                     "description": description,
                     "author": {"name": "External"},
@@ -430,9 +380,6 @@ def generate_pack_data() -> List[Dict[str, Any]]:
     """
     packs = []
 
-    # Load plugin title mappings from docs/plugins.json
-    plugin_titles = load_plugin_titles()
-
     for pack_dir in DOCS_PACK_DIRS:
         pack_path = Path(pack_dir)
 
@@ -442,7 +389,7 @@ def generate_pack_data() -> List[Dict[str, Any]]:
 
         docs = parse_docs(pack_dir)
 
-        plugin = parse_plugin_json(pack_dir, plugin_titles)
+        plugin = parse_plugin_json(pack_dir)
         overlay_plugin_version_from_marketplace(pack_dir, plugin)
 
         pack = {
@@ -461,7 +408,7 @@ def generate_pack_data() -> List[Dict[str, Any]]:
         plugin_title = pack['plugin'].get('title', pack_dir)
         print(f"✓ Parsed {plugin_title}: {len(pack['skills'])} skills, {len(pack['agents'])} agents, {len(docs)} docs")
 
-    federated = load_federated_packs(plugin_titles)
+    federated = load_federated_packs()
     if federated:
         packs.extend(federated)
         print(f"✓ Added {len(federated)} marketplace pack(s)")

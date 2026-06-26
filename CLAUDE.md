@@ -21,7 +21,6 @@ agentic-collections-catalog/
 │   ├── app.js                   # Application logic
 │   ├── styles.css               # Styling
 │   ├── data.json                # Generated catalog data (skills, packs, MCPs)
-│   ├── plugins.json             # Plugin registry
 │   ├── mcp.json                 # MCP server metadata
 │   └── collections/             # Generated per-pack HTML pages
 ├── scripts/                     # Catalog build and maintenance scripts
@@ -40,7 +39,7 @@ Skills repos (multiple)          Internal process          This repo
 │ agentic-collections-│     │ Fetch skills repos    │     │ marketplace/        │
 │ skills/             │────>│ Evaluate & score      │────>│ docs/ (website)     │
 │   rh-sre/           │     │ Build catalog data    │     │ data.json           │
-│   ocp-admin/        │     │ Generate website      │     │ plugins.json        │
+│   ocp-admin/        │     │ Generate website      │     │ mcp.json            │
 │   ...               │     └──────────────────────┘     └─────────────────────┘
 ├─────────────────────┤
 │ other-skills-repo/  │────> (same process)
@@ -65,7 +64,6 @@ This file defines which packs are available, their versions, and where to fetch 
 The `docs/` directory contains the static site served at agentskills.io. Key files:
 
 - `data.json` — Generated catalog data aggregating all packs, skills, and MCP servers
-- `plugins.json` — Plugin registry for marketplace discovery
 - `mcp.json` — MCP server metadata and tool descriptions
 - `collections/*.html` — Per-pack detail pages
 
@@ -88,7 +86,7 @@ Scripts in `scripts/` support catalog build and maintenance:
 | `test_local.sh` | Automated site verification (data.json, HTML, XSS, credentials) |
 | `validate_mcp_types.py` | Validate MCP server type parsing (command vs HTTP) |
 | `eval_site_enrichment.py` | Enrich catalog with evaluation data |
-| `pack_registry.py` | Discover packs from marketplace and plugins.json |
+| `pack_registry.py` | Discover packs from the marketplace (single source of truth) |
 
 ## Key Considerations
 
@@ -102,7 +100,7 @@ If you need to create or modify skills, work in the appropriate skills source re
 
 ### Catalog Data is Generated
 
-Files like `docs/data.json`, `docs/collections/*.html`, and parts of `plugins.json` are generated artifacts. They are rebuilt by the internal process and should not be edited manually.
+Files like `docs/data.json` and `docs/collections/*.html` are generated artifacts. They are rebuilt by the internal process and should not be edited manually.
 
 ### Schema Changes
 

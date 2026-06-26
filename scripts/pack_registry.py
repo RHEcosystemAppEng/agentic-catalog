@@ -1,13 +1,12 @@
 """
-Resolve the set of agentic pack directories from Lola marketplace + docs/plugins.json.
+Resolve the set of agentic pack directories from the Lola marketplace file.
 
-Policy (union): include every ``modules[].path`` from ``marketplace/rh-agentic-collection.yml``
-and every key from ``docs/plugins.json``, keeping only directory names that exist on disk.
+The marketplace file (``marketplace/rh-agentic-collection.yml``) is the single
+source of truth for pack discovery.
 """
 
 from __future__ import annotations
 
-import json
 import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
@@ -15,7 +14,6 @@ from typing import Any, Dict, List, Optional, Set
 import yaml
 
 DEFAULT_MARKETPLACE = Path("marketplace/rh-agentic-collection.yml")
-DEFAULT_PLUGINS_JSON = Path("docs/plugins.json")
 
 
 def _repo_root() -> Path:
@@ -37,35 +35,17 @@ def load_marketplace_module_paths(marketplace_path: Optional[Path] = None) -> Li
     return out
 
 
-def load_plugins_json_keys(plugins_path: Optional[Path] = None) -> List[str]:
-    path = plugins_path or (_repo_root() / DEFAULT_PLUGINS_JSON)
-    if not path.exists():
-        return []
-    with open(path, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    if not isinstance(data, dict):
-        return []
-    return sorted(data.keys())
-
-
 def get_union_pack_dirs(
     repo_root: Optional[Path] = None,
     marketplace_path: Optional[Path] = None,
-    plugins_path: Optional[Path] = None,
 ) -> List[str]:
     """
-    Sorted unique pack directory names that exist under repo root and appear in
-    marketplace and/or docs/plugins.json union.
+    Sorted pack directory names from the marketplace that exist on disk under repo root.
+    The marketplace file is the single source of truth for pack discovery.
     """
     root = repo_root or _repo_root()
-    names: Set[str] = set()
-    names.update(load_marketplace_module_paths(marketplace_path))
-    names.update(load_plugins_json_keys(plugins_path))
-    existing: List[str] = []
-    for name in sorted(names):
-        if (root / name).is_dir():
-            existing.append(name)
-    return existing
+    names: Set[str] = set(load_marketplace_module_paths(marketplace_path))
+    return [name for name in sorted(names) if (root / name).is_dir()]
 
 
 def load_marketplace_module_by_path(
@@ -156,21 +136,6 @@ def get_federation_module_dirs(repo_root: Optional[Path] = None) -> List[str]:
 def is_federation_module(pack_dir: str) -> bool:
     """Return ``True`` if *pack_dir* lives under ``federation/modules/``."""
     return pack_dir.startswith("federation/modules/")
-
-
-def load_plugin_title(pack_dir: str, repo_root: Optional[Path] = None) -> Optional[str]:
-    root = repo_root or _repo_root()
-    p = root / DEFAULT_PLUGINS_JSON
-    if not p.exists():
-        return None
-    with open(p, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    entry = data.get(pack_dir)
-    if isinstance(entry, dict):
-        t = entry.get("title")
-        if isinstance(t, str):
-            return t
-    return None
 
 
 # Catalog `maturity` value that is included in GitHub Pages / docs/data.json generation.
