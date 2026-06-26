@@ -5,8 +5,14 @@
 * Replace [mcp.json](./docs/mcp.json)
 
 ### External contributions
-* How to replace collection pack info in absemce of collection.yml?
-  * README
-  * License
-  * List of skills
-  * Installation
+* How to replace collection pack info in absence of collection.yml?
+  * ~~README~~
+  * ~~License~~
+  * ~~List of skills~~
+  * ~~Installation~~
+
+### Evals
+* Replace eval with scorecards
+
+### ???
+* 
