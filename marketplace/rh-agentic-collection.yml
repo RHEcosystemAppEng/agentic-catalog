@@ -1,13 +1,13 @@
 name: "redhat-agentic-collections"
 description: "Validated Agentic Collections from Red Hat Ecosystem Engineering"
-url: "https://github.com/RHEcosystemAppEng/agentic-collections"
+url: "https://github.com/RHEcosystemAppEng/agentic-collections-skills"
 version: "0.1.0"
 
 modules:
   - name: "ocp-admin"
     description: "Automation capabilities for OpenShift Container Platform cluster management, workload orchestration, security policies, and operational tasks."
     version: "0.1.0"
-    repository: "https://github.com/RHEcosystemAppEng/agentic-collections"
+    repository: "https://github.com/RHEcosystemAppEng/agentic-collections-skills"
     path: "ocp-admin"
     tags:
       - "red-hat"
@@ -25,7 +25,7 @@ modules:
   - name: "rh-developer"
     description: "Plugins for building and deploying applications on Red Hat platforms."
     version: "0.1.0"
-    repository: "https://github.com/RHEcosystemAppEng/agentic-collections"
+    repository: "https://github.com/RHEcosystemAppEng/agentic-collections-skills"
     path: "rh-developer"
     tags:
       - "developer"
@@ -40,7 +40,7 @@ modules:
   - name: "rh-sre"
     description: "Site reliability engineering tools and automation for managing Red Hat platforms and infrastructure."
     version: "0.1.0"
-    repository: "https://github.com/RHEcosystemAppEng/agentic-collections"
+    repository: "https://github.com/RHEcosystemAppEng/agentic-collections-skills"
     path: "rh-sre"
     tags:
       - "sre"
@@ -52,7 +52,7 @@ modules:
   - name: "rh-ai-engineer"
     description: "Red Hat OpenShift AI Engineering Agentic Collection"
     version: "0.1.0"
-    repository: "https://github.com/RHEcosystemAppEng/agentic-collections"
+    repository: "https://github.com/RHEcosystemAppEng/agentic-collections-skills"
     path: "rh-ai-engineer"
     tags:
       - "ai-engineer"
@@ -68,7 +68,7 @@ modules:
   - name: "rh-virt"
     description: "Virtual machine management and automation for OpenShift Virtualization and KubeVirt workloads."
     version: "0.1.0"
-    repository: "https://github.com/RHEcosystemAppEng/agentic-collections"
+    repository: "https://github.com/RHEcosystemAppEng/agentic-collections-skills"
     path: "rh-virt"
     tags:
       - "red-hat"
@@ -80,7 +80,7 @@ modules:
   - name: "rh-basic"
     description: "Essential Red Hat skills for IT professionals: CVE explanation, diagnostics, product lifecycle, RHEL patch planning, and support severity guidance."
     version: "0.1.0"
-    repository: "https://github.com/RHEcosystemAppEng/agentic-collections"
+    repository: "https://github.com/RHEcosystemAppEng/agentic-collections-skills"
     path: "rh-basic"
     tags:
       - "red-hat"
@@ -94,7 +94,7 @@ modules:
   - name: "rh-automation"
     description: "Ansible Automation Platform governance, execution safety, and forensic troubleshooting tools for Red Hat automation engineers."
     version: "0.1.0"
-    repository: "https://github.com/RHEcosystemAppEng/agentic-collections"
+    repository: "https://github.com/RHEcosystemAppEng/agentic-collections-skills"
     path: "rh-automation"
     tags:
       - "ansible"
