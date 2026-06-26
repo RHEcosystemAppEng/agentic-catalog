@@ -27,17 +27,22 @@ def parse_yaml_frontmatter(file_path: Path) -> Dict[str, Any]:
 
 def parse_skills(pack_dir: str) -> List[Dict[str, Any]]:
     """
-    Parse skills from skills/*/SKILL.md files.
-
-    Args:
-        pack_dir: Name of the pack directory
-
-    Returns:
-        List of skill dictionaries with name, description, file_path
+    Parse skills from skills/*/SKILL.md (multi-skill pack) or SKILL.md at root (single-skill repo).
     """
     skills = []
-    skills_dir = Path(pack_dir) / 'skills'
+    root = Path(pack_dir)
 
+    # Single-skill repo: SKILL.md at the pack root
+    root_skill = root / 'SKILL.md'
+    if root_skill.is_file():
+        frontmatter = parse_yaml_frontmatter(root_skill)
+        name = frontmatter.get('name', root.name)
+        description = frontmatter.get('description', '')
+        if isinstance(description, str):
+            description = ' '.join(description.split())
+        return [{'name': name, 'description': description, 'file_path': 'SKILL.md'}]
+
+    skills_dir = root / 'skills'
     if not skills_dir.exists():
         return skills
 
