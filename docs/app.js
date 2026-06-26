@@ -306,12 +306,6 @@ function createPackCard(pack) {
         }
         badges.appendChild(badge);
     }
-    if (pack.source === 'federated') {
-        const fedBadge = document.createElement('span');
-        fedBadge.className = 'pack-eval-badge is-federated';
-        fedBadge.textContent = 'FEDERATED';
-        badges.appendChild(fedBadge);
-    }
     if (badges.childNodes.length > 0) {
         headerRow.appendChild(badges);
     }
@@ -319,11 +313,8 @@ function createPackCard(pack) {
 
     const meta = document.createElement('p');
     meta.className = 'pack-meta';
-    if (pack.source === 'federated') {
-        meta.textContent = `External · v${pack.plugin.version || '0.0.0'} · ${pack.ref || ''}`;
-    } else {
-        meta.textContent = `By Red Hat · v${pack.plugin.version || '0.0.0'}`;
-    }
+    const author = pack.plugin.author?.name || 'Red Hat';
+    meta.textContent = `By ${author} · v${pack.plugin.version || '0.0.0'}`;
     div.appendChild(meta);
 
     // Description (prefer collection catalog metadata over plugin fallback text)

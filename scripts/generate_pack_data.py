@@ -11,6 +11,8 @@ from typing import Dict, List, Any
 import yaml
 
 import pack_registry
+from catalog_site_bundle import bundle_catalog_for_site
+from generate_mcp_data import parse_mcp_file
 
 # Union registry (marketplace ∪ plugins.json); docs site uses subset helper
 PACK_DIRS = pack_registry.get_union_pack_dirs()
@@ -319,8 +321,7 @@ def load_federated_packs(plugin_titles: Dict[str, str] | None = None) -> List[Di
     """
     Fetch federated modules and return them as standalone pack entries.
 
-    Each federated pack gets ``source: "federated"`` so the docs site can
-    badge it differently from in-tree packs.
+    Fetch modules listed in the marketplace and return them as standalone pack entries.
     """
     import shutil
     import subprocess
@@ -338,16 +339,6 @@ def load_federated_packs(plugin_titles: Dict[str, str] | None = None) -> List[Di
     try:
         for mod in modules:
             name = mod.get("name", "unknown")
-            fed_catalog_dir = f"federation/modules/{name}"
-            maturity = pack_registry.load_pack_maturity(fed_catalog_dir, repo_root)
-            if maturity != pack_registry.DOCS_MATURITY_PUBLISH:
-                label = maturity or "missing catalog"
-                print(
-                    f"  Skipping federated '{name}' for docs site: maturity {label} "
-                    f"(only GREEN is published)"
-                )
-                continue
-
             repository = mod.get("repository", "")
             ref = mod.get("ref", "")
             description = mod.get("description", "")
@@ -382,11 +373,23 @@ def load_federated_packs(plugin_titles: Dict[str, str] | None = None) -> List[Di
             license_id = detect_repo_license(clone_dest, pack_path)
             skills = parse_skills(str(pack_dir))
 
+            # Read catalog from the cloned source repo (not from a local federation/ mirror)
+            cat_bundle, cat_warns = bundle_catalog_for_site(pack_path, clone_dest)
+            for w in cat_warns:
+                print(f"  ⚠️  {w}")
+
+            # README fallback: read content so the UI can show it when catalog is absent
+            readme_path = pack_dir / "README.md"
+            readme_content = readme_path.read_text(encoding="utf-8") if readme_path.is_file() else None
+
+            # MCP servers: parse from cloned content; fix pack field to use module name
+            mcp_servers = parse_mcp_file(str(pack_dir))
+            for s in mcp_servers:
+                s["pack"] = name
+
             pack = {
                 "name": name,
                 "path": repository,
-                "catalog_dir": fed_catalog_dir,
-                "source": "federated",
                 "repository": repository,
                 "ref": pack_registry.normalize_federation_ref(ref)[:12],
                 "plugin": {
@@ -401,10 +404,16 @@ def load_federated_packs(plugin_titles: Dict[str, str] | None = None) -> List[Di
                 "skills": sorted(skills, key=lambda s: s["name"]),
                 "agents": [],
                 "docs": [],
-                "has_readme": (pack_dir / "README.md").exists(),
+                "has_readme": readme_content is not None,
+                "readme_content": readme_content,
+                "mcp_servers_raw": mcp_servers,
             }
+            if cat_bundle is not None:
+                pack["collection"] = cat_bundle
             packs.append(pack)
-            print(f"  ✓ Federated '{name}': {len(skills)} skill(s) from {repository}")
+            catalog_status = "with catalog" if cat_bundle else "README only"
+            mcp_status = f", {len(mcp_servers)} MCP server(s)" if mcp_servers else ""
+            print(f"  ✓ '{name}': {len(skills)} skill(s) from {repository} ({catalog_status}{mcp_status})")
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
@@ -454,7 +463,7 @@ def generate_pack_data() -> List[Dict[str, Any]]:
     federated = load_federated_packs(plugin_titles)
     if federated:
         packs.extend(federated)
-        print(f"✓ Added {len(federated)} federated pack(s)")
+        print(f"✓ Added {len(federated)} marketplace pack(s)")
 
     return packs
 

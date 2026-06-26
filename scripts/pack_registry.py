@@ -92,9 +92,9 @@ FEDERATION_REF_SHA_RE = re.compile(r"^[0-9a-f]{40}$", re.IGNORECASE)
 
 
 def federation_ref_error(ref: Any) -> Optional[str]:
-    """Return an error message when *ref* is missing or not a 40-character commit SHA."""
+    """Return an error message when *ref* is set but not a 40-character commit SHA."""
     if ref is None or not str(ref).strip():
-        return "ref is required (40-character commit SHA; not a branch or tag name)"
+        return None  # absent ref → defaults to main branch
     value = str(ref).strip()
     if not FEDERATION_REF_SHA_RE.fullmatch(value):
         return (
@@ -104,11 +104,12 @@ def federation_ref_error(ref: Any) -> Optional[str]:
 
 
 def normalize_federation_ref(ref: Any) -> str:
-    """Return a lowercase 40-character commit SHA."""
+    """Return a lowercase 40-character commit SHA, or 'main' when ref is absent."""
     err = federation_ref_error(ref)
     if err:
         raise ValueError(err)
-    return str(ref).strip().lower()
+    value = str(ref).strip() if ref is not None else ""
+    return value.lower() if value else "main"
 
 
 def validate_federated_module_entry(module: Dict[str, Any]) -> List[str]:

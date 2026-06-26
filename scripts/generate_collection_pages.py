@@ -15,8 +15,34 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 import markdown
+import yaml
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+_MARKETPLACE_PATH = REPO_ROOT / "marketplace" / "rh-agentic-collection.yml"
+def _load_marketplace_modules() -> Dict[str, Any]:
+    if not _MARKETPLACE_PATH.exists():
+        return {}
+    with open(_MARKETPLACE_PATH, encoding="utf-8") as f:
+        data = yaml.safe_load(f) or {}
+    return {mod["name"]: mod for mod in (data.get("modules") or []) if "name" in mod}
+
+
+_MARKETPLACE_MODULES: Dict[str, Any] = _load_marketplace_modules()
+
+
+def _pack_blob_base(pack: Dict[str, Any]) -> str:
+    """Return the GitHub blob URL base (repo/blob/ref/path) for a pack."""
+    name = pack.get("name", "")
+    mod = _MARKETPLACE_MODULES.get(name, {})
+    repo = (pack.get("repository") or mod.get("repository") or "").rstrip("/")
+    if not repo:
+        raise ValueError(f"Pack '{name}' has no repository in pack data or marketplace")
+    ref = pack.get("ref") or "main"
+    path = (mod.get("path") if mod else None) or name
+    path = path.strip("/")
+    if path and path != ".":
+        return f"{repo}/blob/{ref}/{path}"
+    return f"{repo}/blob/{ref}"
 
 
 def md_to_html(text: Any) -> str:
@@ -384,7 +410,7 @@ def _render_skill_evaluation_block(ev: Dict[str, Any]) -> str:
     return "".join(parts)
 
 
-def _render_skills_list(skills: List[Dict[str, Any]], pack_name: str, list_tag: str | None = None) -> str:
+def _render_skills_list(skills: List[Dict[str, Any]], blob_base: str, list_tag: str | None = None) -> str:
     items: List[str] = []
     for skill in skills:
         if not isinstance(skill, dict):
@@ -392,7 +418,7 @@ def _render_skills_list(skills: List[Dict[str, Any]], pack_name: str, list_tag: 
         name = str(skill.get("name", ""))
         desc = html.escape(str(skill.get("description", "")))
         summary = md_to_html(skill.get("summary_markdown", ""))
-        skill_path = f"https://github.com/RHEcosystemAppEng/agentic-collections/blob/main/{pack_name}/skills/{name}/SKILL.md"
+        skill_path = f"{blob_base}/skills/{name}/SKILL.md"
         heading = f"<div><code>/{html.escape(name)}</code> - {desc}"
         if list_tag:
             heading += f' <span class="skill-kind-badge">{html.escape(list_tag)}</span>'
@@ -442,7 +468,7 @@ def _render_decision_guide(rows: List[Dict[str, Any]]) -> str:
     )
 
 
-def _render_resources(resources: List[Dict[str, Any]], pack_name: str) -> str:
+def _render_resources(resources: List[Dict[str, Any]], blob_base: str) -> str:
     if not resources:
         return "<p class=\"collection-missing\">No resources.</p>"
 
@@ -467,10 +493,7 @@ def _render_resources(resources: List[Dict[str, Any]], pack_name: str) -> str:
         if description:
             line.append(f" - {description}")
         if embedded:
-            embed_url = (
-                "https://github.com/RHEcosystemAppEng/agentic-collections/blob/main/"
-                f"{pack_name}/{embedded.lstrip('/')}"
-            )
+            embed_url = f"{blob_base}/{embedded.lstrip('/')}"
             line.append(
                 f' <a class="collection-inline-link" href="{html.escape(embed_url, quote=True)}" '
                 'target="_blank" rel="noopener noreferrer">[embedded doc]</a>'
@@ -534,14 +557,10 @@ def render_collection_page(pack: Dict[str, Any], mcp_data: List[Dict[str, Any]])
     page_title = collection.get("name") or pack.get("plugin", {}).get("title") or pack.get("name")
     description = str(collection.get("description") or "").strip()
     subtitle = html.escape(description[:120].strip() + ("..." if len(description) > 120 else ""))
-    yaml_link = (
-        "https://github.com/RHEcosystemAppEng/agentic-collections/blob/main/"
-        f"{pack['name']}/.catalog/collection.yaml"
-    )
-    readme_link = (
-        "https://github.com/RHEcosystemAppEng/agentic-collections/blob/main/"
-        f"{pack['name']}/README.md"
-    )
+    blob_base = _pack_blob_base(pack)
+    has_catalog = bool(collection)
+    yaml_link = f"{blob_base}/.catalog/collection.yaml"
+    readme_link = f"{blob_base}/README.md"
     categories = collection.get("categories") or []
     personas = collection.get("personas") or []
     version = pack.get("plugin", {}).get("version")
@@ -591,6 +610,14 @@ def render_collection_page(pack: Dict[str, Any], mcp_data: List[Dict[str, Any]])
         overview_parts.append("<h2>Security Model</h2>")
         overview_parts.append(f"<div class=\"collection-prose\">{md_to_html(collection.get('security_model'))}</div>")
 
+    # README fallback: no catalog data but a README is available
+    if not overview_parts:
+        readme_content = pack.get("readme_content") or ""
+        if readme_content.strip():
+            overview_parts.append(f"<div class=\"collection-prose\">{md_to_html(readme_content)}</div>")
+        else:
+            overview_parts.append("<p class=\"collection-missing\">No overview available.</p>")
+
     # Skills tab
     contents = collection.get("contents") or {}
     skills_parts = ["<h2>Skills</h2>"]
@@ -603,10 +630,10 @@ def render_collection_page(pack: Dict[str, Any], mcp_data: List[Dict[str, Any]])
     skills = contents.get("skills") or []
     if orchestration:
         skills_parts.append(f"<h3>{'Orchestration Skill' if len(orchestration) == 1 else 'Orchestration Skills'}</h3>")
-        skills_parts.append(_render_skills_list(orchestration, pack["name"], "Orchestration skill"))
+        skills_parts.append(_render_skills_list(orchestration, blob_base, "Orchestration skill"))
     if skills:
         skills_parts.append(f"<h3>{'Basic Skills' if orchestration else 'Skills'}</h3>")
-        skills_parts.append(_render_skills_list(skills, pack["name"]))
+        skills_parts.append(_render_skills_list(skills, blob_base))
     guide = contents.get("skills_decision_guide") or []
     if guide:
         skills_parts.append("<h2>Skills Decision Guide</h2>")
@@ -615,7 +642,7 @@ def render_collection_page(pack: Dict[str, Any], mcp_data: List[Dict[str, Any]])
         skills_parts.append("<p class=\"collection-missing\">No skills content.</p>")
 
     # Resources tab
-    resources_html = _render_resources(collection.get("resources") or [], pack["name"])
+    resources_html = _render_resources(collection.get("resources") or [], blob_base)
 
     # Agents tab
     pack_mcp = [s for s in mcp_data if s.get("pack") == pack.get("name")]
@@ -635,7 +662,7 @@ def render_collection_page(pack: Dict[str, Any], mcp_data: List[Dict[str, Any]])
     legal = collection.get("legal_resources") or {}
     license_nav_href = str(legal.get("license_agreement_url") or "").strip()
     if not license_nav_href:
-        license_nav_href = "https://github.com/RHEcosystemAppEng/agentic-collections/blob/main/LICENSE"
+        license_nav_href = f"{blob_base}/LICENSE"
     license_nav_href_esc = html.escape(license_nav_href, quote=True)
 
     return f"""<!DOCTYPE html>
@@ -659,7 +686,7 @@ def render_collection_page(pack: Dict[str, Any], mcp_data: List[Dict[str, Any]])
                         <a href="../index.html" class="collection-back">← Back to Catalog</a>
                     </div>
                     <div class="collection-nav-center">
-                        <a href="{html.escape(yaml_link, quote=True)}" target="_blank" rel="noopener noreferrer" class="collection-meta-link">catalog YAML →</a>
+                        {f'<a href="{html.escape(yaml_link, quote=True)}" target="_blank" rel="noopener noreferrer" class="collection-meta-link">catalog YAML →</a>' if has_catalog else ''}
                     </div>
                     <div class="collection-nav-end">
                         <a href="{html.escape(readme_link, quote=True)}" target="_blank" rel="noopener noreferrer" class="collection-meta-link">README →</a>
@@ -708,7 +735,7 @@ def generate_collection_pages(pack_data: List[Dict[str, Any]], mcp_data: List[Di
     generated_files = set()
     count = 0
     for pack in pack_data:
-        if not pack.get("collection"):
+        if not pack.get("collection") and not pack.get("readme_content") and not pack.get("skills"):
             continue
         collection = pack.get("collection") or {}
         collection_id = (

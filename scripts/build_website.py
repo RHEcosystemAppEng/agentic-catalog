@@ -60,12 +60,14 @@ def build_website():
     for pack in pack_data:
         pack_name = pack['name']
         pack['icon'] = icons['packs'].get(pack_name, '')
-        catalog_dir = pack.get('catalog_dir', pack_name)
-        cat_bundle, cat_warns = bundle_catalog_for_site(catalog_dir, root)
-        for w in cat_warns:
-            print(f"⚠️  {w}")
-        if cat_bundle is not None:
-            pack['collection'] = cat_bundle
+        # Skip local catalog lookup when the catalog was already loaded during cloning
+        if 'collection' not in pack:
+            catalog_dir = pack.get('catalog_dir', pack_name)
+            cat_bundle, cat_warns = bundle_catalog_for_site(catalog_dir, root)
+            for w in cat_warns:
+                print(f"⚠️  {w}")
+            if cat_bundle is not None:
+                pack['collection'] = cat_bundle
 
     # Keep pack cards deterministic and alphabetically ordered.
     pack_data = sorted(pack_data, key=lambda p: p['name'])
@@ -76,7 +78,7 @@ def build_website():
 
     # Generate MCP server data
     print("🔌 Parsing MCP servers...")
-    mcp_data = generate_mcp_data()
+    mcp_data = generate_mcp_data(pack_data)
     
     # Merge MCP server icons
     for server in mcp_data:

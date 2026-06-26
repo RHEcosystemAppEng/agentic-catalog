@@ -4,12 +4,9 @@ Parse mcps.json files and extract MCP server configurations.
 """
 
 import json
-import sys
 import re
 from pathlib import Path
 from typing import Dict, List, Any
-
-from generate_pack_data import DOCS_PACK_DIRS
 
 MCP_FILENAME = "mcps.json"
 MCP_DEPRECATED = ".mcp.json"
@@ -80,8 +77,7 @@ def parse_mcp_file(pack_dir: str) -> List[Dict[str, Any]]:
     mcp_file = pack_path / MCP_FILENAME
 
     if deprecated_path.exists():
-        print(f"Error: {pack_dir}/{MCP_DEPRECATED} is deprecated; rename to {MCP_FILENAME}", file=sys.stderr)
-        sys.exit(1)
+        print(f"Warning: {pack_dir}/{MCP_DEPRECATED} is deprecated and will be ignored; rename to {MCP_FILENAME}")
 
     if not mcp_file.exists():
         return []
@@ -160,59 +156,49 @@ def load_custom_mcp_data() -> Dict[str, Any]:
         return {}
 
 
-def generate_mcp_data() -> List[Dict[str, Any]]:
+def _merge_custom_data(server: Dict[str, Any], custom_data: Dict[str, Any]) -> None:
+    """Merge docs/mcp.json metadata into a server dict in place."""
+    server_name = server['name']
+    custom = custom_data.get(server_name, {})
+    server['repository'] = custom.get('repository', '')
+    server['tools'] = custom.get('tools', [])
+    server['title'] = custom.get('title', server_name)
+    server['tier'] = custom.get('tier', 'Official')
+    server['owner'] = custom.get('owner', 'Red Hat')
+
+
+def generate_mcp_data(pack_data: List[Dict[str, Any]] | None = None) -> List[Dict[str, Any]]:
     """
-    Generate MCP server data for all agentic packs.
-    Merges data from mcps.json files with custom data from docs/mcp.json.
+    Generate MCP server data from pack_data (marketplace packs with mcp_servers_raw)
+    merged with custom metadata from docs/mcp.json.
+
+    Args:
+        pack_data: List of pack dicts from generate_pack_data(); each may carry
+                   ``mcp_servers_raw`` parsed during the clone phase.
 
     Returns:
         List of MCP server dictionaries
     """
     mcp_servers = []
-
-    # Load custom data (repository URLs and tool descriptions)
     custom_data = load_custom_mcp_data()
 
-    for pack_dir in DOCS_PACK_DIRS:
-        pack_path = Path(pack_dir)
-
-        if not pack_path.exists():
-            continue
-
-        servers = parse_mcp_file(pack_dir)
-
-        # Merge custom data for each server
+    for pack in (pack_data or []):
+        servers = list(pack.get("mcp_servers_raw") or [])
         for server in servers:
-            server_name = server['name']
-            if server_name in custom_data:
-                # Add custom metadata from docs/mcp.json
-                server['repository'] = custom_data[server_name].get('repository', '')
-                server['tools'] = custom_data[server_name].get('tools', [])
-                server['title'] = custom_data[server_name].get('title', server_name)
-                server['tier'] = custom_data[server_name].get('tier', 'Official')
-                server['owner'] = custom_data[server_name].get('owner', 'Red Hat')
-            else:
-                # No custom data available - use defaults
-                server['repository'] = ''
-                server['tools'] = []
-                server['title'] = server_name
-                server['tier'] = 'Official'
-                server['owner'] = 'Red Hat'
-
+            _merge_custom_data(server, custom_data)
         mcp_servers.extend(servers)
-
         if servers:
-            print(f"✓ Parsed {pack_dir}: {len(servers)} MCP server(s)")
+            print(f"✓ {pack.get('name', '?')}: {len(servers)} MCP server(s)")
 
     return mcp_servers
 
 
 if __name__ == '__main__':
-    # Test the script
+    from generate_pack_data import generate_pack_data
     print("Parsing MCP server configurations...")
     print()
 
-    servers = generate_mcp_data()
+    servers = generate_mcp_data(generate_pack_data())
 
     print()
     print(f"Found {len(servers)} MCP servers total")
