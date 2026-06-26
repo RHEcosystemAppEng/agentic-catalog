@@ -115,6 +115,9 @@ config.local.*
 # Lola package manager cache
 .lola/
 
+# Serena AI assistant workspace
+.serena/
+
 # Generated Documentation
 docs/data.json
 reports/
