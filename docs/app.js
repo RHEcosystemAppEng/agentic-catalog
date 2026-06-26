@@ -298,10 +298,11 @@ function createPackCard(pack) {
 
     const badges = document.createElement('div');
     badges.className = 'pack-card-badges';
-    if (es && es.catalog_skill_count > 0) {
+    const hasSkills = pack.skills && pack.skills.length > 0;
+    if (hasSkills || (es && es.catalog_skill_count > 0)) {
         const badge = document.createElement('span');
         badge.className = 'pack-eval-badge';
-        if (es.evaluated_count === 0) {
+        if (!es || es.evaluated_count === 0) {
             badge.classList.add('is-none');
             badge.textContent = 'NOT EVALUATED';
         } else if (es.failed_count === 0) {
