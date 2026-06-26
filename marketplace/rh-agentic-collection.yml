@@ -9,6 +9,7 @@ modules:
     version: "0.1.0"
     repository: "https://github.com/RHEcosystemAppEng/agentic-collections-skills"
     path: "ocp-admin"
+    icon: "☸️"
     tags:
       - "red-hat"
       - "openshift"
@@ -27,6 +28,7 @@ modules:
     version: "0.1.0"
     repository: "https://github.com/RHEcosystemAppEng/agentic-collections-skills"
     path: "rh-developer"
+    icon: "💻"
     tags:
       - "developer"
       - "openshift"
@@ -42,6 +44,7 @@ modules:
     version: "0.1.0"
     repository: "https://github.com/RHEcosystemAppEng/agentic-collections-skills"
     path: "rh-sre"
+    icon: "🔧"
     tags:
       - "sre"
       - "red-hat"
@@ -54,6 +57,7 @@ modules:
     version: "0.1.0"
     repository: "https://github.com/RHEcosystemAppEng/agentic-collections-skills"
     path: "rh-ai-engineer"
+    icon: "🤖"
     tags:
       - "ai-engineer"
       - "openshift-ai"
@@ -70,6 +74,7 @@ modules:
     version: "0.1.0"
     repository: "https://github.com/RHEcosystemAppEng/agentic-collections-skills"
     path: "rh-virt"
+    icon: "🖥️"
     tags:
       - "red-hat"
       - "kubevirt"
@@ -82,6 +87,7 @@ modules:
     version: "0.1.0"
     repository: "https://github.com/RHEcosystemAppEng/agentic-collections-skills"
     path: "rh-basic"
+    icon: "https://static.redhat.com/libs/redhat/brand-assets/latest/corp/logo--hat-only.svg"
     tags:
       - "red-hat"
       - "cve"
@@ -96,6 +102,7 @@ modules:
     version: "0.1.0"
     repository: "https://github.com/RHEcosystemAppEng/agentic-collections-skills"
     path: "rh-automation"
+    icon: "⚙️"
     tags:
       - "ansible"
       - "aap"

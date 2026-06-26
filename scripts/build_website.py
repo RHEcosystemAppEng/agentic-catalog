@@ -7,7 +7,7 @@ import json
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, Any
+
 
 # Import our data generators
 from catalog_site_bundle import bundle_catalog_for_site
@@ -17,27 +17,6 @@ from generate_pack_data import generate_pack_data
 from generate_mcp_data import generate_mcp_data
 
 
-def load_icons() -> Dict[str, Dict[str, str]]:
-    """
-    Load icon mappings from docs/icons.json.
-    
-    Returns:
-        Dictionary with 'packs' and 'mcp_servers' icon mappings
-    """
-    icons_file = Path('docs/icons.json')
-    
-    if not icons_file.exists():
-        print("⚠️  Warning: docs/icons.json not found, icons will not be loaded")
-        return {'packs': {}, 'mcp_servers': {}}
-    
-    try:
-        with open(icons_file, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except Exception as e:
-        print(f"⚠️  Warning: Failed to load docs/icons.json: {e}")
-        return {'packs': {}, 'mcp_servers': {}}
-
-
 def build_website():
     """
     Generate the complete website data file.
@@ -45,23 +24,16 @@ def build_website():
     print("🔨 Building documentation website...")
     print()
 
-    # Load icons
-    print("🎨 Loading icons...")
-    icons = load_icons()
-    print()
-
     # Generate pack data
     print("📦 Parsing agentic collections...")
     pack_data = generate_pack_data()
-    
+
     root = Path(__file__).resolve().parent.parent
 
-    # Merge pack icons and optional resolved collection catalog (for Pages UI)
+    # Resolve collection catalog for packs that don't have it from the clone phase
     for pack in pack_data:
-        pack_name = pack['name']
-        pack['icon'] = icons['packs'].get(pack_name, '')
-        # Skip local catalog lookup when the catalog was already loaded during cloning
         if 'collection' not in pack:
+            pack_name = pack['name']
             catalog_dir = pack.get('catalog_dir', pack_name)
             cat_bundle, cat_warns = bundle_catalog_for_site(catalog_dir, root)
             for w in cat_warns:
@@ -79,12 +51,6 @@ def build_website():
     # Generate MCP server data
     print("🔌 Parsing MCP servers...")
     mcp_data = generate_mcp_data(pack_data)
-    
-    # Merge MCP server icons
-    for server in mcp_data:
-        server_name = server['name']
-        server['icon'] = icons['mcp_servers'].get(server_name, '')
-    
     print()
 
     # Generate static collection pages (fork-compatible UX)

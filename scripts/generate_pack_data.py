@@ -392,6 +392,7 @@ def load_federated_packs(plugin_titles: Dict[str, str] | None = None) -> List[Di
                 "path": repository,
                 "repository": repository,
                 "ref": pack_registry.normalize_federation_ref(ref)[:12],
+                "icon": mod.get("icon", ""),
                 "plugin": {
                     "name": name,
                     "title": titles.get(name, name.replace("-", " ").title()),

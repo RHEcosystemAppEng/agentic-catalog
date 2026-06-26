@@ -175,6 +175,19 @@ function formatMetric(value, digits = 2) {
     return typeof value === 'number' && Number.isFinite(value) ? value.toFixed(digits) : 'N/A';
 }
 
+function createIconElement(icon, className) {
+    const isUrl = icon.startsWith('http');
+    const el = document.createElement(isUrl ? 'img' : 'span');
+    if (className) el.className = className;
+    if (isUrl) {
+        el.src = icon;
+        el.alt = '';
+    } else {
+        el.textContent = icon;
+    }
+    return el;
+}
+
 function createPackCard(pack) {
     const NS_SVG = 'http://www.w3.org/2000/svg';
     const makeSvg = () => {
@@ -274,10 +287,7 @@ function createPackCard(pack) {
     
     // Custom icon (if available)
     if (pack.icon) {
-        const customIcon = document.createElement('span');
-        customIcon.className = 'card-icon';
-        customIcon.textContent = pack.icon;
-        h3.appendChild(customIcon);
+        h3.appendChild(createIconElement(pack.icon, 'card-icon'));
     }
     
     const titleText = document.createElement('span');
@@ -552,11 +562,7 @@ function createMCPCard(server) {
     
     // Custom icon (if available)
     if (server.icon) {
-        const customIcon = document.createElement('span');
-        customIcon.className = 'card-icon';
-        customIcon.textContent = server.icon;
-        customIcon.style.fontSize = '1.2rem';
-        h3.appendChild(customIcon);
+        h3.appendChild(createIconElement(server.icon, 'card-icon'));
     }
     
     const titleText = document.createElement('span');
@@ -1135,11 +1141,7 @@ lola install -f ${moduleName}`;
             
             // Custom icon (if available)
             if (server.icon) {
-                const customIcon = document.createElement('span');
-                customIcon.className = 'item-icon';
-                customIcon.textContent = server.icon;
-                customIcon.style.fontSize = '0.9rem';
-                nameGroup.appendChild(customIcon);
+                nameGroup.appendChild(createIconElement(server.icon, 'item-icon'));
             }
             
             const nameCode = document.createElement('code');
@@ -1245,11 +1247,7 @@ function showMCPDetails(serverName, packName) {
     
     // Custom icon (if available)
     if (server.icon) {
-        const customIcon = document.createElement('span');
-        customIcon.className = 'card-icon';
-        customIcon.textContent = server.icon;
-        customIcon.style.fontSize = '1.8rem';
-        h2.appendChild(customIcon);
+        h2.appendChild(createIconElement(server.icon, 'card-icon'));
     }
     
     const titleText = document.createElement('span');
@@ -2606,9 +2604,7 @@ function buildCollectionAgentsPanel(panel, pack, c) {
             const titleRow = document.createElement('div');
             titleRow.className = 'collection-mcp-card-title';
             if (server.icon) {
-                const ic = document.createElement('span');
-                ic.textContent = server.icon;
-                titleRow.appendChild(ic);
+                titleRow.appendChild(createIconElement(server.icon, ''));
             }
             const t = document.createElement('span');
             t.textContent = server.title || server.name;
