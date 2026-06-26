@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentic Skills packs</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Red+Hat+Text:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css?v=73">
+</head>
+<body>
+    <header>
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <h1>Red Hat Agentic Catalog</h1>
+                <p class="subtitle">Catalog of Red Hat agentic skills collections, MCP tools & resources, and other agentic capabilities</p>
+            </div>
+            <div class="toolbar-center">
+                <div class="counter-badge" id="packs-badge">
+                    <span class="counter-number">0</span>
+                    <span class="counter-label">Packs</span>
+                </div>
+                <div class="counter-badge" id="skills-badge">
+                    <span class="counter-number">0</span>
+                    <span class="counter-label">Skills</span>
+                </div>
+                <div class="counter-badge" id="agents-badge">
+                    <span class="counter-number">0</span>
+                    <span class="counter-label">Agents</span>
+                </div>
+                <div class="counter-badge" id="docs-badge">
+                    <span class="counter-number">0</span>
+                    <span class="counter-label">Docs</span>
+                </div>
+                <div class="counter-badge" id="mcp-badge">
+                    <span class="counter-number">0</span>
+                    <span class="counter-label">MCP</span>
+                </div>
+            </div>
+            <div class="toolbar-right toolbar-actions">
+                <a href="https://github.com/RHEcosystemAppEng/agentic-collections/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" class="collection-meta-link">Apache 2.0 License →</a>
+                <a href="https://github.com/RHEcosystemAppEng/agentic-collections" target="_blank" rel="noopener noreferrer" class="collection-meta-link">GitHub →</a>
+            </div>
+        </div>
+        <div class="search-container">
+            <input type="search" id="searchInput" placeholder="Search collections, skills, agents, MCP servers...">
+        </div>
+    </header>
+
+    <div class="install-callout collapsed" id="install-callout">
+        <div class="install-callout-toggle" onclick="toggleInstallCallout()" onkeydown="if(event.key==='Enter'||event.key===' ') { event.preventDefault(); toggleInstallCallout(); }" role="button" tabindex="0" aria-expanded="false" aria-controls="install-callout-body" title="Click to expand installation instructions">
+            <span class="install-callout-arrow">▶</span>
+            <span class="install-callout-label">Install with <a href="https://github.com/LobsterTrap/lola" target="_blank" onclick="event.stopPropagation()">Lola</a></span>
+            <a href="https://github.com/RHEcosystemAppEng/agentic-collections#installation-lola-package-manager" target="_blank" class="install-callout-link" onclick="event.stopPropagation()">Full instructions →</a>
+        </div>
+        <div class="install-callout-body" id="install-callout-body">
+            <div class="install-callout-command">
+                <pre><code id="install-command">lola market add rh-agentic-collections https://raw.githubusercontent.com/RHEcosystemAppEng/agentic-collections/main/marketplace/rh-agentic-collection.yml</code></pre>
+                <button type="button" class="copy-button" id="install-copy-btn" aria-label="Copy command">Copy</button>
+            </div>
+            <p class="install-callout-note">Then <code>lola install -f &lt;module&gt;</code> — applies to current folder only.</p>
+        </div>
+    </div>
+
+    <main>
+        <!-- Per-collection catalog view (hash: #collection/<pack>) -->
+        <section id="collection-page" class="collection-page" hidden aria-hidden="true">
+            <div class="collection-page-inner">
+                <nav class="collection-nav" aria-label="Collection">
+                    <div class="collection-nav-start">
+                        <a href="#" id="collection-back" class="collection-back">← Back to Catalog</a>
+                    </div>
+                    <div class="collection-nav-center">
+                        <a id="collection-yaml-link" href="#" target="_blank" rel="noopener noreferrer" class="collection-meta-link">catalog YAML →</a>
+                    </div>
+                    <div class="collection-nav-end">
+                        <a id="collection-readme-link" href="#" target="_blank" rel="noopener noreferrer" class="collection-meta-link" hidden>README →</a>
+                        <a id="collection-license-link" href="https://github.com/RHEcosystemAppEng/agentic-collections/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" class="collection-meta-link">Apache 2.0 License →</a>
+                    </div>
+                </nav>
+                <div id="collection-page-body" class="collection-page-body collection-content-inner"></div>
+            </div>
+        </section>
+
+        <!-- Section 1: Agentic Packs -->
+        <section id="packs-section">
+            <h2 onclick="toggleSection('packs')">
+                <span class="arrow">▼</span> Agentic Skills packs <span id="packs-count" class="count"></span>
+            </h2>
+            <p class="section-subtitle">Ready-to-use capability packs designed for Claude Code and Cursor to automate complex domain-specific tasks.</p>
+            <div id="packs-grid" class="grid"></div>
+        </section>
+
+        <!-- Section 2: MCP Servers -->
+        <section id="mcp-section">
+            <h2 onclick="toggleSection('mcp')">
+                <span class="arrow">▼</span> Red Hat MCP servers <span id="mcp-count" class="count"></span>
+            </h2>
+            <p class="section-subtitle">Securely connect your agents to the latest Red Hat knowledge and expertise using the open Model Context Protocol (MCP) standard.</p>
+            <div id="mcp-grid" class="grid"></div>
+        </section>
+
+        <!-- Section 3: Community MCP Servers -->
+        <section id="community-mcp-section">
+            <h2 onclick="toggleSection('community-mcp')">
+                <span class="arrow">▼</span> Community MCP servers <span id="community-mcp-count" class="count"></span>
+            </h2>
+            <p class="section-subtitle">Validated community-contributed MCP servers that extend your agents with trusted third-party integrations and capabilities.</p>
+            <div id="community-mcp-grid" class="grid"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Generated from the <a href="https://github.com/RHEcosystemAppEng/agentic-collections" target="_blank" rel="noopener noreferrer">agentic-collections</a> repository on GitHub.</p>
+    </footer>
+
+    <!-- Modal for Pack Details -->
+    <div id="pack-modal" class="modal">
+        <div class="modal-content" id="pack-details"></div>
+    </div>
+
+    <!-- Modal for MCP Server Details -->
+    <div id="mcp-modal" class="modal">
+        <div class="modal-content" id="mcp-details"></div>
+    </div>
+
+    <script src="app.js?v=73"></script>
+</body>
+</html>
