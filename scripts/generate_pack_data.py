@@ -10,6 +10,7 @@ import yaml
 
 import pack_registry
 from catalog_site_bundle import bundle_catalog_for_site
+from eval_site_enrichment import apply_eval_enrichment
 from generate_mcp_data import parse_mcp_file
 
 def parse_yaml_frontmatter(file_path: Path) -> Dict[str, Any]:
@@ -188,6 +189,8 @@ def load_federated_packs() -> List[Dict[str, Any]]:
             }
             if cat_bundle is not None:
                 pack["collection"] = cat_bundle
+            # Enrich with eval reports from the cloned source repo before cleanup
+            apply_eval_enrichment([pack], clone_dest)
             packs.append(pack)
             catalog_status = "with catalog" if cat_bundle else "README only"
             mcp_status = f", {len(mcp_servers)} MCP server(s)" if mcp_servers else ""
