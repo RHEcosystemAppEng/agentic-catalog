@@ -24,8 +24,7 @@ agentic-collections-catalog/
 │   ├── plugins.json             # Plugin registry
 │   ├── mcp.json                 # MCP server metadata
 │   └── collections/             # Generated per-pack HTML pages
-├── scripts/                     # Catalog build scripts
-├── COLLECTION_SPEC.md           # Specification for .catalog/ structure
+├── scripts/                     # Catalog build and validation scripts
 └── Makefile
 ```
 

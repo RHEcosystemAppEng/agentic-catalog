@@ -175,6 +175,19 @@ function formatMetric(value, digits = 2) {
     return typeof value === 'number' && Number.isFinite(value) ? value.toFixed(digits) : 'N/A';
 }
 
+function createIconElement(icon, className) {
+    const isUrl = icon.startsWith('http');
+    const el = document.createElement(isUrl ? 'img' : 'span');
+    if (className) el.className = className;
+    if (isUrl) {
+        el.src = icon;
+        el.alt = '';
+    } else {
+        el.textContent = icon;
+    }
+    return el;
+}
+
 function createPackCard(pack) {
     const NS_SVG = 'http://www.w3.org/2000/svg';
     const makeSvg = () => {
@@ -274,10 +287,7 @@ function createPackCard(pack) {
     
     // Custom icon (if available)
     if (pack.icon) {
-        const customIcon = document.createElement('span');
-        customIcon.className = 'card-icon';
-        customIcon.textContent = pack.icon;
-        h3.appendChild(customIcon);
+        h3.appendChild(createIconElement(pack.icon, 'card-icon'));
     }
     
     const titleText = document.createElement('span');
@@ -288,10 +298,10 @@ function createPackCard(pack) {
 
     const badges = document.createElement('div');
     badges.className = 'pack-card-badges';
-    if (es && es.catalog_skill_count > 0) {
+    {
         const badge = document.createElement('span');
         badge.className = 'pack-eval-badge';
-        if (es.evaluated_count === 0) {
+        if (!es || es.evaluated_count === 0) {
             badge.classList.add('is-none');
             badge.textContent = 'NOT EVALUATED';
         } else if (es.failed_count === 0) {
@@ -306,12 +316,6 @@ function createPackCard(pack) {
         }
         badges.appendChild(badge);
     }
-    if (pack.source === 'federated') {
-        const fedBadge = document.createElement('span');
-        fedBadge.className = 'pack-eval-badge is-federated';
-        fedBadge.textContent = 'FEDERATED';
-        badges.appendChild(fedBadge);
-    }
     if (badges.childNodes.length > 0) {
         headerRow.appendChild(badges);
     }
@@ -319,11 +323,8 @@ function createPackCard(pack) {
 
     const meta = document.createElement('p');
     meta.className = 'pack-meta';
-    if (pack.source === 'federated') {
-        meta.textContent = `External · v${pack.plugin.version || '0.0.0'} · ${pack.ref || ''}`;
-    } else {
-        meta.textContent = `By Red Hat · v${pack.plugin.version || '0.0.0'}`;
-    }
+    const author = pack.plugin.author?.name || 'Red Hat';
+    meta.textContent = `By ${author} · v${pack.plugin.version || '0.0.0'}`;
     div.appendChild(meta);
 
     // Description (prefer collection catalog metadata over plugin fallback text)
@@ -561,11 +562,7 @@ function createMCPCard(server) {
     
     // Custom icon (if available)
     if (server.icon) {
-        const customIcon = document.createElement('span');
-        customIcon.className = 'card-icon';
-        customIcon.textContent = server.icon;
-        customIcon.style.fontSize = '1.2rem';
-        h3.appendChild(customIcon);
+        h3.appendChild(createIconElement(server.icon, 'card-icon'));
     }
     
     const titleText = document.createElement('span');
@@ -1144,11 +1141,7 @@ lola install -f ${moduleName}`;
             
             // Custom icon (if available)
             if (server.icon) {
-                const customIcon = document.createElement('span');
-                customIcon.className = 'item-icon';
-                customIcon.textContent = server.icon;
-                customIcon.style.fontSize = '0.9rem';
-                nameGroup.appendChild(customIcon);
+                nameGroup.appendChild(createIconElement(server.icon, 'item-icon'));
             }
             
             const nameCode = document.createElement('code');
@@ -1254,11 +1247,7 @@ function showMCPDetails(serverName, packName) {
     
     // Custom icon (if available)
     if (server.icon) {
-        const customIcon = document.createElement('span');
-        customIcon.className = 'card-icon';
-        customIcon.textContent = server.icon;
-        customIcon.style.fontSize = '1.8rem';
-        h2.appendChild(customIcon);
+        h2.appendChild(createIconElement(server.icon, 'card-icon'));
     }
     
     const titleText = document.createElement('span');
@@ -2615,9 +2604,7 @@ function buildCollectionAgentsPanel(panel, pack, c) {
             const titleRow = document.createElement('div');
             titleRow.className = 'collection-mcp-card-title';
             if (server.icon) {
-                const ic = document.createElement('span');
-                ic.textContent = server.icon;
-                titleRow.appendChild(ic);
+                titleRow.appendChild(createIconElement(server.icon, ''));
             }
             const t = document.createElement('span');
             t.textContent = server.title || server.name;

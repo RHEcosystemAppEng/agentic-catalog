@@ -1312,6 +1312,14 @@ footer a:hover {
     font-size: 1rem;
 }
 
+img.card-icon,
+img.item-icon {
+    height: 1em;
+    width: auto;
+    vertical-align: middle;
+    object-fit: contain;
+}
+
 /* Per-collection catalog page (#collection/<pack>) */
 .collection-page {
     max-width: 920px;

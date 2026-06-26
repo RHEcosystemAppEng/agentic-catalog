@@ -12,8 +12,6 @@ This directory contains the generated GitHub Pages site for agentic-collections.
 
 ## Local Development
 
-From the repository root, install git hooks once (`make install` then `scripts/install-hooks.sh`) so commits run [pre-commit](https://pre-commit.com/) (gitleaks + scoped `make validate` / skill design checks); see the main [README.md](../README.md#security).
-
 Run locally:
 ```bash
 python -m http.server 8000
@@ -36,28 +34,18 @@ When present under the repository root, **`eval/<pack_name>/<skill_name>/report.
 
 The **`name`** of each skill in **`collection.yaml`** must match the **`skills/<name>/`** directory and the **`eval/<pack>/<name>/`** folder segment so lookups resolve correctly.
 
-## Manual Updates
-
-To manually update the site:
-1. Modify pack configurations (`mcps.json`, skills, agents; optional `.claude-plugin/plugin.json`) and per-pack **`.catalog/collection.yaml`** when catalog metadata changes (see [COLLECTION_SPEC.md](../COLLECTION_SPEC.md) and [catalog/schema.yaml](../catalog/schema.yaml); use the **create-collection** / **collection-compliance** repo skills).
-2. If you edit `collection.yaml`, refresh mirrors: `make catalog-mirror-json` from the repository root.
-3. Run `make generate` from the root directory (runs `make validate` first when using `make test`).
-4. Commit the updated `docs/data.json` and any `.catalog/` files.
-5. Push to trigger GitHub Pages deployment.
-
 ## Validation for Docs Metadata
 
-When changing docs presentation metadata (`styles.css`, `app.js`, `icons.json`, `plugins.json`, `mcp.json`):
+When changing docs presentation metadata (`styles.css`, `app.js`, `mcp.json`):
 
-1. Prefer canonical tokens from `styles.css` and `style-tokens.json` over hardcoded values.
-2. Ensure every in-scope pack has icon/title mappings in `icons.json` and `plugins.json`.
-3. Run validation checks:
+1. Prefer canonical tokens from `styles.css` over hardcoded values.
+2. Run validation checks:
 
 ```bash
 make validate
 ```
 
-4. Review validation output before merge.
+3. Review validation output before merge.
 
 ## Security
 
