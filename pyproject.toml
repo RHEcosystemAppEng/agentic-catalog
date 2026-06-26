@@ -1,0 +1,9 @@
+[project]
+name = "agentic-collections-catalog"
+version = "0.1.0"
+description = "Unified catalog and marketplace for Red Hat agentic collections"
+requires-python = ">=3.11"
+dependencies = [
+    "PyYAML>=6.0",
+    "markdown>=3.6",
+]
