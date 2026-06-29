@@ -66,40 +66,40 @@ def load_marketplace_module_by_path(
     return None
 
 
-FEDERATION_REF_SHA_RE = re.compile(r"^[0-9a-f]{40}$", re.IGNORECASE)
+REPOSITORY_REF_SHA_RE = re.compile(r"^[0-9a-f]{40}$", re.IGNORECASE)
 
 
-def federation_ref_error(ref: Any) -> Optional[str]:
+def repository_ref_error(ref: Any) -> Optional[str]:
     """Return an error message when *ref* is set but not a 40-character commit SHA."""
     if ref is None or not str(ref).strip():
         return None  # absent ref → defaults to main branch
     value = str(ref).strip()
-    if not FEDERATION_REF_SHA_RE.fullmatch(value):
+    if not REPOSITORY_REF_SHA_RE.fullmatch(value):
         return (
             f"ref must be a 40-character commit SHA, not a branch or tag (got {value!r})"
         )
     return None
 
 
-def normalize_federation_ref(ref: Any) -> str:
+def normalize_repository_ref(ref: Any) -> str:
     """Return a lowercase 40-character commit SHA, or 'main' when ref is absent."""
-    err = federation_ref_error(ref)
+    err = repository_ref_error(ref)
     if err:
         raise ValueError(err)
     value = str(ref).strip() if ref is not None else ""
     return value.lower() if value else "main"
 
 
-def validate_federated_module_entry(module: Dict[str, Any]) -> List[str]:
-    """Return validation errors for a federated marketplace module entry."""
+def validate_repository_module_entry(module: Dict[str, Any]) -> List[str]:
+    """Return validation errors for a repository marketplace module entry."""
     name = module.get("name") or "<unknown>"
-    err = federation_ref_error(module.get("ref"))
+    err = repository_ref_error(module.get("ref"))
     if err:
         return [f"{name}: {err}"]
     return []
 
 
-def load_federated_modules(
+def load_repository_modules(
     marketplace_path: Optional[Path] = None,
 ) -> List[Dict[str, Any]]:
     """Return all marketplace modules that have an external repository."""
