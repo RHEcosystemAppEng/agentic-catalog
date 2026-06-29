@@ -95,19 +95,19 @@ def detect_repo_license(repo_root: Path, pack_path: str = ".") -> str:
     return "Unknown"
 
 
-def load_federated_packs() -> List[Dict[str, Any]]:
+def load_repository_packs() -> List[Dict[str, Any]]:
     """Clone each marketplace module and return it as a standalone pack entry."""
     import shutil
     import subprocess
     import tempfile
 
-    modules = pack_registry.load_federated_modules()
+    modules = pack_registry.load_repository_modules()
     if not modules:
         return []
 
     repo_root = Path(__file__).resolve().parent.parent
     packs: List[Dict[str, Any]] = []
-    tmp = Path(tempfile.mkdtemp(prefix="federated-build-"))
+    tmp = Path(tempfile.mkdtemp(prefix="repository-build-"))
 
     try:
         for mod in modules:
@@ -120,12 +120,12 @@ def load_federated_packs() -> List[Dict[str, Any]]:
             pack_path = mod.get("path", ".")
 
             if not repository:
-                print(f"  Warning: federated module '{name}' missing repository, skipping")
+                print(f"  Warning: repository module '{name}' missing repository, skipping")
                 continue
 
-            ref_err = pack_registry.federation_ref_error(ref)
+            ref_err = pack_registry.repository_ref_error(ref)
             if ref_err:
-                print(f"  Warning: federated module '{name}' invalid ref: {ref_err}")
+                print(f"  Warning: repository module '{name}' invalid ref: {ref_err}")
                 continue
 
             clone_dest = tmp / name
@@ -135,7 +135,7 @@ def load_federated_packs() -> List[Dict[str, Any]]:
                     check=True, capture_output=True, text=True, timeout=120,
                 )
                 subprocess.run(
-                    ["git", "checkout", "--quiet", pack_registry.normalize_federation_ref(ref)],
+                    ["git", "checkout", "--quiet", pack_registry.normalize_repository_ref(ref)],
                     check=True, capture_output=True, text=True, cwd=clone_dest, timeout=30,
                 )
             except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
@@ -146,7 +146,7 @@ def load_federated_packs() -> List[Dict[str, Any]]:
             license_id = detect_repo_license(clone_dest, pack_path)
             skills = parse_skills(str(pack_dir))
 
-            # Read catalog from the cloned source repo (not from a local federation/ mirror)
+            # Read catalog from the cloned source repo
             cat_bundle, cat_warns = bundle_catalog_for_site(pack_path, clone_dest)
             for w in cat_warns:
                 print(f"  ⚠️  {w}")
@@ -169,7 +169,7 @@ def load_federated_packs() -> List[Dict[str, Any]]:
                 "name": name,
                 "path": repository,
                 "repository": repository,
-                "ref": pack_registry.normalize_federation_ref(ref)[:12],
+                "ref": pack_registry.normalize_repository_ref(ref)[:12],
                 "icon": mod.get("icon", ""),
                 "plugin": {
                     "name": name,
@@ -210,10 +210,10 @@ def generate_pack_data() -> List[Dict[str, Any]]:
     """
     packs = []
 
-    federated = load_federated_packs()
-    if federated:
-        packs.extend(federated)
-        print(f"✓ Added {len(federated)} marketplace pack(s)")
+    repository_packs = load_repository_packs()
+    if repository_packs:
+        packs.extend(repository_packs)
+        print(f"✓ Added {len(repository_packs)} marketplace pack(s)")
 
     return packs
 
