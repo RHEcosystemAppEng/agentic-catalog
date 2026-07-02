@@ -1,6 +1,6 @@
-name: "redhat-agentic-collections"
-description: "Validated Agentic Collections from Red Hat Ecosystem Engineering"
-url: "https://github.com/RHEcosystemAppEng/agentic-collections-skills"
+name: "redhat-agentic-catalog"
+description: "Validated Agentic Catalog from Red Hat Ecosystem Engineering"
+url: "https://github.com/RHEcosystemAppEng/agentic-catalog"
 version: "0.1.0"
 
 modules:
@@ -8,7 +8,7 @@ modules:
     title: "Agentic skill pack for Red Hat OpenShift"
     description: "Automation capabilities for OpenShift Container Platform cluster management, workload orchestration, security policies, and operational tasks."
     version: "0.1.0"
-    repository: "https://github.com/RHEcosystemAppEng/agentic-collections-skills"
+    repository: "https://github.com/RHEcosystemAppEng/agentic-plugins"
     path: "ocp-admin"
     icon: "☸️"
     tags:
@@ -28,7 +28,7 @@ modules:
     title: "Agentic skill pack for Software Developers"
     description: "Plugins for building and deploying applications on Red Hat platforms."
     version: "0.1.0"
-    repository: "https://github.com/RHEcosystemAppEng/agentic-collections-skills"
+    repository: "https://github.com/RHEcosystemAppEng/agentic-plugins"
     path: "rh-developer"
     icon: "💻"
     tags:
@@ -45,7 +45,7 @@ modules:
     title: "Agentic skill pack for Security Reliability Engineers"
     description: "Site reliability engineering tools and automation for managing Red Hat platforms and infrastructure."
     version: "0.1.0"
-    repository: "https://github.com/RHEcosystemAppEng/agentic-collections-skills"
+    repository: "https://github.com/RHEcosystemAppEng/agentic-plugins"
     path: "rh-sre"
     icon: "🔧"
     tags:
@@ -59,7 +59,7 @@ modules:
     title: "Agentic skill pack for OpenShift AI Engineers"
     description: "Red Hat OpenShift AI Engineering Agentic Collection"
     version: "0.1.0"
-    repository: "https://github.com/RHEcosystemAppEng/agentic-collections-skills"
+    repository: "https://github.com/RHEcosystemAppEng/agentic-plugins"
     path: "rh-ai-engineer"
     icon: "🤖"
     tags:
@@ -77,7 +77,7 @@ modules:
     title: "Agentic skill pack for Red Hat OpenShift Virtualization"
     description: "Virtual machine management and automation for OpenShift Virtualization and KubeVirt workloads."
     version: "0.1.0"
-    repository: "https://github.com/RHEcosystemAppEng/agentic-collections-skills"
+    repository: "https://github.com/RHEcosystemAppEng/agentic-plugins"
     path: "rh-virt"
     icon: "🖥️"
     tags:
@@ -91,7 +91,7 @@ modules:
     title: "Agentic skill pack for Red Hat customers"
     description: "Essential Red Hat skills for IT professionals: CVE explanation, diagnostics, product lifecycle, RHEL patch planning, and support severity guidance."
     version: "0.1.0"
-    repository: "https://github.com/RHEcosystemAppEng/agentic-collections-skills"
+    repository: "https://github.com/RHEcosystemAppEng/agentic-plugins"
     path: "rh-basic"
     icon: "https://static.redhat.com/libs/redhat/brand-assets/latest/corp/logo--hat-only.svg"
     tags:
@@ -107,7 +107,7 @@ modules:
     title: "Agentic skill pack for Automation Engineers"
     description: "Ansible Automation Platform governance, execution safety, and forensic troubleshooting tools for Red Hat automation engineers."
     version: "0.1.0"
-    repository: "https://github.com/RHEcosystemAppEng/agentic-collections-skills"
+    repository: "https://github.com/RHEcosystemAppEng/agentic-plugins"
     path: "rh-automation"
     icon: "⚙️"
     tags:

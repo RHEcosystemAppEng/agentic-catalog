@@ -23,7 +23,7 @@ _MARKETPLACE_RAW_URL = (
     "https://raw.githubusercontent.com/RHEcosystemAppEng/agentic-catalog"
     "/main/marketplace/rh-agentic-collection.yml"
 )
-_MARKETPLACE_ALIAS = "rh-agentic-collections"
+_MARKETPLACE_ALIAS = "rh-agentic-catalog"
 def _load_marketplace_modules() -> Dict[str, Any]:
     if not _MARKETPLACE_PATH.exists():
         return {}

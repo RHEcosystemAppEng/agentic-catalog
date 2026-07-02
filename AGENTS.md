@@ -9,7 +9,7 @@ This is the **catalog and marketplace** for Red Hat agentic collections. It serv
 1. **Lola marketplace** — `marketplace/rh-agentic-collection.yml` declares which skill packs are available and where to fetch them. Users install packs with `lola install -f <pack-name>`.
 2. **agentskills.io website** — the `docs/` directory is the static site. The scripts in `scripts/` build it by cloning each pack's source repo and extracting metadata.
 
-**No skills are authored or stored here.** Skills live in their own source repos (e.g., [agentic-collections-skills](https://github.com/RHEcosystemAppEng/agentic-collections-skills)). This repo only aggregates and presents them.
+**No skills are authored or stored here.** Skills live in their own source repos (e.g., [agentic-plugins](https://github.com/RHEcosystemAppEng/agentic-plugins)). This repo only aggregates and presents them.
 
 ## Repository Structure
 
@@ -40,7 +40,7 @@ agentic-catalog/
 
 The clones are ephemeral (deleted after each build). Nothing from external repos is committed here.
 
-> **Eval data lives in source repos, not here.** `eval_site_enrichment.py` reads `eval/<pack>/<skill>/report.json` from the *cloned* source repo (e.g. `agentic-collections-skills/eval/rh-sre/remediation/report.json`). There is no `eval/` directory in this catalog repo — looking for eval files here will always find nothing.
+> **Eval data lives in source repos, not here.** `eval_site_enrichment.py` reads `eval/<pack>/<skill>/report.json` from the *cloned* source repo (e.g. `agentic-plugins/eval/rh-sre/remediation/report.json`). There is no `eval/` directory in this catalog repo — looking for eval files here will always find nothing.
 
 ## Marketplace File
 
