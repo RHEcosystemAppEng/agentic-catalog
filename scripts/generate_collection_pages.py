@@ -19,11 +19,6 @@ import yaml
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 _MARKETPLACE_PATH = REPO_ROOT / "marketplace" / "rh-agentic-collection.yml"
-_MARKETPLACE_RAW_URL = (
-    "https://raw.githubusercontent.com/RHEcosystemAppEng/agentic-catalog"
-    "/main/marketplace/rh-agentic-collection.yml"
-)
-_MARKETPLACE_ALIAS = "rh-agentic-collections"
 def _load_marketplace_modules() -> Dict[str, Any]:
     if not _MARKETPLACE_PATH.exists():
         return {}

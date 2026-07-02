@@ -1,8 +1,8 @@
-# Agentic Collections Catalog
+# Agentic Catalog
 
 Unified marketplace and website for Red Hat agentic skill collections. This repository aggregates content from skills source repositories and publishes it through [Lola](https://github.com/LobsterTrap/lola) and [agentskills.io](https://agentskills.io).
 
-**This is not a skills development repository.** Skills are authored in source repositories like [agentic-collections-skills](https://github.com/RHEcosystemAppEng/agentic-collections-skills). An internal process fetches, evaluates, and assembles the catalog automatically.
+**This is not a skills development repository.** Skills are authored in source repositories like [agentic-plugins](https://github.com/RHEcosystemAppEng/agentic-plugins). An internal process fetches, evaluates, and assembles the catalog automatically.
 
 > **Note:** Evaluation reports (`eval/<pack>/<skill>/report.json`) live in the **source skills repos**, not here. This catalog repo contains no `eval/` directory — eval data is read from the temporary clones at build time.
 
@@ -54,11 +54,11 @@ make serve
 ```
 Skills repos (source)            Internal process            This repo (output)
 ┌─────────────────────┐     ┌──────────────────────┐     ┌─────────────────────┐
-│ agentic-collections- │     │ Fetch skills repos    │     │ marketplace/        │
-│ skills/              │────>│ Evaluate & score      │────>│ docs/ (website)     │
-│   rh-sre/            │     │ Build catalog data    │     │ data.json           │
-│   ocp-admin/         │     │ Generate website      │     │ mcp.json            │
-│   ...                │     └──────────────────────┘     └─────────────────────┘
+│ agentic-plugins     │     │ Fetch skills repos   │     │ marketplace/        │
+│ skills/             │────>│ Evaluate & score     │────>│ docs/ (website)     │
+│   rh-sre/           │     │ Build catalog data   │     │ data.json           │
+│   ocp-admin/        │     │ Generate website     │     │ mcp.json            │
+│   ...               │     └──────────────────────┘     └─────────────────────┘
 └─────────────────────┘
 
 ```
