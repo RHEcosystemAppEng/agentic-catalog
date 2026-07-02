@@ -14,7 +14,7 @@ This is the **catalog and marketplace** for Red Hat agentic collections. It serv
 ## Repository Structure
 
 ```
-agentic-collections-catalog/
+agentic-catalog/
 ├── marketplace/
 │   └── rh-agentic-collection.yml  # Single source of truth for pack discovery
 ├── docs/                          # Static site (agentskills.io)

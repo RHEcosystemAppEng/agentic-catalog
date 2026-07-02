@@ -1,7 +1,7 @@
 .PHONY: help install generate serve test test-full clean check-uv
 
 help:
-	@echo "agentic-collections-catalog"
+	@echo "agentic-catalog"
 	@echo ""
 	@echo "Available targets:"
 	@echo "  install    - Install Python dependencies (requires uv)"

@@ -1,5 +1,5 @@
 /**
- * agentic-collections-catalog Documentation Site
+ * agentic-catalog Documentation Site
  *
  * SECURITY: All DOM manipulation uses textContent and createElement
  * to prevent XSS vulnerabilities. No innerHTML with user data.
@@ -17,7 +17,7 @@ const JS_STYLE_TOKENS = {
 };
 
 /** Default LICENSE in upstream repo (collection legal_resources may override). */
-const UPSTREAM_REPO_LICENSE_URL = 'https://github.com/RHEcosystemAppEng/agentic-collections-catalog/blob/main/LICENSE';
+const UPSTREAM_REPO_LICENSE_URL = 'https://github.com/RHEcosystemAppEng/agentic-catalog/blob/main/LICENSE';
 
 /**
  * Update toolbar counter badges

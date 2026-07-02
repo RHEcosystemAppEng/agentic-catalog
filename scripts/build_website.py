@@ -57,10 +57,10 @@ def build_website():
     # Combine into final output
     output = {
         'repository': {
-            'name': 'agentic-collections-catalog',
+            'name': 'agentic-catalog',
             'owner': 'Red Hat Ecosystem Engineering',
             'description': 'Agentic collections catalog and website for Red Hat platforms and products',
-            'url': 'https://github.com/RHEcosystemAppEng/agentic-collections-catalog'
+            'url': 'https://github.com/RHEcosystemAppEng/agentic-catalog'
         },
         'packs': pack_data,
         'mcp_servers': mcp_data,

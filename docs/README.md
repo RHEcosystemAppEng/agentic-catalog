@@ -1,6 +1,6 @@
 # Documentation Site
 
-This directory contains the generated GitHub Pages site for agentic-collections-catalog.
+This directory contains the generated GitHub Pages site for agentic-catalog.
 
 ## Files
 
