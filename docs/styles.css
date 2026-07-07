@@ -589,6 +589,18 @@ section.collapsed .grid {
     border-color: #d1d5db;
 }
 
+.pack-eval-badge.is-zip {
+    color: #4a7fd7;
+    background: #ffffff;
+    border-color: #a4c2f4;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.pack-eval-badge.is-zip:hover {
+    background: #eef4fc;
+}
+
 
 .pack-eval-divider {
     width: 100%;
