@@ -299,6 +299,15 @@ function createPackCard(pack) {
     const badges = document.createElement('div');
     badges.className = 'pack-card-badges';
     {
+        const zipBadge = document.createElement('a');
+        zipBadge.className = 'pack-eval-badge is-zip';
+        zipBadge.href = `https://github.com/RHEcosystemAppEng/agentic-plugins/releases/download/latest/${encodeURIComponent(pack.name)}.zip`;
+        zipBadge.rel = 'noopener noreferrer';
+        zipBadge.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>ZIP bundle';
+        zipBadge.addEventListener('click', (event) => event.stopPropagation());
+        badges.appendChild(zipBadge);
+    }
+    {
         const badge = document.createElement('span');
         badge.className = 'pack-eval-badge';
         if (!es || es.evaluated_count === 0) {
