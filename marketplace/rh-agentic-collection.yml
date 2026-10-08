@@ -17,7 +17,7 @@ modules:
   - openshift
   - cluster-management
   - administration
-  ref: 50195558c8d9d4e9f74862935ce3ee47e4e7b9f0
+  ref: feeb8f54fc8e84b18e933aff9a4a25f8ec6e1388
   content_hash: "sha256:546134e310cff2d0c7bfba9cb6f61eb51fdbc25390086046b059fd52a7bce434"
   mcp_evaluations:
   - name: assisted-installer
@@ -26,7 +26,7 @@ modules:
     track_id: mcp-scorecard
     recommendation: pass
     source: soundcheck-api
-    evaluated_at: '2026-10-08T06:25:10.106653Z'
+    evaluated_at: '2026-10-08T07:53:43.067768Z'
     total_checks: 15
     soundcheck_levels_summary:
       Lead:
@@ -51,7 +51,7 @@ modules:
     track_id: mcp-scorecard
     recommendation: pass
     source: soundcheck-api
-    evaluated_at: '2026-10-08T06:25:10.106653Z'
+    evaluated_at: '2026-10-08T07:53:43.067768Z'
     total_checks: 15
     soundcheck_levels_summary:
       Lead:
@@ -100,8 +100,8 @@ modules:
   - sre
   - monitoring
   - vulnerability-management
-  ref: 50195558c8d9d4e9f74862935ce3ee47e4e7b9f0
-  content_hash: "sha256:ed233ead987bc3b5ac339229234a36e32162c8ea415598717a2fbc6aaac9b84a"
+  ref: feeb8f54fc8e84b18e933aff9a4a25f8ec6e1388
+  content_hash: "sha256:a60dfe8d1089a51b88a23a46802a8c89b6b7805e0db00ae0f48f21ae49c04e5d"
   soundcheck_levels_summary:
     Foundational:
       pass: 17
@@ -122,7 +122,7 @@ modules:
     track_id: mcp-scorecard
     recommendation: pass
     source: soundcheck-api
-    evaluated_at: '2026-10-08T06:25:10.106653Z'
+    evaluated_at: '2026-10-08T07:53:43.067768Z'
     total_checks: 0
     soundcheck_levels_summary: {}
   - name: ansible-automation-platform
@@ -131,7 +131,7 @@ modules:
     track_id: mcp-scorecard
     recommendation: pass
     source: soundcheck-api
-    evaluated_at: '2026-10-08T06:25:10.106653Z'
+    evaluated_at: '2026-10-08T07:53:43.067768Z'
     total_checks: 15
     soundcheck_levels_summary:
       Lead:
@@ -181,7 +181,7 @@ modules:
   - virtualization
   - kubevirt
   - openshift
-  ref: 50195558c8d9d4e9f74862935ce3ee47e4e7b9f0
+  ref: feeb8f54fc8e84b18e933aff9a4a25f8ec6e1388
   content_hash: "sha256:9f1f517c2c01983d174a5d3b83fb37b077934f4bf8feb72d80b8a09776c8f58e"
   mcp_evaluations:
   - name: openshift-mcp-server
@@ -190,7 +190,7 @@ modules:
     track_id: mcp-scorecard
     recommendation: pass
     source: soundcheck-api
-    evaluated_at: '2026-10-08T06:25:10.106653Z'
+    evaluated_at: '2026-10-08T07:53:43.067768Z'
     total_checks: 15
     soundcheck_levels_summary:
       Lead:
@@ -222,7 +222,7 @@ modules:
   - red-hat
   - getting-started
   - support
-  ref: 50195558c8d9d4e9f74862935ce3ee47e4e7b9f0
+  ref: feeb8f54fc8e84b18e933aff9a4a25f8ec6e1388
   content_hash: "sha256:419ca5824a9a929a1e586e515230b4e8be76f34233cde1a403f7e8fc4e8c7772"
   soundcheck_levels_summary:
     Foundational:
@@ -244,7 +244,7 @@ modules:
     track_id: mcp-scorecard
     recommendation: pass
     source: soundcheck-api
-    evaluated_at: '2026-10-08T06:25:10.106653Z'
+    evaluated_at: '2026-10-08T07:53:43.067768Z'
     total_checks: 17
     soundcheck_levels_summary:
       Lead:
