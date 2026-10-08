@@ -1,0 +1,47 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "lightspeed-mcp": {
+      "type": "stdio",
+      "command": "podman",
+      "args": [
+        "run",
+        "--rm",
+        "-i",
+        "--env",
+        "LIGHTSPEED_CLIENT_ID",
+        "--env",
+        "LIGHTSPEED_CLIENT_SECRET",
+        "quay.io/redhat-services-prod/insights-management-tenant/insights-mcp/red-hat-lightspeed-mcp@sha256:bdf2aeae8a534966416b0b38f9bf8740d9db4f7d435e93edc5066cf078a036fa"
+      ],
+      "env": {
+        "LIGHTSPEED_CLIENT_ID": "${LIGHTSPEED_CLIENT_ID}",
+        "LIGHTSPEED_CLIENT_SECRET": "${LIGHTSPEED_CLIENT_SECRET}"
+      }
+    },
+    "aap-mcp-job-management": {
+      "type": "stdio",
+      "command": "python3",
+      "args": [
+        "${PLUGIN_ROOT}/scripts/aap-proxy.py",
+        "job_management/mcp"
+      ],
+      "env": {
+        "AAP_MCP_SERVER": "${AAP_MCP_SERVER}",
+        "AAP_API_TOKEN": "${AAP_API_TOKEN}"
+      }
+    },
+    "aap-mcp-inventory-management": {
+      "type": "stdio",
+      "command": "python3",
+      "args": [
+        "${PLUGIN_ROOT}/scripts/aap-proxy.py",
+        "inventory_management/mcp"
+      ],
+      "env": {
+        "AAP_MCP_SERVER": "${AAP_MCP_SERVER}",
+        "AAP_API_TOKEN": "${AAP_API_TOKEN}"
+      }
+    }
+  }
+}
