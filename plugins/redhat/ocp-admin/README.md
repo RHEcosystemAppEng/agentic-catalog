@@ -45,9 +45,11 @@ The ocp-admin collection provides specialized tools for managing OpenShift clust
 Install the pack with [Lola](https://github.com/LobsterTrap/lola):
 
 ```bash
-lola market add rh-agentic-plugins https://raw.githubusercontent.com/RHEcosystemAppEng/agentic-catalog/main/marketplace/rh-agentic-collection.yml
+lola market add rh-agentic-collections https://raw.githubusercontent.com/RHEcosystemAppEng/agentic-catalog/main/marketplace/rh-agentic-collection.yml
 lola install -f ocp-admin
 ```
+
+Also install from this hub on GitHub (`plugins/redhat/ocp-admin`) or via Claude Code using `claude-marketplace/marketplace.json` on `main`. See the catalog [Install](https://github.com/RHEcosystemAppEng/agentic-catalog/blob/main/README.md#install) section.
 
 Verify installation:
 

@@ -23,9 +23,11 @@ Agentic skill pack for Red Hat customers provides lightweight, self-contained sk
 ### Installation (Lola)
 
 ```bash
-lola market add rh-agentic-plugins https://raw.githubusercontent.com/RHEcosystemAppEng/agentic-catalog/main/marketplace/rh-agentic-collection.yml
+lola market add rh-agentic-collections https://raw.githubusercontent.com/RHEcosystemAppEng/agentic-catalog/main/marketplace/rh-agentic-collection.yml
 lola install -f rh-basic
 ```
+
+Also install from this hub on GitHub (`plugins/redhat/rh-basic`) or via Claude Code using `claude-marketplace/marketplace.json` on `main`. See the catalog [Install](https://github.com/RHEcosystemAppEng/agentic-catalog/blob/main/README.md#install) section.
 
 ### MCP Setup (optional but recommended)
 

@@ -1,10 +1,8 @@
 # Agentic Catalog
 
-Unified marketplace and website for Red Hat agentic skill collections. This repository aggregates content from skills source repositories and publishes it through [Lola](https://github.com/LobsterTrap/lola) and [agentskills.io](https://agentskills.io).
+Published **hub** for Red Hat agentic skill collections: Lola marketplace, Claude Code marketplace, pack trees under `plugins/redhat/`, and the GitHub Pages website.
 
-**This is not a skills development repository.** Skills are authored in source repositories like [agentic-plugins](https://github.com/RHEcosystemAppEng/agentic-plugins). An internal process fetches, evaluates, and assembles the catalog automatically.
-
-> **Note:** Evaluation reports (`eval/<pack>/<skill>/report.json`) live in the **source skills repos**, not here. This catalog repo contains no `eval/` directory — eval data is read from the temporary clones at build time.
+Skills are **authored** in source repositories such as [agentic-plugins](https://github.com/RHEcosystemAppEng/agentic-plugins). An internal pipeline (plugin-pipeline P6) evaluates packs and publishes them onto this hub (`rc/v1.0.0` for the ecosystem channel). The live website deploys from **`main`** after merge.
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Validate Catalog](https://github.com/RHEcosystemAppEng/agentic-catalog/actions/workflows/validate.yml/badge.svg)](https://github.com/RHEcosystemAppEng/agentic-catalog/actions/workflows/validate.yml)
@@ -16,28 +14,62 @@ Unified marketplace and website for Red Hat agentic skill collections. This repo
 
 ```
 agentic-catalog/
-├── marketplace/                 # Lola marketplace definition
-│   └── rh-agentic-collection.yml
-├── docs/                        # Website source (agentskills.io)
+├── plugins/redhat/              # Published pack trees (hub payload)
+├── marketplace/
+│   └── rh-agentic-collection.yml  # Lola modules (path, ref, Soundcheck)
+├── claude-marketplace/
+│   └── marketplace.json         # Claude Code git-subdir listings
+├── docs/                        # GitHub Pages site
 │   ├── index.html
 │   ├── app.js
 │   ├── styles.css
-│   ├── data.json                # Generated catalog data
-│   ├── mcp.json                 # MCP server metadata
-│   └── collections/             # Generated per-pack HTML pages
-├── scripts/                     # Catalog build and validation scripts
+│   ├── data.json                # Generated — do not edit
+│   ├── mcp.json                 # MCP enrichment metadata
+│   └── collections/             # Generated per-pack HTML
+├── scripts/                     # Checkout-only site generate
 └── Makefile
 ```
 
 ---
 
-## Usage
+## Install
+
+Three ways to consume a pack from this hub (no ZIP releases on the ecosystem channel).
+
+### 1. Direct (GitHub)
+
+Open the pack directory at the commit pinned in the marketplace `ref`, for example:
+
+`https://github.com/RHEcosystemAppEng/agentic-catalog/tree/<ref>/plugins/redhat/<pack>`
+
+Clone this repository and use the same subdirectory.
+
+### 2. Lola
+
+```bash
+lola market add rh-agentic-collections https://raw.githubusercontent.com/RHEcosystemAppEng/agentic-catalog/main/marketplace/rh-agentic-collection.yml
+lola install -f <pack-name>
+```
+
+Use branch **`main`** (the published hub). P6 may still land on `rc/v1.0.0` until that work is merged.
+
+### 3. Claude Code marketplace
+
+Marketplace file:
+
+`https://raw.githubusercontent.com/RHEcosystemAppEng/agentic-catalog/main/claude-marketplace/marketplace.json`
+
+Add that marketplace in Claude Code, then install the plugin by name (each entry is a `git-subdir` of `plugins/redhat/<pack>`).
+
+---
+
+## Usage (site maintainers)
 
 ```bash
 # Install dependencies
 make install
 
-# Generate docs/data.json and collection pages
+# Generate docs/data.json and collection pages from THIS checkout
 make generate
 
 # Generate + verify site
@@ -47,21 +79,25 @@ make test
 make serve
 ```
 
+`make generate` does **not** clone other repositories. It reads `marketplace/rh-agentic-collection.yml`, `plugins/redhat/*`, `claude-marketplace/marketplace.json`, pack `README.md` / `mcp.json` / `skills/`. Modules whose `path` is missing on disk are skipped.
+
+Eval on the site is **Soundcheck** from the marketplace YAML (`soundcheck_levels_summary` and `mcp_evaluations`), not ABEval `eval/` reports.
+
 ---
 
 ## How It Works
 
 ```
-Skills repos (source)            Internal process            This repo (output)
+Authoring (GitLab)               Pipeline                      This hub
 ┌─────────────────────┐     ┌──────────────────────┐     ┌─────────────────────┐
-│ agentic-plugins     │     │ Fetch skills repos   │     │ marketplace/        │
-│ skills/             │────>│ Evaluate & score     │────>│ docs/ (website)     │
-│   rh-sre/           │     │ Build catalog data   │     │ data.json           │
-│   ocp-admin/        │     │ Generate website     │     │ mcp.json            │
-│   ...               │     └──────────────────────┘     └─────────────────────┘
-└─────────────────────┘
-
+│ agentic-plugins     │     │ Fetch, score,        │     │ plugins/redhat/     │
+│ <pack>/skills/      │────>│ assemble, publish    │────>│ marketplace/        │
+│                     │     │ (P6 ecosystem)       │     │ claude-marketplace/ │
+└─────────────────────┘     └──────────────────────┘     │ docs/ (Pages)       │
+                                                         └─────────────────────┘
 ```
+
+GitHub Pages: develop and validate on `rc/v1.0.0`; merge into `main` to publish the site.
 
 ---
 

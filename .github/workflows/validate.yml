@@ -3,7 +3,7 @@ name: Validate Catalog
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, rc/v1.0.0]
 
 jobs:
   validate:

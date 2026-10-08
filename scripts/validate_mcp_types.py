@@ -4,13 +4,14 @@ Validate that both command-based and HTTP MCP servers are parsed correctly.
 """
 
 from generate_mcp_data import generate_mcp_data
+from generate_pack_data import generate_pack_data
 
 
 def validate_mcp_types():
     """
     Validate MCP server type detection and parsing.
     """
-    servers = generate_mcp_data()
+    servers = generate_mcp_data(generate_pack_data())
 
     print("🔍 Validating MCP Server Types...\n")
 

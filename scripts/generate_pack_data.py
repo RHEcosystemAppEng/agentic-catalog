@@ -1,17 +1,20 @@
 #!/usr/bin/env python3
 """
-Parse agentic packs and extract plugin metadata, skills, and agents.
+Parse hub pack trees and extract plugin metadata and skills.
+
+Reads this checkout only (marketplace YAML + plugins/redhat/*). Does not clone.
 """
 
+import json
 import re
 from pathlib import Path
 from typing import Dict, List, Any
-import yaml
 
 import pack_registry
-from catalog_site_bundle import bundle_catalog_for_site
-from eval_site_enrichment import apply_eval_enrichment
 from generate_mcp_data import parse_mcp_file
+from install_links import attach_install, load_claude_plugins
+from marketplace_eval_enrichment import apply_marketplace_eval
+
 
 def parse_yaml_frontmatter(file_path: Path) -> Dict[str, Any]:
     try:
@@ -20,6 +23,7 @@ def parse_yaml_frontmatter(file_path: Path) -> Dict[str, Any]:
         match = re.match(r'^---\s*\n(.*?)\n---\s*\n', content, re.DOTALL)
         if not match:
             return {}
+        import yaml
         return yaml.safe_load(match.group(1)) or {}
     except Exception as e:
         print(f"Warning: Failed to parse frontmatter from {file_path}: {e}")
@@ -33,7 +37,6 @@ def parse_skills(pack_dir: str) -> List[Dict[str, Any]]:
     skills = []
     root = Path(pack_dir)
 
-    # Single-skill repo: SKILL.md at the pack root
     root_skill = root / 'SKILL.md'
     if root_skill.is_file():
         frontmatter = parse_yaml_frontmatter(root_skill)
@@ -47,15 +50,12 @@ def parse_skills(pack_dir: str) -> List[Dict[str, Any]]:
     if not skills_dir.exists():
         return skills
 
-    # Find all SKILL.md files
     for skill_file in skills_dir.glob('*/SKILL.md'):
         frontmatter = parse_yaml_frontmatter(skill_file)
 
-        # Extract name and description
         name = frontmatter.get('name', skill_file.parent.name)
         description = frontmatter.get('description', '')
 
-        # Clean up description (remove leading/trailing whitespace, collapse newlines)
         if isinstance(description, str):
             description = ' '.join(description.split())
 
@@ -69,7 +69,7 @@ def parse_skills(pack_dir: str) -> List[Dict[str, Any]]:
 
 
 def detect_repo_license(repo_root: Path, pack_path: str = ".") -> str:
-    """Best-effort SPDX identifier from LICENSE files in a cloned repository."""
+    """Best-effort SPDX identifier from LICENSE files in this checkout."""
     candidates = [
         repo_root / pack_path / "LICENSE",
         repo_root / pack_path / "LICENSE.txt",
@@ -95,131 +95,117 @@ def detect_repo_license(repo_root: Path, pack_path: str = ".") -> str:
     return "Unknown"
 
 
-def load_repository_packs() -> List[Dict[str, Any]]:
-    """Clone each marketplace module and return it as a standalone pack entry."""
-    import shutil
-    import subprocess
-    import tempfile
+def load_plugin_json(pack_dir: Path) -> Dict[str, Any]:
+    path = pack_dir / "plugin.json"
+    if not path.is_file():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except (OSError, json.JSONDecodeError) as exc:
+        print(f"Warning: failed to parse {path}: {exc}")
+        return {}
 
+
+def _display_ref(module: Dict[str, Any]) -> str:
+    raw = module.get("ref")
+    err = pack_registry.repository_ref_error(raw)
+    if err or not raw:
+        return pack_registry.normalize_repository_ref(raw) if not err else "main"
+    return pack_registry.normalize_repository_ref(raw)
+
+
+def load_hub_packs() -> List[Dict[str, Any]]:
+    """Load packs whose marketplace path exists on this checkout."""
+    repo_root = Path(__file__).resolve().parent.parent
     modules = pack_registry.load_repository_modules()
     if not modules:
         return []
 
-    repo_root = Path(__file__).resolve().parent.parent
+    on_disk_paths = set(pack_registry.get_union_pack_dirs(repo_root))
+    claude_plugins = load_claude_plugins(repo_root)
     packs: List[Dict[str, Any]] = []
-    tmp = Path(tempfile.mkdtemp(prefix="repository-build-"))
 
-    try:
-        for mod in modules:
-            name = mod.get("name", "unknown")
-            repository = mod.get("repository", "")
-            ref = mod.get("ref", "")
-            description = mod.get("description", "")
-            version = mod.get("version", "0.0.0")
-            tags = mod.get("tags", [])
-            pack_path = mod.get("path", ".")
+    for mod in modules:
+        name = mod.get("name", "unknown")
+        repository = str(mod.get("repository") or "").strip()
+        pack_path = str(mod.get("path") or "").strip().strip("/")
+        description = mod.get("description", "")
+        version = mod.get("version", "0.0.0")
+        tags = mod.get("tags", [])
 
-            if not repository:
-                print(f"  Warning: repository module '{name}' missing repository, skipping")
-                continue
+        if not pack_path:
+            print(f"  Warning: marketplace module '{name}' missing path, skipping")
+            continue
+        if pack_path not in on_disk_paths:
+            print(f"  Skipping '{name}': path {pack_path!r} is not on this checkout")
+            continue
 
-            ref_err = pack_registry.repository_ref_error(ref)
-            if ref_err:
-                print(f"  Warning: repository module '{name}' invalid ref: {ref_err}")
-                continue
+        pack_dir = repo_root / pack_path
+        plugin_json = load_plugin_json(pack_dir)
+        license_id = plugin_json.get("license") or detect_repo_license(repo_root, pack_path)
+        skills = parse_skills(str(pack_dir))
 
-            clone_dest = tmp / name
-            try:
-                subprocess.run(
-                    ["git", "clone", "--quiet", "--no-checkout", repository, str(clone_dest)],
-                    check=True, capture_output=True, text=True, timeout=120,
-                )
-                subprocess.run(
-                    ["git", "checkout", "--quiet", pack_registry.normalize_repository_ref(ref)],
-                    check=True, capture_output=True, text=True, cwd=clone_dest, timeout=30,
-                )
-            except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
-                print(f"  Warning: failed to clone '{name}': {exc}")
-                continue
+        readme_path = pack_dir / "README.md"
+        readme_content = readme_path.read_text(encoding="utf-8") if readme_path.is_file() else None
 
-            pack_dir = clone_dest / pack_path
-            license_id = detect_repo_license(clone_dest, pack_path)
-            skills = parse_skills(str(pack_dir))
+        mcp_servers = parse_mcp_file(str(pack_dir))
+        for s in mcp_servers:
+            s["pack"] = name
 
-            # Read catalog from the cloned source repo
-            cat_bundle, cat_warns = bundle_catalog_for_site(pack_path, clone_dest)
-            for w in cat_warns:
-                print(f"  ⚠️  {w}")
+        author = plugin_json.get("author")
+        if not isinstance(author, dict):
+            author = {"name": "Red Hat"}
+        elif not author.get("name"):
+            author = {**author, "name": "Red Hat"}
 
-            maturity = (cat_bundle.get("maturity") or "").strip().upper() if cat_bundle else ""
-            if maturity and maturity != pack_registry.DOCS_MATURITY_PUBLISH:
-                print(f"  ⚠️  Skipping '{name}': maturity is {maturity!r} (not GREEN)")
-                continue
-
-            # README fallback: read content so the UI can show it when catalog is absent
-            readme_path = pack_dir / "README.md"
-            readme_content = readme_path.read_text(encoding="utf-8") if readme_path.is_file() else None
-
-            # MCP servers: parse from cloned content; fix pack field to use module name
-            mcp_servers = parse_mcp_file(str(pack_dir))
-            for s in mcp_servers:
-                s["pack"] = name
-
-            pack = {
-                "name": name,
-                "path": repository,
-                "repository": repository,
-                "ref": pack_registry.normalize_repository_ref(ref)[:12],
-                "icon": mod.get("icon", ""),
-                "plugin": {
-                    "name": name,
-                    "title": mod.get("title") or name.replace("-", " ").title(),
-                    "version": version,
-                    "description": description,
-                    "author": {"name": "External"},
-                    "license": license_id,
-                    "keywords": tags,
-                },
-                "skills": sorted(skills, key=lambda s: s["name"]),
-                "agents": [],
-                "docs": [],
-                "has_readme": readme_content is not None,
-                "readme_content": readme_content,
-                "mcp_servers_raw": mcp_servers,
-            }
-            if cat_bundle is not None:
-                pack["collection"] = cat_bundle
-            # Enrich with eval reports from the cloned source repo before cleanup
-            apply_eval_enrichment([pack], clone_dest)
-            packs.append(pack)
-            catalog_status = "with catalog" if cat_bundle else "README only"
-            mcp_status = f", {len(mcp_servers)} MCP server(s)" if mcp_servers else ""
-            print(f"  ✓ '{name}': {len(skills)} skill(s) from {repository} ({catalog_status}{mcp_status})")
-    finally:
-        shutil.rmtree(tmp, ignore_errors=True)
+        ref = _display_ref(mod)
+        pack = {
+            "name": name,
+            "path": pack_path,
+            "hub_path": pack_path,
+            "repository": repository,
+            "ref": ref,
+            "icon": mod.get("icon", ""),
+            "plugin": {
+                "name": plugin_json.get("name") or name,
+                "title": mod.get("title") or name.replace("-", " ").title(),
+                "version": plugin_json.get("version") or version,
+                "description": description,
+                "author": author,
+                "license": license_id,
+                "keywords": tags,
+            },
+            "skills": sorted(skills, key=lambda s: s["name"]),
+            "agents": [],
+            "docs": [],
+            "has_readme": readme_content is not None,
+            "readme_content": readme_content,
+            "mcp_servers_raw": mcp_servers,
+        }
+        apply_marketplace_eval(pack, mod)
+        attach_install(pack, mod, claude_plugins)
+        packs.append(pack)
+        mcp_status = f", {len(mcp_servers)} MCP server(s)" if mcp_servers else ""
+        print(f"  ✓ '{name}': {len(skills)} skill(s) from {pack_path} (README + mcp.json{mcp_status})")
 
     return packs
 
 
 def generate_pack_data() -> List[Dict[str, Any]]:
     """
-    Generate pack data for all agentic packs.
+    Generate pack data for all hub packs present on this checkout.
 
     Returns:
         List of pack dictionaries
     """
-    packs = []
-
-    repository_packs = load_repository_packs()
-    if repository_packs:
-        packs.extend(repository_packs)
-        print(f"✓ Added {len(repository_packs)} marketplace pack(s)")
-
+    packs = load_hub_packs()
+    if packs:
+        print(f"✓ Added {len(packs)} marketplace pack(s) from this checkout")
     return packs
 
 
 if __name__ == '__main__':
-    # Test the script
     print("Parsing agentic collections...")
     print()
 

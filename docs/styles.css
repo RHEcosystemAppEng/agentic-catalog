@@ -589,7 +589,7 @@ section.collapsed .grid {
     border-color: #d1d5db;
 }
 
-.pack-eval-badge.is-zip {
+.pack-eval-badge.is-install {
     color: #4a7fd7;
     background: #ffffff;
     border-color: #a4c2f4;
@@ -597,7 +597,7 @@ section.collapsed .grid {
     cursor: pointer;
 }
 
-.pack-eval-badge.is-zip:hover {
+.pack-eval-badge.is-install:hover {
     background: #eef4fc;
 }
 

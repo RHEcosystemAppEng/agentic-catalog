@@ -4,88 +4,86 @@ Guidance for AI coding assistants working in this repository.
 
 ## What This Repository Is
 
-This is the **catalog and marketplace** for Red Hat agentic collections. It serves two purposes:
+This is the **published catalog hub** for Red Hat agentic collections. It is not a skills authoring repo.
 
-1. **Lola marketplace** — `marketplace/rh-agentic-collection.yml` declares which skill packs are available and where to fetch them. Users install packs with `lola install -f <pack-name>`.
-2. **agentskills.io website** — the `docs/` directory is the static site. The scripts in `scripts/` build it by cloning each pack's source repo and extracting metadata.
+1. **Lola marketplace** — `marketplace/rh-agentic-collection.yml` lists packs with hub `repository`, `path` (`plugins/redhat/<pack>`), and pinned `ref` (hub commit SHA). Users: `lola market add` the raw YAML on `main`, then `lola install -f <pack-name>`.
+2. **Claude Code marketplace** — `claude-marketplace/marketplace.json` lists the same packs as `git-subdir` sources.
+3. **Website** — `docs/` is the static site. `make generate` reads **this checkout only** (no `git clone`).
 
-**No skills are authored or stored here.** Skills live in their own source repos (e.g., [agentic-plugins](https://github.com/RHEcosystemAppEng/agentic-plugins)). This repo only aggregates and presents them.
+Authoring stays in source repos (e.g. [agentic-plugins](https://github.com/RHEcosystemAppEng/agentic-plugins)). P6 publishes pack trees here and writes Soundcheck fields onto Lola modules.
 
 ## Repository Structure
 
 ```
 agentic-catalog/
+├── plugins/redhat/<pack>/         # Hub payload (skills, mcp.json, README, plugin.json)
 ├── marketplace/
 │   └── rh-agentic-collection.yml  # Single source of truth for pack discovery
-├── docs/                          # Static site (agentskills.io)
-│   ├── index.html                 # SPA entry point
-│   ├── app.js                     # Rendering and search logic (XSS-safe, no innerHTML)
-│   ├── styles.css                 # Red Hat-themed styling
-│   ├── data.json                  # Generated — do not edit manually
-│   ├── mcp.json                   # MCP server metadata — do not edit manually
-│   └── collections/               # Generated per-pack HTML pages
-└── scripts/                       # Build and verification scripts
+├── claude-marketplace/
+│   └── marketplace.json
+├── docs/                          # Static site (GitHub Pages)
+└── scripts/                       # Checkout-only generate
 ```
+
+`.catalog/` and `eval/` are **authoring-only**. P6 strips them; they are not on the hub and are not fetched at generate time.
 
 ## How the Build Works
 
 `make generate` runs `scripts/build_website.py`, which:
 
-1. Reads `marketplace/rh-agentic-collection.yml` to get the list of packs
-2. For each pack: `git clone` its source repo into a temp directory
-3. Reads `.catalog/collection.yaml` (if present) for metadata and maturity
-4. Skips packs whose catalog declares a non-GREEN maturity; absent catalog → assumed GREEN
-5. Reads `skills/*/SKILL.md` frontmatter, README, and `mcps.json` from the clone
-6. Writes `docs/data.json` and generates `docs/collections/<pack>.html`
+1. Reads `marketplace/rh-agentic-collection.yml`
+2. Includes a module only if `repo_root / module.path` exists (e.g. `plugins/redhat/rh-sre`)
+3. Reads `skills/*/SKILL.md`, `README.md`, and hub **`mcp.json`**
+4. Attaches `soundcheck_levels_summary` and `mcp_evaluations` from the module (Soundcheck, not ABEval)
+5. Attaches `install` links (GitHub tree, Lola, Claude marketplace)
+6. Writes `docs/data.json` and `docs/collections/<pack>.html`
 
-The clones are ephemeral (deleted after each build). Nothing from external repos is committed here.
-
-> **Eval data lives in source repos, not here.** `eval_site_enrichment.py` reads `eval/<pack>/<skill>/report.json` from the *cloned* source repo (e.g. `agentic-plugins/eval/rh-sre/remediation/report.json`). There is no `eval/` directory in this catalog repo — looking for eval files here will always find nothing.
+Do **not** add generate-time clones of GitLab authoring, GitHub agentic-plugins, or this hub.
 
 ## Marketplace File
 
-`marketplace/rh-agentic-collection.yml` is the **only** place that controls which packs appear on the site. Each module entry carries:
+`marketplace/rh-agentic-collection.yml` controls which packs appear. Hub-published modules:
 
-| Field | Required | Purpose |
-|-------|----------|---------|
-| `name` | yes | Pack identifier (used in URLs and filenames) |
-| `repository` | yes | Git URL to clone |
-| `path` | yes | Subdirectory within the repo (`.` for root) |
-| `version` | yes | Displayed version |
-| `description` | yes | Short description shown on cards |
-| `title` | yes | Display name shown on cards |
-| `icon` | recommended | Emoji or HTTPS URL to an image |
-| `tags` | optional | Filter tags |
-| `ref` | optional | 40-char commit SHA to pin; absent = main branch |
+| Field | Purpose |
+|-------|---------|
+| `name` | Pack identifier |
+| `repository` | Hub git URL (`agentic-catalog`) |
+| `path` | Hub subdirectory, e.g. `plugins/redhat/rh-sre` |
+| `ref` | 40-char **hub** commit SHA |
+| `content_hash` | Pack payload hash from P6 |
+| `soundcheck_levels_summary` | Skill-track Soundcheck (Foundational / Trusted / Certified) |
+| `mcp_evaluations[]` | Per-MCP Compass scorecard (Lead / Bronze / Silver / Gold). Do **not** join `name` onto `mcp.json` keys. |
 
-Do not add packs to `docs/data.json` or any other file directly. Add them to the marketplace YAML.
+Modules still pointing at `agentic-plugins` with a path that is not on disk are **skipped**.
 
 ## Scripts
 
 | Script | Purpose | Invoked by |
 |--------|---------|------------|
 | `build_website.py` | Orchestrates the full build | `make generate` |
-| `generate_pack_data.py` | Clones repos, extracts pack/skill metadata | build |
-| `generate_mcp_data.py` | Extracts MCP server configs from `mcps.json` | build |
-| `generate_collection_pages.py` | Renders per-pack HTML pages | build |
-| `catalog_site_bundle.py` | Resolves `.catalog/` fragment `#ref` pointers | build |
-| `eval_site_enrichment.py` | Attaches ABEval report summaries to skills | build |
-| `pack_registry.py` | Marketplace-driven pack discovery utilities | build |
-| `check_site.py` | Interactive manual verification of `data.json` | manual |
-| `test_local.sh` | Automated validation (JSON, HTML, XSS, credentials) | `make test` |
-| `validate_mcp_types.py` | Sanity-checks MCP server type parsing | manual |
+| `generate_pack_data.py` | Hub-local pack/skill/README/`mcp.json` | build |
+| `generate_mcp_data.py` | Parses hub `mcp.json` (`stdio` / `streamable-http`) | build |
+| `marketplace_eval_enrichment.py` | Soundcheck + MCP scorecards from YAML | build |
+| `install_links.py` | GitHub / Lola / Claude install metadata | build |
+| `generate_collection_pages.py` | Per-pack HTML | build |
+| `pack_registry.py` | Marketplace discovery (`get_union_pack_dirs`) | build |
+| `eval_site_enrichment.py` | Unused (ABEval; hub has no `eval/`) | — |
+| `catalog_site_bundle.py` | Unused (no `.catalog` on hub) | — |
+| `test_local.sh` | Automated validation | `make test` |
 
 ## Key Rules
 
-- **Marketplace is the single source of truth.** Do not add packs, icons, or titles anywhere else.
-- **Generated files are read-only.** `docs/data.json`, `docs/mcp.json`, and `docs/collections/*.html` are rebuilt on every run — manual edits will be overwritten.
-- **No skills development here.** To create or modify skills, work in the appropriate skills source repo.
-- **Schema changes need coordination.** Updating `.catalog/collection.yaml` in skills repos requires consistent field usage across all packs.
-- **Security.** All DOM manipulation in `app.js` uses `textContent` and `createElement` — never `innerHTML` with external data.
+- **Marketplace is the single source of truth** for which packs appear.
+- **Generated files are read-only.** `docs/data.json` and `docs/collections/*.html` are rebuilt every run.
+- **No skills development here.** Change skills in the authoring repo; P6 republishes the hub tree.
+- **Eval on the site is Soundcheck** from marketplace YAML. Do not use `recommendation` (P3 constant) or ABEval trial counts for badges.
+- **Security.** DOM updates in `app.js` use `textContent` / `createElement` — never `innerHTML` with external data.
 
 ## CI
 
 | Workflow | Trigger | What it does |
-|----------|---------|-------------|
-| `validate.yml` | Push / PR | Runs `make test` (→ `test_local.sh`) |
-| `deploy-pages.yml` | Push to main | Runs `make generate`, deploys `docs/` to GitHub Pages |
+|----------|---------|--------------|
+| `validate.yml` | PR; push to `main` or `rc/v1.0.0` | `make test` |
+| `deploy-pages.yml` | Push to **`main` only** | `make generate`, deploy `docs/` |
+
+Do not deploy Pages from `rc/v1.0.0`. Expand Pages `paths` includes `plugins/**` and `claude-marketplace/**`.

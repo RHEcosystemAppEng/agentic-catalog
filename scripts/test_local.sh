@@ -79,6 +79,23 @@ for pack in data['packs']:
     if 'name' not in pack or 'plugin' not in pack:
         print(f"Pack missing required fields: {pack.get('name', 'unknown')}")
         sys.exit(1)
+    if pack.get('path') in (None, '') or str(pack.get('path', '')).startswith('http'):
+        print(f"Pack {pack.get('name')} should use hub path, got {pack.get('path')!r}")
+        sys.exit(1)
+    install = pack.get('install') or {}
+    if not install.get('hub_url'):
+        print(f"Pack {pack.get('name')} missing install.hub_url")
+        sys.exit(1)
+    es = pack.get('evaluation_summary') or {}
+    if es.get('evaluation_source') != 'soundcheck':
+        print(f"Pack {pack.get('name')} evaluation_source should be soundcheck")
+        sys.exit(1)
+
+names = {p['name'] for p in data['packs']}
+for leftover in ('rh-developer', 'rh-ai-engineer', 'rh-automation'):
+    if leftover in names:
+        print(f"Pack {leftover} should be skipped (path not on hub checkout)")
+        sys.exit(1)
 
 # Check MCP servers structure
 if not isinstance(data['mcp_servers'], list):
@@ -148,6 +165,16 @@ then
     echo -e " ${GREEN}✓${NC}"
 else
     echo -e " ${RED}✗${NC}"
+    exit 1
+fi
+
+# Test 8: Hub-checkout generate (no clone, mcp.json, self-tests)
+echo -n "8. Hub generate helpers... "
+if python scripts/marketplace_eval_enrichment.py >/dev/null && \
+   python scripts/install_links.py >/dev/null; then
+    echo -e "${GREEN}✓${NC}"
+else
+    echo -e "${RED}✗${NC}"
     exit 1
 fi
 

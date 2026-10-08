@@ -7,6 +7,7 @@ source of truth for pack discovery.
 
 from __future__ import annotations
 
+import os
 import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
@@ -14,6 +15,10 @@ from typing import Any, Dict, List, Optional, Set
 import yaml
 
 DEFAULT_MARKETPLACE = Path("marketplace/rh-agentic-collection.yml")
+DEFAULT_CLAUDE_MARKETPLACE = Path("claude-marketplace/marketplace.json")
+# Consumer install / Pages branch. Override with CATALOG_BRANCH (e.g. rc/v1.0.0).
+DEFAULT_CATALOG_BRANCH = "main"
+LOLA_MARKET_ALIAS = "rh-agentic-collections"
 
 
 def _repo_root() -> Path:
@@ -115,6 +120,73 @@ def load_repository_modules(
         m for m in modules
         if isinstance(m, dict) and m.get("repository", "").strip()
     ]
+
+
+def load_on_disk_modules(
+    repo_root: Optional[Path] = None,
+    marketplace_path: Optional[Path] = None,
+) -> List[Dict[str, Any]]:
+    """Marketplace modules whose ``path`` exists on this checkout.
+
+    Modules still pointing at authoring layouts (e.g. ``rh-developer``) are
+    omitted until they are published onto the hub tree.
+    """
+    root = repo_root or _repo_root()
+    out: List[Dict[str, Any]] = []
+    for mod in load_repository_modules(marketplace_path):
+        raw = str(mod.get("path") or "").strip().strip("/")
+        if not raw or raw == ".":
+            continue
+        if (root / raw).is_dir():
+            out.append(mod)
+    return out
+
+
+def catalog_branch() -> str:
+    value = os.environ.get("CATALOG_BRANCH", "").strip()
+    return value or DEFAULT_CATALOG_BRANCH
+
+
+def web_repo_url(repository: str) -> str:
+    """HTTPS repo URL without trailing slash or ``.git`` suffix."""
+    return str(repository or "").strip().rstrip("/").removesuffix(".git")
+
+
+def github_blob_base(repository: str, ref: str, subpath: str = "") -> str:
+    """Blob URL for a file under *subpath* at *ref* (GitHub or GitLab)."""
+    repo = web_repo_url(repository)
+    if not repo:
+        return ""
+    ref_part = (ref or "main").strip() or "main"
+    path = str(subpath or "").strip().strip("/")
+    blob_sep = "/-/blob" if "gitlab.com" in repo else "/blob"
+    base = f"{repo}{blob_sep}/{ref_part}"
+    return f"{base}/{path}" if path and path != "." else base
+
+
+def github_tree_url(repository: str, ref: str, subpath: str = "") -> str:
+    """Directory tree URL for a pack at *ref*."""
+    repo = web_repo_url(repository)
+    if not repo:
+        return ""
+    ref_part = (ref or "main").strip() or "main"
+    path = str(subpath or "").strip().strip("/")
+    tree_sep = "/-/tree" if "gitlab.com" in repo else "/tree"
+    base = f"{repo}{tree_sep}/{ref_part}"
+    return f"{base}/{path}" if path and path != "." else base
+
+
+def github_raw_url(repository: str, ref: str, rel_path: str) -> str:
+    """Raw file URL on GitHub (or GitLab) for a path at *ref*."""
+    repo = web_repo_url(repository)
+    rel = str(rel_path or "").lstrip("/")
+    ref_part = (ref or "main").strip() or "main"
+    if "github.com" in repo:
+        slug = repo.split("github.com/", 1)[-1]
+        return f"https://raw.githubusercontent.com/{slug}/{ref_part}/{rel}"
+    if "gitlab.com" in repo:
+        return f"{repo}/-/raw/{ref_part}/{rel}"
+    return f"{repo}/{rel}"
 
 
 # Catalog `maturity` value published to GitHub Pages / docs/data.json.

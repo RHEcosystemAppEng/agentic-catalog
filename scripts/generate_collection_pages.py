@@ -15,35 +15,21 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 import markdown
-import yaml
+
+import pack_registry
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-_MARKETPLACE_PATH = REPO_ROOT / "marketplace" / "rh-agentic-collection.yml"
-def _load_marketplace_modules() -> Dict[str, Any]:
-    if not _MARKETPLACE_PATH.exists():
-        return {}
-    with open(_MARKETPLACE_PATH, encoding="utf-8") as f:
-        data = yaml.safe_load(f) or {}
-    return {mod["name"]: mod for mod in (data.get("modules") or []) if "name" in mod}
-
-
-_MARKETPLACE_MODULES: Dict[str, Any] = _load_marketplace_modules()
 
 
 def _pack_blob_base(pack: Dict[str, Any]) -> str:
-    """Return the blob URL base (repo/blob/ref/path) for a pack, supporting GitHub and GitLab."""
+    """Return the blob URL base (repo/blob/ref/path) for a pack."""
     name = pack.get("name", "")
-    mod = _MARKETPLACE_MODULES.get(name, {})
-    repo = (pack.get("repository") or mod.get("repository") or "").rstrip("/")
+    repo = pack.get("repository") or ""
     if not repo:
-        raise ValueError(f"Pack '{name}' has no repository in pack data or marketplace")
+        raise ValueError(f"Pack '{name}' has no repository in pack data")
     ref = pack.get("ref") or "main"
-    path = (mod.get("path") if mod else None) or "."
-    path = path.strip("/")
-    blob_sep = "/-/blob" if "gitlab.com" in repo else "/blob"
-    if path and path != ".":
-        return f"{repo}{blob_sep}/{ref}/{path}"
-    return f"{repo}{blob_sep}/{ref}"
+    path = pack.get("hub_path") or pack.get("path") or ""
+    return pack_registry.github_blob_base(str(repo), str(ref), str(path))
 
 
 def md_to_html(text: Any) -> str:
@@ -118,30 +104,32 @@ def format_relative_age(iso_value: str) -> str:
     return f"{delta_seconds}s ago"
 
 
+def _format_soundcheck_levels(levels: Any) -> str:
+    if not isinstance(levels, dict) or not levels:
+        return ""
+    parts: List[str] = []
+    for name, counts in levels.items():
+        if not isinstance(counts, dict):
+            continue
+        passed = int(counts.get("pass") or 0)
+        total = int(counts.get("total") or 0)
+        parts.append(f"{name} {passed}/{total} pass")
+    return " · ".join(parts)
+
+
 def _render_eval_skills_banner(es: Dict[str, Any]) -> str:
-    """Pack-level eval summary for the Skills tab (HTML-safe)."""
-    n = int(es.get("evaluated_count") or 0)
-    total = int(es.get("catalog_skill_count") or 0)
+    """Pack-level Soundcheck summary for the Skills tab (HTML-safe)."""
+    if str(es.get("evaluation_source") or "") != "soundcheck":
+        return ""
+    total = int(es.get("total_checks") or 0)
     if total <= 0:
         return ""
-    coverage_pct = (n / total * 100.0) if total > 0 else 0.0
+    passed = int(es.get("passed_count") or 0)
+    failed = int(es.get("failed_count") or 0)
     latest = html.escape(str(es.get("latest_generated_at") or "N/A"))
-    title = f"Evaluation coverage: {n} of {total} skills evaluated ({coverage_pct:.1f}%)"
-    if n <= 0:
-        note_cls = "muted"
-        note = "No evaluations were executed for this pack yet."
-    else:
-        trials = int(es.get("total_trials_treatment") or 0)
-        confidence = str(es.get("confidence_level") or "LOW").upper()
-        if confidence == "LOW":
-            note_cls = "warn"
-            note = f"Low confidence - based on {trials} trial{'s' if trials != 1 else ''}. More evaluations needed for stronger results."
-        elif confidence == "MEDIUM":
-            note_cls = "warn"
-            note = f"Moderate confidence - based on {trials} trial{'s' if trials != 1 else ''}."
-        else:
-            note_cls = "ok"
-            note = f"High confidence - based on {trials} trial{'s' if trials != 1 else ''}."
+    title = f"Soundcheck: {passed} pass · {failed} fail ({total} checks)"
+    note = _format_soundcheck_levels(es.get("levels")) or "Skill-track Soundcheck from the marketplace YAML."
+    note_cls = "ok" if failed == 0 else ("warn" if passed else "muted")
     return (
         '<div class="collection-eval-summary">'
         '<div class="collection-eval-summary-icon" aria-hidden="true">📊</div>'
@@ -151,6 +139,33 @@ def _render_eval_skills_banner(es: Dict[str, Any]) -> str:
         '</div>'
         f'<div class="collection-eval-summary-meta"><span>Last evaluated:</span> {latest}</div>'
         "</div>"
+    )
+
+
+def _render_mcp_scorecards(mcp_evaluations: List[Dict[str, Any]]) -> str:
+    """Pack-level MCP Soundcheck list (Compass name / entity_ref). Not joined to mcp.json."""
+    if not mcp_evaluations:
+        return ""
+    items: List[str] = []
+    for entry in mcp_evaluations:
+        name = html.escape(str(entry.get("name") or ""))
+        entity = html.escape(str(entry.get("entity_ref") or ""))
+        status = html.escape(str(entry.get("soundcheck_status") or ""))
+        levels = _format_soundcheck_levels(entry.get("soundcheck_levels_summary"))
+        level_html = f" — {html.escape(levels)}" if levels else ""
+        items.append(
+            "<li>"
+            f"<strong>{name}</strong>"
+            + (f" <code>{entity}</code>" if entity else "")
+            + (f" ({status})" if status else "")
+            + level_html
+            + "</li>"
+        )
+    return (
+        "<h2>MCP scorecards</h2>"
+        "<p class=\"collection-page-sub\">Compass Soundcheck per MCP server "
+        "(independent of hub mcp.json keys).</p>"
+        f"<ul class=\"simple-list\">{''.join(items)}</ul>"
     )
 
 
@@ -434,9 +449,6 @@ def _render_skills_list(skills: List[Dict[str, Any]], blob_base: str, list_tag: 
         ]
         if summary:
             block.append(f"<div class=\"collection-prose collection-prose-tight\">{summary}</div>")
-        ev = skill.get("evaluation") if isinstance(skill.get("evaluation"), dict) else None
-        if ev:
-            block.append(_render_skill_evaluation_block(ev))
         block.append(
             f"<a class=\"collection-inline-link\" href=\"{skill_path}\" target=\"_blank\" rel=\"noopener noreferrer\">"
             "View SKILL.md →</a>"
@@ -542,7 +554,8 @@ def _render_agents_tab(
         w for w in workflows if isinstance(w, dict) and w.get("name") != "TODO: Add workflow"
     ]
     if not valid_workflows:
-        valid_workflows = [{"name": "See collection.yaml", "workflow": "Add workflows in collection.yaml."}]
+        out.append("<p class=\"collection-missing\">No sample workflows published on the hub.</p>")
+        return "".join(out)
     for wf in valid_workflows:
         name = html.escape(str(wf.get("name", "")))
         workflow_html = md_to_html(wf.get("workflow", ""))
@@ -551,21 +564,51 @@ def _render_agents_tab(
     return "".join(out)
 
 
-def _render_lola_install_block(pack_name: str) -> str:
-    """Generate a Lola installation block for packs without catalog deploy_and_use instructions."""
-    name_esc = html.escape(pack_name)
-    code = f"lola install -f {name_esc}"
-    return (
-        "<h2>Quick Start</h2>"
-        '<div class="install-accordion">'
-        '<details class="install-accordion-item" open>'
-        '<summary class="install-accordion-header">Installation (Lola)</summary>'
-        '<div class="install-accordion-body collection-prose">'
-        f"<pre><code>{code}</code></pre>"
-        "</div>"
-        "</details>"
-        "</div>"
+def _render_install_block(pack: Dict[str, Any]) -> str:
+    """Hub-native install paths: git tree, Lola, Claude Code marketplace."""
+    install = pack.get("install") or {}
+    hub_url = html.escape(str(install.get("hub_url") or ""), quote=True)
+    lola = install.get("lola") or {}
+    claude = install.get("claude") or {}
+    lola_cmd = html.escape(str(lola.get("command") or f"lola install -f {pack.get('name') or ''}"))
+    claude_json = html.escape(str(claude.get("marketplace_json_url") or ""), quote=True)
+    plugin_name = html.escape(str(claude.get("plugin_name") or pack.get("name") or ""))
+    parts = [
+        "<h2>Install</h2>",
+        '<div class="install-accordion">',
+        '<details class="install-accordion-item" open>',
+        '<summary class="install-accordion-header">1. Direct (GitHub)</summary>',
+        '<div class="install-accordion-body collection-prose">',
+    ]
+    if hub_url:
+        parts.append(
+            f'<p><a class="collection-inline-link" href="{hub_url}" '
+            'target="_blank" rel="noopener noreferrer">Browse pack on GitHub →</a></p>'
+        )
+    parts.extend(
+        [
+            "</div></details>",
+            '<details class="install-accordion-item">',
+            '<summary class="install-accordion-header">2. Lola</summary>',
+            '<div class="install-accordion-body collection-prose">',
+            f"<pre><code>{lola_cmd}</code></pre>",
+            "</div></details>",
+            '<details class="install-accordion-item">',
+            '<summary class="install-accordion-header">3. Claude Code marketplace</summary>',
+            '<div class="install-accordion-body collection-prose">',
+        ]
     )
+    if claude_json:
+        parts.append(
+            f'<p>Marketplace manifest: <a class="collection-inline-link" href="{claude_json}" '
+            'target="_blank" rel="noopener noreferrer">claude-marketplace/marketplace.json</a></p>'
+        )
+    parts.append(
+        f"<p>Install plugin <code>{plugin_name}</code> from that marketplace "
+        f"(git-subdir path on the hub).</p>"
+    )
+    parts.append("</div></details></div>")
+    return "".join(parts)
 
 
 def render_collection_page(pack: Dict[str, Any], mcp_data: List[Dict[str, Any]]) -> str:
@@ -577,11 +620,11 @@ def render_collection_page(pack: Dict[str, Any], mcp_data: List[Dict[str, Any]])
         or pack.get("name")
     )
     page_title = collection.get("name") or pack.get("plugin", {}).get("title") or pack.get("name")
-    description = str(collection.get("description") or "").strip()
+    description = str(
+        collection.get("description") or pack.get("plugin", {}).get("description") or ""
+    ).strip()
     subtitle = html.escape(description[:120].strip() + ("..." if len(description) > 120 else ""))
     blob_base = _pack_blob_base(pack)
-    has_catalog = bool(collection)
-    yaml_link = f"{blob_base}/.catalog/collection.yaml"
     readme_link = f"{blob_base}/README.md"
     categories = collection.get("categories") or []
     personas = collection.get("personas") or []
@@ -640,36 +683,20 @@ def render_collection_page(pack: Dict[str, Any], mcp_data: List[Dict[str, Any]])
         else:
             overview_parts.append("<p class=\"collection-missing\">No overview available.</p>")
 
-    # Inferred Lola install block for packs with no catalog deploy instructions
-    if not has_catalog or not collection.get("deploy_and_use"):
-        overview_parts.append(_render_lola_install_block(pack.get("name", "")))
+    overview_parts.append(_render_install_block(pack))
+    overview_parts.append(_render_mcp_scorecards(pack.get("mcp_evaluations") or []))
 
-    # Skills tab
-    contents = collection.get("contents") or {}
+    # Skills tab — SKILL.md on the hub tree (no .catalog)
     pack_skills_raw = pack.get("skills") or []
     skills_parts = ["<h2>Skills</h2>"]
     esum = pack.get("evaluation_summary") or {}
-    if int(esum.get("catalog_skill_count") or 0) > 0:
-        skills_parts.append(_render_eval_skills_banner(esum))
-    if contents.get("description"):
-        skills_parts.append(f"<div class=\"collection-prose\">{md_to_html(contents.get('description'))}</div>")
-    orchestration = contents.get("orchestration_skills") or []
-    catalog_skills = contents.get("skills") or []
-    if orchestration:
-        skills_parts.append(f"<h3>{'Orchestration Skill' if len(orchestration) == 1 else 'Orchestration Skills'}</h3>")
-        skills_parts.append(_render_skills_list(orchestration, blob_base, "Orchestration skill"))
-    if catalog_skills:
-        skills_parts.append(f"<h3>{'Basic Skills' if orchestration else 'Skills'}</h3>")
-        skills_parts.append(_render_skills_list(catalog_skills, blob_base))
-    guide = contents.get("skills_decision_guide") or []
-    if guide:
-        skills_parts.append("<h2>Skills Decision Guide</h2>")
-        skills_parts.append(_render_decision_guide(guide))
-    if not orchestration and not catalog_skills and not guide and not contents.get("description"):
-        if pack_skills_raw:
-            skills_parts.append(_render_skills_list(pack_skills_raw, blob_base))
-        else:
-            skills_parts.append("<p class=\"collection-missing\">No skills content.</p>")
+    banner = _render_eval_skills_banner(esum)
+    if banner:
+        skills_parts.append(banner)
+    if pack_skills_raw:
+        skills_parts.append(_render_skills_list(pack_skills_raw, blob_base))
+    else:
+        skills_parts.append("<p class=\"collection-missing\">No skills content.</p>")
 
     # Resources tab
     resources_html = _render_resources(collection.get("resources") or [], blob_base)
@@ -717,9 +744,7 @@ def render_collection_page(pack: Dict[str, Any], mcp_data: List[Dict[str, Any]])
                     <div class="collection-nav-start">
                         <a href="../index.html" class="collection-back">← Back to Catalog</a>
                     </div>
-                    <div class="collection-nav-center">
-                        {f'<a href="{html.escape(yaml_link, quote=True)}" target="_blank" rel="noopener noreferrer" class="collection-meta-link">catalog YAML →</a>' if has_catalog else ''}
-                    </div>
+                    <div class="collection-nav-center"></div>
                     <div class="collection-nav-end">
                         <a href="{html.escape(readme_link, quote=True)}" target="_blank" rel="noopener noreferrer" class="collection-meta-link">README →</a>
                         <a href="{license_nav_href_esc}" target="_blank" rel="noopener noreferrer" class="collection-meta-link">{html.escape(license_nav_label)} →</a>

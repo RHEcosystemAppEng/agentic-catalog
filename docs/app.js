@@ -262,20 +262,8 @@ function createPackCard(pack) {
     const es = pack.evaluation_summary && typeof pack.evaluation_summary === 'object'
         ? pack.evaluation_summary
         : null;
-    const coveragePctValue = es && es.catalog_skill_count > 0
-        ? (typeof es.coverage_pct === 'number'
-            ? es.coverage_pct
-            : (es.evaluated_count / es.catalog_skill_count) * 100)
-        : 0;
-    const verifiedCountValue = es
-        ? Number(es.verified_execution_count ?? es.total_trials_treatment ?? 0)
-        : 0;
-    const requiresMoreEval = es
-        ? Boolean(
-            es.requires_more_evaluation ??
-            (coveragePctValue < 50 || verifiedCountValue < 5)
-        )
-        : false;
+    const isSoundcheck = Boolean(es && es.evaluation_source === 'soundcheck');
+    const install = pack.install && typeof pack.install === 'object' ? pack.install : {};
 
     // Header row (title + eval badge)
     const headerRow = document.createElement('div');
@@ -298,19 +286,24 @@ function createPackCard(pack) {
 
     const badges = document.createElement('div');
     badges.className = 'pack-card-badges';
-    {
-        const zipBadge = document.createElement('a');
-        zipBadge.className = 'pack-eval-badge is-zip';
-        zipBadge.href = `https://github.com/RHEcosystemAppEng/agentic-plugins/releases/download/latest/${encodeURIComponent(pack.name)}.zip`;
-        zipBadge.rel = 'noopener noreferrer';
-        zipBadge.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>ZIP bundle';
-        zipBadge.addEventListener('click', (event) => event.stopPropagation());
-        badges.appendChild(zipBadge);
-    }
+    const addInstallBadge = (href, label) => {
+        if (!href) return;
+        const link = document.createElement('a');
+        link.className = 'pack-eval-badge is-install';
+        link.href = String(href);
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.textContent = label;
+        link.addEventListener('click', (event) => event.stopPropagation());
+        badges.appendChild(link);
+    };
+    addInstallBadge(install.hub_url, 'GitHub');
+    addInstallBadge(install.lola && install.lola.marketplace_raw_url, 'Lola');
+    addInstallBadge(install.claude && install.claude.marketplace_json_url, 'Claude');
     {
         const badge = document.createElement('span');
         badge.className = 'pack-eval-badge';
-        if (!es || es.evaluated_count === 0) {
+        if (!es || !es.evaluated_count) {
             badge.classList.add('is-none');
             badge.textContent = 'NOT EVALUATED';
         } else if (es.failed_count === 0) {
@@ -379,108 +372,63 @@ function createPackCard(pack) {
     addChip('mcp', `${mcpCount} MCP`);
     div.appendChild(chips);
 
-    if (es && es.catalog_skill_count > 0) {
+    if (isSoundcheck && (Number(es.total_checks || 0) > 0 || Number(es.mcp_evaluation_count || 0) > 0)) {
         const divider = document.createElement('div');
         divider.className = 'pack-eval-divider';
         div.appendChild(divider);
 
         const evidenceLine = document.createElement('p');
         evidenceLine.className = 'pack-eval-evidence';
-        evidenceLine.textContent = `✔ ${verifiedCountValue} verified execution${verifiedCountValue === 1 ? '' : 's'}`;
+        if (Number(es.total_checks || 0) > 0) {
+            evidenceLine.textContent =
+                `Soundcheck ${es.passed_count || 0} pass · ${es.failed_count || 0} fail (${es.total_checks} checks)`;
+        } else {
+            evidenceLine.textContent =
+                `MCP scorecards: ${es.mcp_evaluation_count} (no skill-track Soundcheck on this pack)`;
+        }
         div.appendChild(evidenceLine);
 
-        if (verifiedCountValue > 0) {
-            const metricGrid = document.createElement('div');
-            metricGrid.className = 'pack-eval-metrics';
-            const evalBlock = document.createElement('div');
-            evalBlock.className = 'pack-eval-metric pack-eval-metric-main';
-            const evalLabel = document.createElement('p');
-            evalLabel.className = 'metric-label';
-            evalLabel.textContent = 'Evaluation';
-            const evalValueWrap = document.createElement('div');
-            evalValueWrap.className = 'pack-eval-main-value';
-            const evalIcon = document.createElement('span');
-            evalIcon.className = 'pack-eval-main-icon';
-            evalIcon.appendChild(createPackIcon('evaluation'));
-            const evalValue = document.createElement('p');
-            evalValue.className = 'metric-value';
-            evalValue.textContent = `${verifiedCountValue} verified execution${verifiedCountValue === 1 ? '' : 's'}`;
-            evalValueWrap.appendChild(evalIcon);
-            evalValueWrap.appendChild(evalValue);
-            const evalSub = document.createElement('p');
-            evalSub.className = 'metric-sub';
-            evalSub.textContent = `Coverage: ${coveragePctValue.toFixed(1)}% (${es.evaluated_count}/${es.catalog_skill_count} skills)`;
-            evalBlock.appendChild(evalLabel);
-            evalBlock.appendChild(evalValueWrap);
-            evalBlock.appendChild(evalSub);
-            metricGrid.appendChild(evalBlock);
-
-            const passRate = typeof es.pass_rate === 'number' ? `${Math.round(es.pass_rate * 100)}%` : 'N/A';
-            const metricData = [
-                {
-                    label: 'Pass rate',
-                    value: passRate,
-                    sub: `${es.passed_count || 0} pass · ${es.failed_count || 0} fail`,
-                },
-                {
-                    label: 'Last evaluated',
-                    value: formatRelativeAge(es.latest_generated_at),
-                    sub: es.latest_pipeline_run_id ? `Run: ${es.latest_pipeline_run_id}` : 'Run: N/A',
-                }
-            ];
-            metricData.forEach(item => {
-                const block = document.createElement('div');
-                block.className = 'pack-eval-metric';
-                const label = document.createElement('p');
-                label.className = 'metric-label';
-                label.textContent = item.label;
-                const value = document.createElement('p');
-                value.className = 'metric-value';
-                value.textContent = item.value;
-                const sub = document.createElement('p');
-                sub.className = 'metric-sub';
-                sub.textContent = item.sub;
-                block.appendChild(label);
-                block.appendChild(value);
-                block.appendChild(sub);
-                metricGrid.appendChild(block);
-            });
-            div.appendChild(metricGrid);
-
-            if (requiresMoreEval) {
-                const hint = document.createElement('p');
-                hint.className = 'pack-eval-hint';
-                hint.textContent = '⚠ Low confidence - run more evaluations';
-                div.appendChild(hint);
+        const metricGrid = document.createElement('div');
+        metricGrid.className = 'pack-eval-metrics';
+        const passRate = typeof es.pass_rate === 'number' ? `${Math.round(es.pass_rate * 100)}%` : 'N/A';
+        const levelNames = es.levels && typeof es.levels === 'object'
+            ? Object.keys(es.levels).join(' · ')
+            : '';
+        const metricData = [
+            {
+                label: 'Soundcheck',
+                value: passRate,
+                sub: levelNames || 'skill track',
+            },
+            {
+                label: 'MCP scorecards',
+                value: String(es.mcp_evaluation_count || 0),
+                sub: 'Compass entity list',
+            },
+            {
+                label: 'Last evaluated',
+                value: formatRelativeAge(es.latest_generated_at),
+                sub: 'marketplace YAML',
             }
-
-            const footer = document.createElement('div');
-            footer.className = 'pack-eval-footer';
-            const latestReport = es.latest_report_md_url || es.latest_report_json_url;
-            if (latestReport) {
-                const reportLink = document.createElement('a');
-                reportLink.className = 'pack-eval-link';
-                reportLink.href = String(latestReport);
-                reportLink.target = '_blank';
-                reportLink.rel = 'noopener noreferrer';
-                const reportIcon = document.createElement('span');
-                reportIcon.className = 'pack-eval-link-icon';
-                reportIcon.appendChild(createPackIcon('report'));
-                const reportText = document.createElement('span');
-                reportText.textContent = 'View latest report';
-                reportLink.appendChild(reportIcon);
-                reportLink.appendChild(reportText);
-                reportLink.addEventListener('click', (event) => event.stopPropagation());
-                footer.appendChild(reportLink);
-            }
-            if (es.latest_pipeline_run_id) {
-                const pipe = document.createElement('p');
-                pipe.className = 'pack-eval-pipeline';
-                pipe.textContent = `Pipeline ${es.latest_pipeline_run_id}`;
-                footer.appendChild(pipe);
-            }
-            div.appendChild(footer);
-        }
+        ];
+        metricData.forEach(item => {
+            const block = document.createElement('div');
+            block.className = 'pack-eval-metric';
+            const label = document.createElement('p');
+            label.className = 'metric-label';
+            label.textContent = item.label;
+            const value = document.createElement('p');
+            value.className = 'metric-value';
+            value.textContent = item.value;
+            const sub = document.createElement('p');
+            sub.className = 'metric-sub';
+            sub.textContent = item.sub;
+            block.appendChild(label);
+            block.appendChild(value);
+            block.appendChild(sub);
+            metricGrid.appendChild(block);
+        });
+        div.appendChild(metricGrid);
     }
 
     // Entire card click should open static collection page.
@@ -1205,11 +1153,25 @@ function setupModals() {
 }
 
 /**
- * GitHub blob URL base (main branch) for deep links from repository.url in data.json
+ * GitHub/GitLab blob URL base for a pack (pinned hub SHA + hub path).
  */
+function packBlobBase(pack) {
+    const repo = String(
+        (pack && pack.repository) ||
+        (data && data.repository && data.repository.url) ||
+        ''
+    ).replace(/\/$/, '').replace(/\.git$/, '');
+    const ref = (pack && pack.ref) ? String(pack.ref) : 'main';
+    const path = String((pack && (pack.hub_path || pack.path)) || '').replace(/^\/+|\/+$/g, '');
+    if (!repo) return '';
+    const blobSep = repo.includes('gitlab.com') ? '/-/blob' : '/blob';
+    const base = `${repo}${blobSep}/${ref}`;
+    return path && path !== '.' ? `${base}/${path}` : base;
+}
+
 function githubBlobBase() {
     const u = data && data.repository && data.repository.url
-        ? String(data.repository.url).replace(/\/$/, '')
+        ? String(data.repository.url).replace(/\/$/, '').replace(/\.git$/, '')
         : '';
     return u ? `${u}/blob/main` : '';
 }
@@ -1856,7 +1818,10 @@ function appendSkillListOl(container, skills, blob, packName, listTag = null) {
         appendSkillEvalBlock(li, skill);
         if (blob && skill.name) {
             const gh = document.createElement('a');
-            gh.href = `${blob}/${packName}/skills/${encodeURIComponent(skill.name)}/SKILL.md`;
+            const rel = skill.file_path
+                ? String(skill.file_path).replace(/^\//, '')
+                : `skills/${encodeURIComponent(skill.name)}/SKILL.md`;
+            gh.href = `${blob}/${rel}`;
             gh.target = '_blank';
             gh.rel = 'noopener noreferrer';
             gh.textContent = 'View SKILL.md on GitHub →';
@@ -1868,24 +1833,75 @@ function appendSkillListOl(container, skills, blob, packName, listTag = null) {
     container.appendChild(ol);
 }
 
-function buildCollectionOverviewPanel(panel, pack, c, blob) {
-    const eso = pack.evaluation_summary;
-    if (eso && typeof eso === 'object' && eso.catalog_skill_count > 0) {
-        const evBanner = document.createElement('p');
-        evBanner.className = 'collection-eval-banner';
-        let bt = `ABEval: ${eso.coverage_label || `${eso.evaluated_count}/${eso.catalog_skill_count} skills evaluated`}`;
-        if (eso.passed_count != null) {
-            bt += ` — ${eso.passed_count} pass`;
-        }
-        if (eso.median_uplift != null && typeof eso.median_uplift === 'number') {
-            bt += ` — median uplift ${eso.median_uplift.toFixed(2)}`;
-        }
-        if (eso.latest_generated_at) {
-            bt += ` — latest ${eso.latest_generated_at}`;
-        }
-        evBanner.textContent = bt;
-        panel.appendChild(evBanner);
+function appendSoundcheckBanner(panel, es) {
+    if (!es || es.evaluation_source !== 'soundcheck' || !Number(es.total_checks || 0)) {
+        return;
     }
+    const evBanner = document.createElement('p');
+    evBanner.className = 'collection-eval-banner';
+    evBanner.textContent =
+        `Soundcheck: ${es.passed_count || 0} pass · ${es.failed_count || 0} fail (${es.total_checks} checks)` +
+        (es.latest_generated_at ? ` — latest ${es.latest_generated_at}` : '');
+    panel.appendChild(evBanner);
+}
+
+function appendInstallAccordion(panel, pack) {
+    const install = pack.install || {};
+    collectionTabHeading(panel, 'Install');
+    const acc = document.createElement('div');
+    acc.className = 'install-accordion';
+    const addItem = (title, opener, bodyFn) => {
+        const det = document.createElement('details');
+        det.className = 'install-accordion-item';
+        if (opener) det.open = true;
+        const summ = document.createElement('summary');
+        summ.className = 'install-accordion-header';
+        summ.textContent = title;
+        det.appendChild(summ);
+        const accBody = document.createElement('div');
+        accBody.className = 'install-accordion-body collection-prose';
+        bodyFn(accBody);
+        det.appendChild(accBody);
+        acc.appendChild(det);
+    };
+    addItem('1. Direct (GitHub)', true, (body) => {
+        if (install.hub_url) {
+            const a = document.createElement('a');
+            a.className = 'collection-inline-link';
+            a.href = String(install.hub_url);
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.textContent = 'Browse pack on GitHub →';
+            body.appendChild(a);
+        }
+    });
+    addItem('2. Lola', false, (body) => {
+        const pre = document.createElement('pre');
+        const code = document.createElement('code');
+        code.textContent = (install.lola && install.lola.command) || `lola install -f ${pack.name}`;
+        pre.appendChild(code);
+        body.appendChild(pre);
+    });
+    addItem('3. Claude Code marketplace', false, (body) => {
+        if (install.claude && install.claude.marketplace_json_url) {
+            const a = document.createElement('a');
+            a.className = 'collection-inline-link';
+            a.href = String(install.claude.marketplace_json_url);
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.textContent = 'claude-marketplace/marketplace.json';
+            body.appendChild(a);
+        }
+        const p = document.createElement('p');
+        p.textContent = `Install plugin ${pack.name} from that marketplace (git-subdir on the hub).`;
+        body.appendChild(p);
+    });
+    panel.appendChild(acc);
+}
+
+function buildCollectionOverviewPanel(panel, pack, c, blob) {
+    appendSoundcheckBanner(panel, pack.evaluation_summary);
+    c = c || {};
 
     if (c.summary) {
         collectionTabHeading(panel, 'Overview');
@@ -1960,13 +1976,44 @@ function buildCollectionOverviewPanel(panel, pack, c, blob) {
         w.appendChild(createExpandableText(String(c.security_model), 800));
         panel.appendChild(w);
     }
+
+    if (!c.summary && !c.deploy_and_use && pack.readme_content) {
+        const wrap = document.createElement('div');
+        wrap.className = 'collection-prose';
+        wrap.appendChild(renderMarkdown(String(pack.readme_content)));
+        panel.appendChild(wrap);
+    }
+
+    appendInstallAccordion(panel, pack);
+
+    const mcpEvals = Array.isArray(pack.mcp_evaluations) ? pack.mcp_evaluations : [];
+    if (mcpEvals.length) {
+        collectionTabHeading(panel, 'MCP scorecards');
+        const ul = document.createElement('ul');
+        ul.className = 'simple-list';
+        mcpEvals.forEach((entry) => {
+            if (!entry || typeof entry !== 'object') return;
+            const li = document.createElement('li');
+            const strong = document.createElement('strong');
+            strong.textContent = String(entry.name || '');
+            li.appendChild(strong);
+            if (entry.entity_ref) {
+                li.appendChild(document.createTextNode(' '));
+                const code = document.createElement('code');
+                code.textContent = String(entry.entity_ref);
+                li.appendChild(code);
+            }
+            ul.appendChild(li);
+        });
+        panel.appendChild(ul);
+    }
 }
 
 function buildCollectionSkillsPanel(panel, pack, c, blob) {
-    const contents = c.contents || {};
+    const contents = (c && c.contents) || {};
     collectionTabHeading(panel, 'Skills');
     const ess = pack.evaluation_summary;
-    if (ess && typeof ess === 'object' && ess.catalog_skill_count > 0) {
+    if (ess && ess.evaluation_source === 'soundcheck' && Number(ess.total_checks || 0) > 0) {
         const ban = document.createElement('div');
         ban.className = 'collection-eval-summary';
         const icon = document.createElement('div');
@@ -1979,30 +2026,16 @@ function buildCollectionSkillsPanel(panel, pack, c, blob) {
         body.className = 'collection-eval-summary-body';
         const title = document.createElement('div');
         title.className = 'collection-eval-summary-title';
-        const n = Number(ess.evaluated_count || 0);
-        const total = Number(ess.catalog_skill_count || 0);
-        const coveragePct = total > 0 ? ((n / total) * 100) : 0;
-        title.textContent = `Evaluation coverage: ${n} of ${total} skills evaluated (${coveragePct.toFixed(1)}%)`;
+        title.textContent =
+            `Soundcheck: ${ess.passed_count || 0} pass · ${ess.failed_count || 0} fail (${ess.total_checks} checks)`;
         body.appendChild(title);
         const note = document.createElement('div');
         note.className = 'collection-eval-summary-note';
-        if (n <= 0) {
-            note.classList.add('muted');
-            note.textContent = 'No evaluations were executed for this pack yet.';
-        } else {
-            const trials = Number(ess.total_trials_treatment || 0);
-            const confidence = String(ess.confidence_level || 'LOW').toUpperCase();
-            if (confidence === 'LOW') {
-                note.classList.add('warn');
-                note.textContent = `Low confidence - based on ${trials} trial${trials === 1 ? '' : 's'}. More evaluations needed for stronger results.`;
-            } else if (confidence === 'MEDIUM') {
-                note.classList.add('warn');
-                note.textContent = `Moderate confidence - based on ${trials} trial${trials === 1 ? '' : 's'}.`;
-            } else {
-                note.classList.add('ok');
-                note.textContent = `High confidence - based on ${trials} trial${trials === 1 ? '' : 's'}.`;
-            }
-        }
+        note.classList.add(Number(ess.failed_count || 0) === 0 ? 'ok' : 'warn');
+        const levelNames = ess.levels && typeof ess.levels === 'object'
+            ? Object.keys(ess.levels).join(' · ')
+            : 'skill-track Soundcheck';
+        note.textContent = levelNames;
         body.appendChild(note);
         ban.appendChild(body);
 
@@ -2071,16 +2104,21 @@ function buildCollectionSkillsPanel(panel, pack, c, blob) {
     }
 
     if (!contents.description && !orch.length && !skills.length && !guide.length) {
-        const p = document.createElement('p');
-        p.className = 'collection-missing';
-        p.textContent = 'No skills content.';
-        panel.appendChild(p);
+        const packSkills = pack.skills || [];
+        if (packSkills.length) {
+            appendSkillListOl(panel, packSkills, blob, pack.name, null);
+        } else {
+            const p = document.createElement('p');
+            p.className = 'collection-missing';
+            p.textContent = 'No skills content.';
+            panel.appendChild(p);
+        }
     }
 }
 
 function buildCollectionResourcesPanel(panel, pack, c, blob) {
     collectionTabHeading(panel, 'References');
-    const resources = c.resources || [];
+    const resources = (c && c.resources) || [];
     if (!resources.length) {
         const p = document.createElement('p');
         p.className = 'collection-missing';
@@ -2112,7 +2150,7 @@ function buildCollectionResourcesPanel(panel, pack, c, blob) {
         if (r.embedded_doc && blob) {
             li.appendChild(document.createTextNode(' '));
             const ed = document.createElement('a');
-            ed.href = `${blob}/${pack.name}/${String(r.embedded_doc).replace(/^\//, '')}`;
+            ed.href = `${blob}/${String(r.embedded_doc).replace(/^\//, '')}`;
             ed.target = '_blank';
             ed.rel = 'noopener noreferrer';
             ed.textContent = '[embedded doc]';
@@ -2168,9 +2206,13 @@ function buildCollectionAgentsPanel(panel, pack, c) {
     }
 
     collectionTabHeading(panel, 'Sample Workflows');
-    let workflows = (c.sample_workflows || []).filter(w => w && w.name !== 'TODO: Add workflow');
+    let workflows = ((c && c.sample_workflows) || []).filter(w => w && w.name !== 'TODO: Add workflow');
     if (!workflows.length) {
-        workflows = [{ name: 'See collection.yaml', workflow: 'Add workflows in collection.yaml.' }];
+        const missing = document.createElement('p');
+        missing.className = 'collection-missing';
+        missing.textContent = 'No sample workflows published on the hub.';
+        panel.appendChild(missing);
+        return;
     }
     workflows.forEach(wf => {
         const name = wf.name != null ? String(wf.name) : (wf.title != null ? String(wf.title) : '');
@@ -2194,21 +2236,16 @@ function renderCollectionPage(pack) {
     body.textContent = '';
 
     const yamlLink = document.getElementById('collection-yaml-link');
-    const blob = githubBlobBase();
+    const blob = packBlobBase(pack);
     if (yamlLink) {
-        if (blob) {
-            yamlLink.href = `${blob}/${pack.name}/.catalog/collection.yaml`;
-            yamlLink.removeAttribute('hidden');
-        } else {
-            yamlLink.href = '#';
-            yamlLink.setAttribute('hidden', '');
-        }
+        yamlLink.href = '#';
+        yamlLink.setAttribute('hidden', '');
     }
 
     const readmeLink = document.getElementById('collection-readme-link');
     if (readmeLink) {
         if (blob && pack.has_readme) {
-            readmeLink.href = `${blob}/${pack.name}/README.md`;
+            readmeLink.href = `${blob}/README.md`;
             readmeLink.removeAttribute('hidden');
         } else {
             readmeLink.href = '#';
@@ -2252,24 +2289,17 @@ function renderCollectionPage(pack) {
     body.appendChild(metaLine);
 
     if (!c) {
-        const note = document.createElement('p');
-        note.className = 'collection-missing';
-        note.textContent =
-            'Structured catalog metadata is not included in the published site data for this pack yet. See the repository README on GitHub.';
-        body.appendChild(note);
-        if (pack.has_readme && blob) {
-            const a = document.createElement('a');
-            a.href = `${blob}/${pack.name}/README.md`;
-            a.target = '_blank';
-            a.rel = 'noopener noreferrer';
-            a.textContent = 'README on GitHub →';
-            a.className = 'collection-meta-link';
-            body.appendChild(a);
+        const pluginDesc = pack.plugin && pack.plugin.description;
+        if (pluginDesc) {
+            const sub = document.createElement('p');
+            sub.className = 'collection-page-sub';
+            const d = String(pluginDesc);
+            sub.textContent = d.length > 120 ? `${d.slice(0, 120).trim()}…` : d;
+            body.appendChild(sub);
         }
-        return;
     }
 
-    if (c.categories && c.categories.length) {
+    if (c && c.categories && c.categories.length) {
         const catRow = document.createElement('p');
         catRow.className = 'collection-tags';
         const catLab = document.createElement('strong');
@@ -2332,7 +2362,7 @@ function renderCollectionPage(pack) {
 
     wireCollectionTabs(body);
 
-    if (c.repository) {
+    if (c && c.repository) {
         const foot = document.createElement('p');
         foot.className = 'collection-footer-meta';
         foot.textContent = String(c.repository);
