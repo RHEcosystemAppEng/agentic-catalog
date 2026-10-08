@@ -1,0 +1,39 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "ocp-admin",
+  "version": "1.0",
+  "description": "Points to all AI skill catalog entities in the ocp-admin agentic pack for Red Hat OpenShift administration.\n",
+  "author": {
+    "name": "Red Hat",
+    "email": "agentic-team@redhat.com"
+  },
+  "homepage": "https://github.com/RHEcosystemAppEng/agentic-catalog.git",
+  "repository": "https://github.com/RHEcosystemAppEng/agentic-catalog.git",
+  "license": "Apache-2.0",
+  "keywords": [
+    "ai-skill",
+    "openshift",
+    "cluster-management",
+    "administration"
+  ],
+  "extensions": {
+    "com.anthropic.claude-code": {
+      "instructions": "./com.anthropic.claude-code/CLAUDE.md"
+    },
+    "com.google.gemini-cli": {
+      "instructions": "./com.google.gemini-cli/GEMINI.md"
+    },
+    "ai.opencode": {
+      "instructions": "./ai.opencode/AGENTS.md"
+    },
+    "com.github.copilot": {
+      "instructions": "./com.github.copilot/copilot-instructions.md"
+    },
+    "com.cursor.editor": {
+      "instructions": "./com.cursor.editor/rules/ocp-admin-instructions.mdc"
+    },
+    "com.openai.codex": {
+      "instructions": "./com.openai.codex/AGENTS.md"
+    }
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "openshift-self-managed": {
+      "type": "stdio",
+      "command": "podman",
+      "args": [
+        "run",
+        "--rm",
+        "-i",
+        "--network=host",
+        "-e",
+        "OFFLINE_TOKEN=${OFFLINE_TOKEN}",
+        "-e",
+        "TRANSPORT=stdio",
+        "-e",
+        "INVENTORY_URL=https://api.openshift.com/api/assisted-install/v2",
+        "-e",
+        "PULL_SECRET_URL=https://api.openshift.com/api/accounts_mgmt/v1/access_token",
+        "-e",
+        "SSO_URL=https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token",
+        "quay.io/ecosystem-appeng/assisted-service-mcp@sha256:e3e84602c6ef2882dc0737e7ad0fafd16d39887dce9f4fb399c470b11158f486"
+      ],
+      "env": {
+        "OFFLINE_TOKEN": "${OFFLINE_TOKEN}"
+      }
+    },
+    "openshift-ocm-managed": {
+      "type": "stdio",
+      "command": "podman",
+      "args": [
+        "run",
+        "--rm",
+        "-i",
+        "--network=host",
+        "-e",
+        "OFFLINE_TOKEN=${OFFLINE_TOKEN}",
+        "-e",
+        "TRANSPORT=stdio",
+        "-e",
+        "INVENTORY_URL=https://api.openshift.com/api/clusters_mgmt/v1",
+        "-e",
+        "PULL_SECRET_URL=https://api.openshift.com/api/accounts_mgmt/v1/access_token",
+        "-e",
+        "SSO_URL=https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token",
+        "quay.io/ecosystem-appeng/assisted-service-mcp@sha256:e3e84602c6ef2882dc0737e7ad0fafd16d39887dce9f4fb399c470b11158f486"
+      ],
+      "env": {
+        "OFFLINE_TOKEN": "${OFFLINE_TOKEN}"
+      }
+    },
+    "openshift-administration": {
+      "type": "stdio",
+      "command": "podman",
+      "args": [
+        "run",
+        "--rm",
+        "-i",
+        "--network=host",
+        "--userns=keep-id:uid=65532,gid=65532",
+        "-v",
+        "${KUBECONFIG}:/kubeconfig:ro,Z",
+        "--entrypoint",
+        "/app/kubernetes-mcp-server",
+        "quay.io/ecosystem-appeng/openshift-mcp-server@sha256:3531cb78f51f8c7ebcdb21adc21358ab8924116994848a3ce1ff542b3fc23742",
+        "--kubeconfig",
+        "/kubeconfig",
+        "--toolsets",
+        "core,config"
+      ],
+      "env": {
+        "KUBECONFIG": "${KUBECONFIG}"
+      }
+    }
+  }
+}
