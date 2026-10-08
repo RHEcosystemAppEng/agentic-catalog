@@ -170,8 +170,8 @@ fi
 
 # Test 8: Hub-checkout generate (no clone, mcp.json, self-tests)
 echo -n "8. Hub generate helpers... "
-if python scripts/marketplace_eval_enrichment.py >/dev/null && \
-   python scripts/install_links.py >/dev/null; then
+if uv run python scripts/marketplace_eval_enrichment.py >/dev/null && \
+   uv run python scripts/install_links.py >/dev/null; then
     echo -e "${GREEN}✓${NC}"
 else
     echo -e "${RED}✗${NC}"
