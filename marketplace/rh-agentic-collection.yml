@@ -4,117 +4,278 @@ url: "https://github.com/RHEcosystemAppEng/agentic-catalog"
 version: "0.1.0"
 
 modules:
-  - name: "ocp-admin"
-    title: "Agentic skill pack for Red Hat OpenShift"
-    description: "Automation capabilities for OpenShift Container Platform cluster management, workload orchestration, security policies, and operational tasks."
-    version: "0.1.0"
-    repository: "https://github.com/RHEcosystemAppEng/agentic-plugins"
-    path: "ocp-admin"
-    icon: "☸️"
-    tags:
-      - "red-hat"
-      - "openshift"
-      - "administration"
-      - "management"
-      - "security"
-      - "cve"
-      - "sbom"
-      - "vex"
-      - "coreos"
-      - "container-security"
-      - "vulnerability-management"
+- name: "ocp-admin"
+  title: "OpenShift Administration Agentic Pack"
+  description: "Points to all AI skill catalog entities in the ocp-admin agentic pack
+    for Red Hat OpenShift administration.\n"
+  version: "1.0"
+  repository: "https://github.com/RHEcosystemAppEng/agentic-catalog.git"
+  path: "plugins/redhat/ocp-admin"
+  icon: "☸️"
+  tags:
+  - ai-skill
+  - openshift
+  - cluster-management
+  - administration
+  ref: 50195558c8d9d4e9f74862935ce3ee47e4e7b9f0
+  content_hash: "sha256:546134e310cff2d0c7bfba9cb6f61eb51fdbc25390086046b059fd52a7bce434"
+  mcp_evaluations:
+  - name: assisted-installer
+    entity_ref: mcpserver:ai5-marketplace/assisted-installer
+    soundcheck_status: ok
+    track_id: mcp-scorecard
+    recommendation: pass
+    source: soundcheck-api
+    evaluated_at: '2026-10-08T06:25:10.106653Z'
+    total_checks: 15
+    soundcheck_levels_summary:
+      Lead:
+        pass: 0
+        fail: 1
+        total: 1
+      Bronze:
+        pass: 1
+        fail: 5
+        total: 6
+      Silver:
+        pass: 1
+        fail: 6
+        total: 7
+      Gold:
+        pass: 0
+        fail: 1
+        total: 1
+  - name: openshift-mcp-server
+    entity_ref: mcpserver:ai5-marketplace/openshift-mcp-server
+    soundcheck_status: ok
+    track_id: mcp-scorecard
+    recommendation: pass
+    source: soundcheck-api
+    evaluated_at: '2026-10-08T06:25:10.106653Z'
+    total_checks: 15
+    soundcheck_levels_summary:
+      Lead:
+        pass: 0
+        fail: 1
+        total: 1
+      Bronze:
+        pass: 1
+        fail: 5
+        total: 6
+      Silver:
+        pass: 1
+        fail: 6
+        total: 7
+      Gold:
+        pass: 0
+        fail: 1
+        total: 1
+- name: "rh-developer"
+  title: "Agentic skill pack for Software Developers"
+  description: "Plugins for building and deploying applications on Red Hat platforms."
+  version: "0.1.0"
+  repository: "https://github.com/RHEcosystemAppEng/agentic-plugins"
+  path: "rh-developer"
+  icon: "💻"
+  tags:
+  - "developer"
+  - "openshift"
+  - "rhel"
+  - "s2i"
+  - "containerization"
+  - "deployment"
+  - "helm"
+  - "podman"
 
-  - name: "rh-developer"
-    title: "Agentic skill pack for Software Developers"
-    description: "Plugins for building and deploying applications on Red Hat platforms."
-    version: "0.1.0"
-    repository: "https://github.com/RHEcosystemAppEng/agentic-plugins"
-    path: "rh-developer"
-    icon: "💻"
-    tags:
-      - "developer"
-      - "openshift"
-      - "rhel"
-      - "s2i"
-      - "containerization"
-      - "deployment"
-      - "helm"
-      - "podman"
+- name: "rh-sre"
+  title: "Site Reliability Engineering Agentic Pack"
+  description: "Points to all AI skill catalog entities in the rh-sre agentic pack
+    for Red Hat Site Reliability Engineering workflows.\n"
+  version: "1.0"
+  repository: "https://github.com/RHEcosystemAppEng/agentic-catalog.git"
+  path: "plugins/redhat/rh-sre"
+  icon: "🔧"
+  tags:
+  - ai-skill
+  - sre
+  - monitoring
+  - vulnerability-management
+  ref: 50195558c8d9d4e9f74862935ce3ee47e4e7b9f0
+  content_hash: "sha256:ed233ead987bc3b5ac339229234a36e32162c8ea415598717a2fbc6aaac9b84a"
+  soundcheck_levels_summary:
+    Foundational:
+      pass: 17
+      fail: 2
+      total: 19
+    Trusted:
+      pass: 9
+      fail: 0
+      total: 9
+    Certified:
+      pass: 14
+      fail: 4
+      total: 18
+  mcp_evaluations:
+  - name: red-hat-lightspeed-mcp-server
+    entity_ref: mcpserver:redhat/red-hat-lightspeed-mcp-server
+    soundcheck_status: ok
+    track_id: mcp-scorecard
+    recommendation: pass
+    source: soundcheck-api
+    evaluated_at: '2026-10-08T06:25:10.106653Z'
+    total_checks: 0
+    soundcheck_levels_summary: {}
+  - name: ansible-automation-platform
+    entity_ref: mcpserver:ai5-marketplace/ansible-automation-platform
+    soundcheck_status: ok
+    track_id: mcp-scorecard
+    recommendation: pass
+    source: soundcheck-api
+    evaluated_at: '2026-10-08T06:25:10.106653Z'
+    total_checks: 15
+    soundcheck_levels_summary:
+      Lead:
+        pass: 0
+        fail: 1
+        total: 1
+      Bronze:
+        pass: 1
+        fail: 5
+        total: 6
+      Silver:
+        pass: 1
+        fail: 6
+        total: 7
+      Gold:
+        pass: 0
+        fail: 1
+        total: 1
+- name: "rh-ai-engineer"
+  title: "Agentic skill pack for OpenShift AI Engineers"
+  description: "Red Hat OpenShift AI Engineering Agentic Collection"
+  version: "0.1.0"
+  repository: "https://github.com/RHEcosystemAppEng/agentic-plugins"
+  path: "rh-ai-engineer"
+  icon: "🤖"
+  tags:
+  - "ai-engineer"
+  - "openshift-ai"
+  - "rhoai"
+  - "kserve"
+  - "vllm"
+  - "nvidia-nim"
+  - "model-serving"
+  - "inference"
+  - "gpu"
 
-  - name: "rh-sre"
-    title: "Agentic skill pack for Security Reliability Engineers"
-    description: "Site reliability engineering tools and automation for managing Red Hat platforms and infrastructure."
-    version: "0.1.0"
-    repository: "https://github.com/RHEcosystemAppEng/agentic-plugins"
-    path: "rh-sre"
-    icon: "🔧"
-    tags:
-      - "sre"
-      - "red-hat"
-      - "platforms"
-      - "products"
-      - "automation"
-
-  - name: "rh-ai-engineer"
-    title: "Agentic skill pack for OpenShift AI Engineers"
-    description: "Red Hat OpenShift AI Engineering Agentic Collection"
-    version: "0.1.0"
-    repository: "https://github.com/RHEcosystemAppEng/agentic-plugins"
-    path: "rh-ai-engineer"
-    icon: "🤖"
-    tags:
-      - "ai-engineer"
-      - "openshift-ai"
-      - "rhoai"
-      - "kserve"
-      - "vllm"
-      - "nvidia-nim"
-      - "model-serving"
-      - "inference"
-      - "gpu"
-
-  - name: "rh-virt"
-    title: "Agentic skill pack for Red Hat OpenShift Virtualization"
-    description: "Virtual machine management and automation for OpenShift Virtualization and KubeVirt workloads."
-    version: "0.1.0"
-    repository: "https://github.com/RHEcosystemAppEng/agentic-plugins"
-    path: "rh-virt"
-    icon: "🖥️"
-    tags:
-      - "red-hat"
-      - "kubevirt"
-      - "openshift"
-      - "virtualization"
-      - "virt"
-
-  - name: "rh-basic"
-    title: "Agentic skill pack for Red Hat customers"
-    description: "Essential Red Hat skills for IT professionals: CVE explanation, diagnostics, product lifecycle, RHEL patch planning, and support severity guidance."
-    version: "0.1.0"
-    repository: "https://github.com/RHEcosystemAppEng/agentic-plugins"
-    path: "rh-basic"
-    icon: "https://static.redhat.com/libs/redhat/brand-assets/latest/corp/logo--hat-only.svg"
-    tags:
-      - "red-hat"
-      - "cve"
-      - "rhel"
-      - "support"
-      - "lifecycle"
-      - "diagnostics"
-      - "patching"
-
-  - name: "rh-automation"
-    title: "Agentic skill pack for Automation Engineers"
-    description: "Ansible Automation Platform governance, execution safety, and forensic troubleshooting tools for Red Hat automation engineers."
-    version: "0.1.0"
-    repository: "https://github.com/RHEcosystemAppEng/agentic-plugins"
-    path: "rh-automation"
-    icon: "⚙️"
-    tags:
-      - "ansible"
-      - "aap"
-      - "automation"
-      - "red-hat"
-      - "governance"
-      - "troubleshooting"
-      - "execution"
+- name: "rh-virt"
+  title: "Virtualization Management Agentic Pack"
+  description: "Points to all AI skill catalog entities in the rh-virt agentic pack
+    for Red Hat OpenShift Virtualization management.\n"
+  version: "1.0"
+  repository: "https://github.com/RHEcosystemAppEng/agentic-catalog.git"
+  path: "plugins/redhat/rh-virt"
+  icon: "🖥️"
+  tags:
+  - ai-skill
+  - virtualization
+  - kubevirt
+  - openshift
+  ref: 50195558c8d9d4e9f74862935ce3ee47e4e7b9f0
+  content_hash: "sha256:9f1f517c2c01983d174a5d3b83fb37b077934f4bf8feb72d80b8a09776c8f58e"
+  mcp_evaluations:
+  - name: openshift-mcp-server
+    entity_ref: mcpserver:ai5-marketplace/openshift-mcp-server
+    soundcheck_status: ok
+    track_id: mcp-scorecard
+    recommendation: pass
+    source: soundcheck-api
+    evaluated_at: '2026-10-08T06:25:10.106653Z'
+    total_checks: 15
+    soundcheck_levels_summary:
+      Lead:
+        pass: 0
+        fail: 1
+        total: 1
+      Bronze:
+        pass: 1
+        fail: 5
+        total: 6
+      Silver:
+        pass: 1
+        fail: 6
+        total: 7
+      Gold:
+        pass: 0
+        fail: 1
+        total: 1
+- name: "rh-basic"
+  title: "Getting Started Agentic Pack"
+  description: "Points to all AI skill catalog entities in the rh-basic agentic pack
+    for Red Hat product exploration and getting started workflows.\n"
+  version: "1.0"
+  repository: "https://github.com/RHEcosystemAppEng/agentic-catalog.git"
+  path: "plugins/redhat/rh-basic"
+  icon: "https://static.redhat.com/libs/redhat/brand-assets/latest/corp/logo--hat-only.svg"
+  tags:
+  - ai-skill
+  - red-hat
+  - getting-started
+  - support
+  ref: 50195558c8d9d4e9f74862935ce3ee47e4e7b9f0
+  content_hash: "sha256:419ca5824a9a929a1e586e515230b4e8be76f34233cde1a403f7e8fc4e8c7772"
+  soundcheck_levels_summary:
+    Foundational:
+      pass: 2
+      fail: 0
+      total: 2
+    Trusted:
+      pass: 1
+      fail: 0
+      total: 1
+    Certified:
+      pass: 1
+      fail: 1
+      total: 2
+  mcp_evaluations:
+  - name: security-mcp-server
+    entity_ref: mcpserver:redhat/security-mcp-server
+    soundcheck_status: ok
+    track_id: mcp-scorecard
+    recommendation: pass
+    source: soundcheck-api
+    evaluated_at: '2026-10-08T06:25:10.106653Z'
+    total_checks: 17
+    soundcheck_levels_summary:
+      Lead:
+        pass: 0
+        fail: 1
+        total: 1
+      Bronze:
+        pass: 4
+        fail: 2
+        total: 6
+      Silver:
+        pass: 2
+        fail: 6
+        total: 8
+      Gold:
+        pass: 0
+        fail: 2
+        total: 2
+- name: "rh-automation"
+  title: "Agentic skill pack for Automation Engineers"
+  description: "Ansible Automation Platform governance, execution safety, and forensic
+    troubleshooting tools for Red Hat automation engineers."
+  version: "0.1.0"
+  repository: "https://github.com/RHEcosystemAppEng/agentic-plugins"
+  path: "rh-automation"
+  icon: "⚙️"
+  tags:
+  - "ansible"
+  - "aap"
+  - "automation"
+  - "red-hat"
+  - "governance"
+  - "troubleshooting"
+  - "execution"
