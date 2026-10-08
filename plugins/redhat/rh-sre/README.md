@@ -141,9 +141,11 @@ export LIGHTSPEED_CLIENT_SECRET="your-service-account-client-secret"
 Install the pack with [Lola](https://github.com/LobsterTrap/lola):
 
 ```bash
-lola market add rh-agentic-plugins https://raw.githubusercontent.com/RHEcosystemAppEng/agentic-catalog/main/marketplace/rh-agentic-collection.yml
+lola market add rh-agentic-collections https://raw.githubusercontent.com/RHEcosystemAppEng/agentic-catalog/main/marketplace/rh-agentic-collection.yml
 lola install -f rh-sre
 ```
+
+Also install from this hub on GitHub (`plugins/redhat/rh-sre`) or via Claude Code using `claude-marketplace/marketplace.json` on `main`. See the catalog [Install](https://github.com/RHEcosystemAppEng/agentic-catalog/blob/main/README.md#install) section.
 
 Verify installation:
 ```

@@ -52,9 +52,11 @@ podman inspect --format='{{.Digest}}' quay.io/redhat-user-workloads/crt-nshift-l
 Install the pack with [Lola](https://github.com/LobsterTrap/lola):
 
 ```bash
-lola market add rh-agentic-plugins https://raw.githubusercontent.com/RHEcosystemAppEng/agentic-catalog/main/marketplace/rh-agentic-collection.yml
+lola market add rh-agentic-collections https://raw.githubusercontent.com/RHEcosystemAppEng/agentic-catalog/main/marketplace/rh-agentic-collection.yml
 lola install -f rh-virt
 ```
+
+Also install from this hub on GitHub (`plugins/redhat/rh-virt`) or via Claude Code using `claude-marketplace/marketplace.json` on `main`. See the catalog [Install](https://github.com/RHEcosystemAppEng/agentic-catalog/blob/main/README.md#install) section.
 
 ## Skills
 

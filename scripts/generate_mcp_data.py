@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Parse mcps.json files and extract MCP server configurations.
+Parse plugin MCP configs (hub ``mcp.json``, authoring ``mcps.json`` fallback).
 """
 
 import json
@@ -8,8 +8,11 @@ import re
 from pathlib import Path
 from typing import Dict, List, Any
 
-MCP_FILENAME = "mcps.json"
+MCP_HUB_FILENAME = "mcp.json"
+MCP_AUTHORING_FILENAME = "mcps.json"
 MCP_DEPRECATED = ".mcp.json"
+
+HTTP_TYPES = {"http", "streamable-http"}
 
 
 def extract_env_vars(env_dict: Dict[str, str]) -> List[str]:
@@ -60,26 +63,40 @@ def extract_header_env_vars(headers: Dict[str, str]) -> List[str]:
     return env_vars
 
 
+def _mcp_config_path(plugin_path: Path) -> Path | None:
+    hub = plugin_path / MCP_HUB_FILENAME
+    if hub.is_file():
+        return hub
+    authoring = plugin_path / MCP_AUTHORING_FILENAME
+    if authoring.is_file():
+        return authoring
+    return None
+
+
 def parse_mcp_file(plugin_dir: str) -> List[Dict[str, Any]]:
     """
-    Parse mcps.json file from a plugin directory.
-    Supports both command-based and HTTP-based MCP servers.
-    Errors if deprecated .mcp.json exists (must be renamed to mcps.json).
+    Parse ``mcp.json`` (hub) or ``mcps.json`` (authoring fallback).
+
+    ``stdio`` is treated as command-based. ``streamable-http`` is treated as
+    HTTP so the site UI can reuse the existing remote-server cards.
 
     Args:
-        plugin_dir: Name of the plugin directory
+        plugin_dir: Filesystem path to the plugin directory
 
     Returns:
         List of MCP server configurations
     """
     plugin_path = Path(plugin_dir)
     deprecated_path = plugin_path / MCP_DEPRECATED
-    mcp_file = plugin_path / MCP_FILENAME
+    mcp_file = _mcp_config_path(plugin_path)
 
-    if deprecated_path.exists():
-        print(f"Warning: {plugin_dir}/{MCP_DEPRECATED} is deprecated and will be ignored; rename to {MCP_FILENAME}")
+    if deprecated_path.exists() and mcp_file is None:
+        print(
+            f"Warning: {plugin_dir}/{MCP_DEPRECATED} is deprecated and will be ignored; "
+            f"use {MCP_HUB_FILENAME} or {MCP_AUTHORING_FILENAME}"
+        )
 
-    if not mcp_file.exists():
+    if mcp_file is None:
         return []
 
     try:
@@ -88,41 +105,34 @@ def parse_mcp_file(plugin_dir: str) -> List[Dict[str, Any]]:
 
         servers = []
 
-        # Extract each MCP server
         for server_name, server_config in config.get('mcpServers', {}).items():
-            # Detect server type
-            server_type = server_config.get('type', 'command')
+            if not isinstance(server_config, dict):
+                continue
+            raw_type = str(server_config.get('type') or 'command').strip().lower()
+            is_http = raw_type in HTTP_TYPES
+            site_type = 'http' if is_http else 'command'
 
-            # Base server configuration
             server = {
                 'name': server_name,
                 'plugin': plugin_dir,
-                'type': server_type,
+                'type': site_type,
+                'transport': raw_type,
                 'description': server_config.get('description', ''),
-                'security': server_config.get('security', {})
+                'security': server_config.get('security', {}),
             }
 
-            # Extract type-specific fields
-            if server_type == 'http':
-                # HTTP-based remote server
+            if is_http:
                 server['url'] = server_config.get('url', '')
                 server['headers'] = server_config.get('headers', {})
-
-                # Extract env vars from both env dict and headers
                 env_vars = extract_env_vars(server_config.get('env', {}))
                 header_env_vars = extract_header_env_vars(server_config.get('headers', {}))
                 server['env'] = sorted(set(env_vars + header_env_vars))
-
-                # Command and args are not applicable for HTTP servers
                 server['command'] = ''
                 server['args'] = []
             else:
-                # Command-based server (default)
                 server['command'] = server_config.get('command', '')
                 server['args'] = server_config.get('args', [])
                 server['env'] = extract_env_vars(server_config.get('env', {}))
-
-                # URL and headers are not applicable for command servers
                 server['url'] = ''
                 server['headers'] = {}
 
@@ -174,7 +184,7 @@ def generate_mcp_data(plugin_data: List[Dict[str, Any]] | None = None) -> List[D
 
     Args:
         plugin_data: List of plugin dicts from generate_plugin_data(); each may carry
-                   ``mcp_servers_raw`` parsed during the clone phase.
+                   ``mcp_servers_raw`` parsed from hub ``mcp.json``.
 
     Returns:
         List of MCP server dictionaries
@@ -182,13 +192,13 @@ def generate_mcp_data(plugin_data: List[Dict[str, Any]] | None = None) -> List[D
     mcp_servers = []
     custom_data = load_custom_mcp_data()
 
-    for plugin in (plugin_data or []):
-        servers = list(plugin.get("mcp_servers_raw") or [])
+    for plugin_entry in (plugin_data or []):
+        servers = list(plugin_entry.get("mcp_servers_raw") or [])
         for server in servers:
             _merge_custom_data(server, custom_data)
         mcp_servers.extend(servers)
         if servers:
-            print(f"✓ {plugin.get('name', '?')}: {len(servers)} MCP server(s)")
+            print(f"✓ {plugin_entry.get('name', '?')}: {len(servers)} MCP server(s)")
 
     return mcp_servers
 

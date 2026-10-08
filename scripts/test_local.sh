@@ -79,6 +79,23 @@ for plugin_entry in data['plugins']:
     if 'name' not in plugin_entry or 'plugin' not in plugin_entry:
         print(f"Plugin missing required fields: {plugin_entry.get('name', 'unknown')}")
         sys.exit(1)
+    if plugin_entry.get('path') in (None, '') or str(plugin_entry.get('path', '')).startswith('http'):
+        print(f"Plugin {plugin_entry.get('name')} should use hub path, got {plugin_entry.get('path')!r}")
+        sys.exit(1)
+    install = plugin_entry.get('install') or {}
+    if not install.get('hub_url'):
+        print(f"Plugin {plugin_entry.get('name')} missing install.hub_url")
+        sys.exit(1)
+    es = plugin_entry.get('evaluation_summary') or {}
+    if es.get('evaluation_source') != 'soundcheck':
+        print(f"Plugin {plugin_entry.get('name')} evaluation_source should be soundcheck")
+        sys.exit(1)
+
+names = {p['name'] for p in data['plugins']}
+for leftover in ('rh-developer', 'rh-ai-engineer', 'rh-automation'):
+    if leftover in names:
+        print(f"Plugin {leftover} should be skipped (path not on hub checkout)")
+        sys.exit(1)
 
 # Check MCP servers structure
 if not isinstance(data['mcp_servers'], list):
@@ -148,6 +165,16 @@ then
     echo -e " ${GREEN}✓${NC}"
 else
     echo -e " ${RED}✗${NC}"
+    exit 1
+fi
+
+# Test 8: Hub-checkout generate (no clone, mcp.json, self-tests)
+echo -n "8. Hub generate helpers... "
+if python scripts/marketplace_eval_enrichment.py >/dev/null && \
+   python scripts/install_links.py >/dev/null; then
+    echo -e "${GREEN}✓${NC}"
+else
+    echo -e "${RED}✗${NC}"
     exit 1
 fi
 
