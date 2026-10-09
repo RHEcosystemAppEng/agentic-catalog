@@ -2154,7 +2154,7 @@ function buildCollectionAgentsPanel(panel, pluginEntry, c) {
             meta.className = 'collection-mcp-card-meta';
             meta.textContent = `By ${server.owner || 'Red Hat'} · ${server.type === 'http' ? 'HTTP Remote' : 'Container'}`;
             card.appendChild(meta);
-            const openMcp = () => showMCPDetails(server.name, server.pluginEntry);
+            const openMcp = () => showMCPDetails(server.name, server.plugin);
             card.addEventListener('click', openMcp);
             card.addEventListener('keydown', e => {
                 if (e.key === 'Enter' || e.key === ' ') {
