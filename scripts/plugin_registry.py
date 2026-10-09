@@ -1,8 +1,8 @@
 """
-Resolve the set of agentic pack directories from the Lola marketplace file.
+Resolve the set of agentic plugin directories from the Lola marketplace file.
 
 The marketplace file (``marketplace/rh-agentic-collection.yml``) is the single
-source of truth for pack discovery.
+source of truth for plugin discovery.
 """
 
 from __future__ import annotations
@@ -35,13 +35,13 @@ def load_marketplace_module_paths(marketplace_path: Optional[Path] = None) -> Li
     return out
 
 
-def get_union_pack_dirs(
+def get_union_plugin_dirs(
     repo_root: Optional[Path] = None,
     marketplace_path: Optional[Path] = None,
 ) -> List[str]:
     """
-    Sorted pack directory names from the marketplace that exist on disk under repo root.
-    The marketplace file is the single source of truth for pack discovery.
+    Sorted plugin directory names from the marketplace that exist on disk under repo root.
+    The marketplace file is the single source of truth for plugin discovery.
     """
     root = repo_root or _repo_root()
     names: Set[str] = set(load_marketplace_module_paths(marketplace_path))
@@ -49,11 +49,11 @@ def get_union_pack_dirs(
 
 
 def load_marketplace_module_by_path(
-    pack_dir: str,
+    plugin_dir: str,
     repo_root: Optional[Path] = None,
     marketplace_path: Optional[Path] = None,
 ) -> Optional[Dict[str, Any]]:
-    """Return the marketplace module dict for a pack path, or None."""
+    """Return the marketplace module dict for a plugin path, or None."""
     root = repo_root or _repo_root()
     path = marketplace_path or (root / DEFAULT_MARKETPLACE)
     if not path.exists():
@@ -61,7 +61,7 @@ def load_marketplace_module_by_path(
     with open(path, "r", encoding="utf-8") as f:
         data = yaml.safe_load(f) or {}
     for mod in data.get("modules") or []:
-        if mod.get("path") == pack_dir:
+        if mod.get("path") == plugin_dir:
             return mod
     return None
 

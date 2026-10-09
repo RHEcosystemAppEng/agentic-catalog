@@ -31,24 +31,24 @@ def print_summary(data):
     print(f"   Owner: {repo['owner']}")
     print(f"   Generated: {data['generated_at']}")
 
-    # Packs section
-    print(f"\n📦 Agentic Collections ({len(data['packs'])} total)")
+    # Plugins section
+    print(f"\n📦 Agentic Collections ({len(data['plugins'])} total)")
     print("   " + "-"*56)
-    for pack in data['packs']:
-        plugin = pack['plugin']
-        print(f"   • {plugin.get('name', pack['name'])} v{plugin.get('version', 'N/A')}")
-        print(f"     Skills: {len(pack['skills'])}, Agents: {len(pack['agents'])}")
-        if pack['skills']:
-            skill_names = ', '.join(s['name'] for s in pack['skills'][:3])
+    for plugin_entry in data['plugins']:
+        plugin = plugin_entry['plugin']
+        print(f"   • {plugin.get('name', plugin_entry['name'])} v{plugin.get('version', 'N/A')}")
+        print(f"     Skills: {len(plugin_entry['skills'])}, Agents: {len(plugin_entry['agents'])}")
+        if plugin_entry['skills']:
+            skill_names = ', '.join(s['name'] for s in plugin_entry['skills'][:3])
             print(f"     Skills: {skill_names}")
-            if len(pack['skills']) > 3:
-                print(f"             ... and {len(pack['skills']) - 3} more")
+            if len(plugin_entry['skills']) > 3:
+                print(f"             ... and {len(plugin_entry['skills']) - 3} more")
 
     # MCP Servers section
     print(f"\n🔌 MCP Servers ({len(data['mcp_servers'])} total)")
     print("   " + "-"*56)
     for server in data['mcp_servers']:
-        print(f"   • {server['name']} (from {server['pack']})")
+        print(f"   • {server['name']} (from {server['plugin']})")
         print(f"     Command: {server['command']}")
         if server['env']:
             print(f"     Env vars: {', '.join(server['env'])}")
@@ -70,14 +70,14 @@ def print_checklist():
 
 3. Test Agentic Collections section:
    □ Section header shows correct count
-   □ Pack cards display in a grid
+   □ Plugin cards display in a grid
    □ Each card shows: name, version, skill/agent counts
-   □ "View Details" button navigates to static collection page (docs/collections/<pack>.html)
+   □ "View Details" button navigates to static collection page (docs/collections/<plugin>.html)
 
 4. Test MCP Servers section:
    □ Section header shows correct count
    □ Server cards display in a grid
-   □ Each card shows: name, pack, container, env var count
+   □ Each card shows: name, plugin, container, env var count
    □ "Details" button works
    □ Modal shows: command, env vars, security settings
    □ Modal closes correctly
@@ -90,7 +90,7 @@ def print_checklist():
 6. Test search functionality:
    □ Type in search bar
    □ Results filter dynamically
-   □ Search works across: pack names, skills, agents, MCP servers
+   □ Search works across: plugin names, skills, agents, MCP servers
 
 7. Test responsive design:
    □ Resize browser window

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Parse agentic packs and extract plugin metadata, skills, and agents.
+Parse agentic plugins and extract plugin metadata, skills, and agents.
 """
 
 import re
@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Dict, List, Any
 import yaml
 
-import pack_registry
+import plugin_registry
 from catalog_site_bundle import bundle_catalog_for_site
 from eval_site_enrichment import apply_eval_enrichment
 from generate_mcp_data import parse_mcp_file
@@ -26,14 +26,14 @@ def parse_yaml_frontmatter(file_path: Path) -> Dict[str, Any]:
         return {}
 
 
-def parse_skills(pack_dir: str) -> List[Dict[str, Any]]:
+def parse_skills(plugin_dir: str) -> List[Dict[str, Any]]:
     """
-    Parse skills from skills/*/SKILL.md (multi-skill pack) or SKILL.md at root (single-skill repo).
+    Parse skills from skills/*/SKILL.md (multi-skill plugin) or SKILL.md at root (single-skill repo).
     """
     skills = []
-    root = Path(pack_dir)
+    root = Path(plugin_dir)
 
-    # Single-skill repo: SKILL.md at the pack root
+    # Single-skill repo: SKILL.md at the plugin root
     root_skill = root / 'SKILL.md'
     if root_skill.is_file():
         frontmatter = parse_yaml_frontmatter(root_skill)
@@ -62,17 +62,17 @@ def parse_skills(pack_dir: str) -> List[Dict[str, Any]]:
         skills.append({
             'name': name,
             'description': description,
-            'file_path': str(skill_file.relative_to(pack_dir))
+            'file_path': str(skill_file.relative_to(plugin_dir))
         })
 
     return sorted(skills, key=lambda s: s['name'])
 
 
-def detect_repo_license(repo_root: Path, pack_path: str = ".") -> str:
+def detect_repo_license(repo_root: Path, plugin_path: str = ".") -> str:
     """Best-effort SPDX identifier from LICENSE files in a cloned repository."""
     candidates = [
-        repo_root / pack_path / "LICENSE",
-        repo_root / pack_path / "LICENSE.txt",
+        repo_root / plugin_path / "LICENSE",
+        repo_root / plugin_path / "LICENSE.txt",
         repo_root / "LICENSE",
         repo_root / "LICENSE.txt",
     ]
@@ -95,18 +95,18 @@ def detect_repo_license(repo_root: Path, pack_path: str = ".") -> str:
     return "Unknown"
 
 
-def load_repository_packs() -> List[Dict[str, Any]]:
-    """Clone each marketplace module and return it as a standalone pack entry."""
+def load_repository_plugins() -> List[Dict[str, Any]]:
+    """Clone each marketplace module and return it as a standalone plugin entry."""
     import shutil
     import subprocess
     import tempfile
 
-    modules = pack_registry.load_repository_modules()
+    modules = plugin_registry.load_repository_modules()
     if not modules:
         return []
 
     repo_root = Path(__file__).resolve().parent.parent
-    packs: List[Dict[str, Any]] = []
+    plugins: List[Dict[str, Any]] = []
     tmp = Path(tempfile.mkdtemp(prefix="repository-build-"))
 
     try:
@@ -117,13 +117,13 @@ def load_repository_packs() -> List[Dict[str, Any]]:
             description = mod.get("description", "")
             version = mod.get("version", "0.0.0")
             tags = mod.get("tags", [])
-            pack_path = mod.get("path", ".")
+            plugin_path = mod.get("path", ".")
 
             if not repository:
                 print(f"  Warning: repository module '{name}' missing repository, skipping")
                 continue
 
-            ref_err = pack_registry.repository_ref_error(ref)
+            ref_err = plugin_registry.repository_ref_error(ref)
             if ref_err:
                 print(f"  Warning: repository module '{name}' invalid ref: {ref_err}")
                 continue
@@ -135,41 +135,41 @@ def load_repository_packs() -> List[Dict[str, Any]]:
                     check=True, capture_output=True, text=True, timeout=120,
                 )
                 subprocess.run(
-                    ["git", "checkout", "--quiet", pack_registry.normalize_repository_ref(ref)],
+                    ["git", "checkout", "--quiet", plugin_registry.normalize_repository_ref(ref)],
                     check=True, capture_output=True, text=True, cwd=clone_dest, timeout=30,
                 )
             except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
                 print(f"  Warning: failed to clone '{name}': {exc}")
                 continue
 
-            pack_dir = clone_dest / pack_path
-            license_id = detect_repo_license(clone_dest, pack_path)
-            skills = parse_skills(str(pack_dir))
+            plugin_dir = clone_dest / plugin_path
+            license_id = detect_repo_license(clone_dest, plugin_path)
+            skills = parse_skills(str(plugin_dir))
 
             # Read catalog from the cloned source repo
-            cat_bundle, cat_warns = bundle_catalog_for_site(pack_path, clone_dest)
+            cat_bundle, cat_warns = bundle_catalog_for_site(plugin_path, clone_dest)
             for w in cat_warns:
                 print(f"  ⚠️  {w}")
 
             maturity = (cat_bundle.get("maturity") or "").strip().upper() if cat_bundle else ""
-            if maturity and maturity != pack_registry.DOCS_MATURITY_PUBLISH:
+            if maturity and maturity != plugin_registry.DOCS_MATURITY_PUBLISH:
                 print(f"  ⚠️  Skipping '{name}': maturity is {maturity!r} (not GREEN)")
                 continue
 
             # README fallback: read content so the UI can show it when catalog is absent
-            readme_path = pack_dir / "README.md"
+            readme_path = plugin_dir / "README.md"
             readme_content = readme_path.read_text(encoding="utf-8") if readme_path.is_file() else None
 
-            # MCP servers: parse from cloned content; fix pack field to use module name
-            mcp_servers = parse_mcp_file(str(pack_dir))
+            # MCP servers: parse from cloned content; fix plugin field to use module name
+            mcp_servers = parse_mcp_file(str(plugin_dir))
             for s in mcp_servers:
-                s["pack"] = name
+                s["plugin"] = name
 
-            pack = {
+            plugin_entry = {
                 "name": name,
                 "path": repository,
                 "repository": repository,
-                "ref": pack_registry.normalize_repository_ref(ref)[:12],
+                "ref": plugin_registry.normalize_repository_ref(ref)[:12],
                 "icon": mod.get("icon", ""),
                 "plugin": {
                     "name": name,
@@ -188,34 +188,34 @@ def load_repository_packs() -> List[Dict[str, Any]]:
                 "mcp_servers_raw": mcp_servers,
             }
             if cat_bundle is not None:
-                pack["collection"] = cat_bundle
+                plugin_entry["collection"] = cat_bundle
             # Enrich with eval reports from the cloned source repo before cleanup
-            apply_eval_enrichment([pack], clone_dest)
-            packs.append(pack)
+            apply_eval_enrichment([plugin_entry], clone_dest)
+            plugins.append(plugin_entry)
             catalog_status = "with catalog" if cat_bundle else "README only"
             mcp_status = f", {len(mcp_servers)} MCP server(s)" if mcp_servers else ""
             print(f"  ✓ '{name}': {len(skills)} skill(s) from {repository} ({catalog_status}{mcp_status})")
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
-    return packs
+    return plugins
 
 
-def generate_pack_data() -> List[Dict[str, Any]]:
+def generate_plugin_data() -> List[Dict[str, Any]]:
     """
-    Generate pack data for all agentic packs.
+    Generate plugin data for all agentic plugins.
 
     Returns:
-        List of pack dictionaries
+        List of plugin dictionaries
     """
-    packs = []
+    plugins = []
 
-    repository_packs = load_repository_packs()
-    if repository_packs:
-        packs.extend(repository_packs)
-        print(f"✓ Added {len(repository_packs)} marketplace pack(s)")
+    repository_plugins = load_repository_plugins()
+    if repository_plugins:
+        plugins.extend(repository_plugins)
+        print(f"✓ Added {len(repository_plugins)} marketplace plugin(s)")
 
-    return packs
+    return plugins
 
 
 if __name__ == '__main__':
@@ -223,15 +223,15 @@ if __name__ == '__main__':
     print("Parsing agentic collections...")
     print()
 
-    packs = generate_pack_data()
+    plugins = generate_plugin_data()
 
     print()
-    print(f"Found {len(packs)} collections total")
+    print(f"Found {len(plugins)} collections total")
     print()
     print("Summary:")
-    for pack in packs:
-        plugin = pack['plugin']
+    for plugin_entry in plugins:
+        plugin = plugin_entry['plugin']
         title = plugin.get('title', plugin['name'])
         print(f"  • {title} v{plugin['version']}")
         print(f"    ({plugin['name']})")
-        print(f"    Skills: {len(pack['skills'])}, Agents: {len(pack['agents'])}, Docs: {len(pack['docs'])}")
+        print(f"    Skills: {len(plugin_entry['skills'])}, Agents: {len(plugin_entry['agents'])}, Docs: {len(plugin_entry['docs'])}")

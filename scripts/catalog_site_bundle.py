@@ -1,5 +1,5 @@
 """
-Resolve <pack>/.catalog/collection.yaml for static site embedding (fragment files inlined).
+Resolve <plugin>/.catalog/collection.yaml for static site embedding (fragment files inlined).
 
 Used by build_website.py only. Does not replace collection.yaml on disk.
 """
@@ -34,19 +34,19 @@ def _catalog_fragment_rel_path(value: str) -> Optional[str]:
     return rel
 
 
-def _read_yaml_catalog(pack_dir: str, root: Path) -> Tuple[Optional[Dict[str, Any]], List[str]]:
-    p = root / pack_dir / ".catalog" / "collection.yaml"
+def _read_yaml_catalog(plugin_dir: str, root: Path) -> Tuple[Optional[Dict[str, Any]], List[str]]:
+    p = root / plugin_dir / ".catalog" / "collection.yaml"
     if not p.exists():
-        return None, [f"{pack_dir}: missing {p.relative_to(root)}"]
+        return None, [f"{plugin_dir}: missing {p.relative_to(root)}"]
     try:
         with open(p, "r", encoding="utf-8") as f:
             raw = f.read()
         data = yaml.safe_load(raw)
         if not isinstance(data, dict):
-            return None, [f"{pack_dir}: collection.yaml must parse to a mapping"]
+            return None, [f"{plugin_dir}: collection.yaml must parse to a mapping"]
         return data, []
     except Exception as e:
-        return None, [f"{pack_dir}: failed to parse collection.yaml: {e}"]
+        return None, [f"{plugin_dir}: failed to parse collection.yaml: {e}"]
 
 
 def _strip_leading_catalog_comment(markdown: str) -> str:
@@ -59,11 +59,11 @@ def _strip_leading_catalog_comment(markdown: str) -> str:
     return s[m.end() :].lstrip("\n")
 
 
-def _read_fragment(pack_dir: str, ref: str, root: Path) -> Tuple[Optional[str], Optional[str]]:
+def _read_fragment(plugin_dir: str, ref: str, root: Path) -> Tuple[Optional[str], Optional[str]]:
     rel = _catalog_fragment_rel_path(ref)
     if not rel:
         return None, f"invalid fragment ref {ref!r}"
-    catalog_dir = (root / pack_dir / ".catalog").resolve()
+    catalog_dir = (root / plugin_dir / ".catalog").resolve()
     target = (catalog_dir / rel).resolve()
     try:
         target.relative_to(catalog_dir)
@@ -75,14 +75,14 @@ def _read_fragment(pack_dir: str, ref: str, root: Path) -> Tuple[Optional[str], 
     return _strip_leading_catalog_comment(raw), None
 
 
-def bundle_catalog_for_site(pack_dir: str, root: Path) -> Tuple[Optional[Dict[str, Any]], list[str]]:
+def bundle_catalog_for_site(plugin_dir: str, root: Path) -> Tuple[Optional[Dict[str, Any]], list[str]]:
     """
     Load catalog YAML and inline all #fragment file references for JSON export.
 
     Returns:
         (dict suitable for docs/data.json, list of warning strings)
     """
-    data, errs = _read_yaml_catalog(pack_dir, root)
+    data, errs = _read_yaml_catalog(plugin_dir, root)
     if errs or data is None:
         return None, errs
     out: Dict[str, Any] = copy.deepcopy(data)
@@ -94,9 +94,9 @@ def bundle_catalog_for_site(pack_dir: str, root: Path) -> Tuple[Optional[Dict[st
             continue
         if not _catalog_fragment_rel_path(val):
             continue
-        text, err = _read_fragment(pack_dir, val, root)
+        text, err = _read_fragment(plugin_dir, val, root)
         if err:
-            warnings.append(f"{pack_dir}: {key}: {err}")
+            warnings.append(f"{plugin_dir}: {key}: {err}")
             continue
         out[key] = text
 

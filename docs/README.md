@@ -30,9 +30,9 @@ This script parses all agentic collections and MCP configurations.
 
 ### ABEval reports (optional)
 
-When present under the repository root, **`eval/<pack_name>/<skill_name>/report.json`** (and optional sibling **`report.md`**) are read at build time only. The **[`scripts/eval_site_enrichment.py`](../scripts/eval_site_enrichment.py)** step attaches a compact summary to each **catalog-listed** skill (`collection.yaml` → `contents.skills` / `orchestration_skills`) and adds **`evaluation_summary`** on the pack. Only the **latest** eval output should be kept in git per skill.
+When present under the repository root, **`eval/<plugin_name>/<skill_name>/report.json`** (and optional sibling **`report.md`**) are read at build time only. The **[`scripts/eval_site_enrichment.py`](../scripts/eval_site_enrichment.py)** step attaches a compact summary to each **catalog-listed** skill (`collection.yaml` → `contents.skills` / `orchestration_skills`) and adds **`evaluation_summary`** on the plugin. Only the **latest** eval output should be kept in git per skill.
 
-The **`name`** of each skill in **`collection.yaml`** must match the **`skills/<name>/`** directory and the **`eval/<pack>/<name>/`** folder segment so lookups resolve correctly.
+The **`name`** of each skill in **`collection.yaml`** must match the **`skills/<name>/`** directory and the **`eval/<plugin>/<name>/`** folder segment so lookups resolve correctly.
 
 ## Validation for Docs Metadata
 

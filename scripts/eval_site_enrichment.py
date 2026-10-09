@@ -1,7 +1,7 @@
 """
 Attach ABEvalFlow report summaries to catalog skills at site build time.
 
-Reads eval/<pack>/<skill_name>/report.json (latest only; not collection.yaml).
+Reads eval/<plugin>/<skill_name>/report.json (latest only; not collection.yaml).
 """
 
 from __future__ import annotations
@@ -75,15 +75,15 @@ def _coverage_fields(n_treatment: int) -> Dict[str, str]:
 
 
 def load_eval_report(
-    root: Path, pack_name: str, skill_name: str,
+    root: Path, plugin_name: str, skill_name: str,
     repo_url: str = "", ref: str = "main",
 ) -> Optional[Dict[str, Any]]:
     """
-    Load and normalize eval/<pack>/<skill>/report.json from a cloned source repo.
+    Load and normalize eval/<plugin>/<skill>/report.json from a cloned source repo.
     repo_url and ref are used to build GitHub URLs pointing back to the source repo.
     Returns None if file missing or invalid.
     """
-    base = root / "eval" / pack_name / skill_name
+    base = root / "eval" / plugin_name / skill_name
     report_json = base / "report.json"
     if not report_json.is_file():
         return None
@@ -110,8 +110,8 @@ def load_eval_report(
     latest_trial_passed = latest_trial.get("passed") if isinstance(latest_trial, dict) else None
     latest_trial_reward = latest_trial.get("reward") if isinstance(latest_trial, dict) else None
 
-    rel_json = f"eval/{pack_name}/{skill_name}/report.json"
-    has_md = (root / "eval" / pack_name / skill_name / "report.md").is_file()
+    rel_json = f"eval/{plugin_name}/{skill_name}/report.json"
+    has_md = (root / "eval" / plugin_name / skill_name / "report.md").is_file()
 
     out: Dict[str, Any] = {
         "recommendation": str(summary.get("recommendation", "")).lower() or None,
@@ -146,9 +146,9 @@ def load_eval_report(
     }
     out["repository"] = repo_url
     out["report_json_url"] = _github_blob_url(repo_url, ref, rel_json) if repo_url else None
-    out["report_dir_url"] = _github_blob_url(repo_url, ref, f"eval/{pack_name}/{skill_name}") if repo_url else None
+    out["report_dir_url"] = _github_blob_url(repo_url, ref, f"eval/{plugin_name}/{skill_name}") if repo_url else None
     if has_md:
-        rel_md = f"eval/{pack_name}/{skill_name}/report.md"
+        rel_md = f"eval/{plugin_name}/{skill_name}/report.md"
         out["report_md_path"] = rel_md
         out["report_md_url"] = _github_blob_url(repo_url, ref, rel_md) if repo_url else None
     else:
@@ -295,37 +295,37 @@ def _rollup_from_evaluations(
     }
 
 
-def apply_eval_enrichment(packs: List[Dict[str, Any]], root: Path) -> None:
+def apply_eval_enrichment(plugins: List[Dict[str, Any]], root: Path) -> None:
     """
-    Mutate each pack: attach skill['evaluation'] for catalog-listed skills when
-    eval/<pack>/<skill>/report.json exists; set pack['evaluation_summary'] rollup.
+    Mutate each plugin: attach skill['evaluation'] for catalog-listed skills when
+    eval/<plugin>/<skill>/report.json exists; set plugin['evaluation_summary'] rollup.
 
     Eval reports live in the SOURCE repo (read from the clone at build time), not in
     the catalog repo. The root argument must point to the cloned source repo root.
 
-    Falls back to pack['skills'] (from SKILL.md frontmatter) when no catalog is present.
+    Falls back to plugin['skills'] (from SKILL.md frontmatter) when no catalog is present.
     """
     root = root.resolve()
-    for pack in packs:
-        coll = pack.get("collection")
+    for plugin in plugins:
+        coll = plugin.get("collection")
         if isinstance(coll, dict):
             skills_ref = _iter_catalog_skills(coll)
         else:
             # No catalog: use raw skills parsed from SKILL.md frontmatter
-            skills_ref = [s for s in (pack.get("skills") or []) if isinstance(s, dict)]
+            skills_ref = [s for s in (plugin.get("skills") or []) if isinstance(s, dict)]
 
         catalog_skill_count = len(skills_ref)
         attached: List[Optional[Dict[str, Any]]] = []
 
-        pack_name = pack.get("name") or ""
-        repo_url = pack.get("repository") or ""
-        ref = pack.get("ref") or "main"
+        plugin_name = plugin.get("name") or ""
+        repo_url = plugin.get("repository") or ""
+        ref = plugin.get("ref") or "main"
         for skill in skills_ref:
             name = skill.get("name")
             if not name or not isinstance(name, str):
                 attached.append(None)
                 continue
-            ev = load_eval_report(root, pack_name, name, repo_url=repo_url, ref=ref)
+            ev = load_eval_report(root, plugin_name, name, repo_url=repo_url, ref=ref)
             if ev:
                 ev["catalog_skill_count"] = catalog_skill_count
                 skill["evaluation"] = ev
@@ -333,7 +333,7 @@ def apply_eval_enrichment(packs: List[Dict[str, Any]], root: Path) -> None:
             else:
                 attached.append(None)
 
-        pack["evaluation_summary"] = _rollup_from_evaluations(attached, catalog_skill_count)
+        plugin["evaluation_summary"] = _rollup_from_evaluations(attached, catalog_skill_count)
 
 
 def _self_test() -> None:
@@ -368,7 +368,7 @@ def _self_test() -> None:
         assert ev["mean_reward_gap"] == 0.05
         assert ev["has_report_md"] is True
 
-        pack = {
+        plugin = {
             "name": "rh-sre",
             "collection": {
                 "contents": {
@@ -377,9 +377,9 @@ def _self_test() -> None:
                 }
             },
         }
-        apply_eval_enrichment([pack], root)
-        assert pack["evaluation_summary"]["evaluated_count"] == 1
-        assert pack["evaluation_summary"]["passed_count"] == 1
+        apply_eval_enrichment([plugin], root)
+        assert plugin["evaluation_summary"]["evaluated_count"] == 1
+        assert plugin["evaluation_summary"]["passed_count"] == 1
     print("eval_site_enrichment self-test OK")
 
 

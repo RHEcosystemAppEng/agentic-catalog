@@ -17,9 +17,9 @@
                 <p class="subtitle">Catalog of Red Hat agentic skills collections, MCP tools & resources, and other agentic capabilities</p>
             </div>
             <div class="toolbar-center">
-                <div class="counter-badge" id="packs-badge">
+                <div class="counter-badge" id="plugins-badge">
                     <span class="counter-number">0</span>
-                    <span class="counter-label">Packs</span>
+                    <span class="counter-label">Plugins</span>
                 </div>
                 <div class="counter-badge" id="skills-badge">
                     <span class="counter-number">0</span>
@@ -64,7 +64,7 @@
     </div>
 
     <main>
-        <!-- Per-collection catalog view (hash: #collection/<pack>) -->
+        <!-- Per-collection catalog view (hash: #collection/<plugin>) -->
         <section id="collection-page" class="collection-page" hidden aria-hidden="true">
             <div class="collection-page-inner">
                 <nav class="collection-nav" aria-label="Collection">
@@ -83,13 +83,13 @@
             </div>
         </section>
 
-        <!-- Section 1: Agentic Packs -->
-        <section id="packs-section">
-            <h2 onclick="toggleSection('packs')">
-                <span class="arrow">▼</span> Agentic Collections <span id="packs-count" class="count"></span>
+        <!-- Section 1: Agentic Plugins -->
+        <section id="plugins-section">
+            <h2 onclick="toggleSection('plugins')">
+                <span class="arrow">▼</span> Agentic Collections <span id="plugins-count" class="count"></span>
             </h2>
-            <p class="section-subtitle">Ready-to-use capability packs designed for Claude Code and Cursor to automate complex domain-specific tasks.</p>
-            <div id="packs-grid" class="grid"></div>
+            <p class="section-subtitle">Ready-to-use capability plugins designed for Claude Code and Cursor to automate complex domain-specific tasks.</p>
+            <div id="plugins-grid" class="grid"></div>
         </section>
 
         <!-- Section 2: MCP Servers -->

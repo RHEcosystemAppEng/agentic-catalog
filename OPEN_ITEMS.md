@@ -5,7 +5,7 @@
 * Replace [mcp.json](./docs/mcp.json)
 
 ### External contributions
-* How to replace collection pack info in absence of collection.yml?
+* How to replace collection plugin info in absence of collection.yml?
   * ~~README~~
   * ~~License~~
   * ~~List of skills~~

@@ -5,7 +5,7 @@ help:
 	@echo ""
 	@echo "Available targets:"
 	@echo "  install    - Install Python dependencies (requires uv)"
-	@echo "  generate   - Generate docs/data.json from pack data"
+	@echo "  generate   - Generate docs/data.json from plugin data"
 	@echo "  serve      - Start local server on http://localhost:8000"
 	@echo "  test       - Generate + verify site"
 	@echo "  test-full  - Generate + serve with browser open"

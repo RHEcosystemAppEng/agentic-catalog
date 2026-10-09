@@ -58,7 +58,7 @@ with open('docs/data.json') as f:
     data = json.load(f)
 
 # Check required top-level keys
-required_keys = ['repository', 'packs', 'mcp_servers', 'generated_at']
+required_keys = ['repository', 'plugins', 'mcp_servers', 'generated_at']
 missing = [k for k in required_keys if k not in data]
 if missing:
     print(f"Missing keys: {missing}")
@@ -69,15 +69,15 @@ if 'name' not in data['repository']:
     print("Missing repository.name")
     sys.exit(1)
 
-# Check packs structure
-if not isinstance(data['packs'], list):
-    print("packs should be a list")
+# Check plugins structure
+if not isinstance(data['plugins'], list):
+    print("plugins should be a list")
     sys.exit(1)
 
-# Check each pack has required fields
-for pack in data['packs']:
-    if 'name' not in pack or 'plugin' not in pack:
-        print(f"Pack missing required fields: {pack.get('name', 'unknown')}")
+# Check each plugin has required fields
+for plugin_entry in data['plugins']:
+    if 'name' not in plugin_entry or 'plugin' not in plugin_entry:
+        print(f"Plugin missing required fields: {plugin_entry.get('name', 'unknown')}")
         sys.exit(1)
 
 # Check MCP servers structure
@@ -89,17 +89,17 @@ print("OK", end='')
 EOF
 echo -e " ${GREEN}✓${NC}"
 
-# Test 5: Count discovered packs and MCP servers
+# Test 5: Count discovered plugins and MCP servers
 echo -n "5. Counting discovered items... "
-PACK_COUNT=$(python -c "import json; print(len(json.load(open('docs/data.json'))['packs']))")
+PLUGIN_COUNT=$(python -c "import json; print(len(json.load(open('docs/data.json'))['plugins']))")
 MCP_COUNT=$(python -c "import json; print(len(json.load(open('docs/data.json'))['mcp_servers']))")
-SKILL_COUNT=$(python -c "import json; packs = json.load(open('docs/data.json'))['packs']; print(sum(len(p['skills']) for p in packs))")
-AGENT_COUNT=$(python -c "import json; packs = json.load(open('docs/data.json'))['packs']; print(sum(len(p['agents']) for p in packs))")
+SKILL_COUNT=$(python -c "import json; plugins = json.load(open('docs/data.json'))['plugins']; print(sum(len(p['skills']) for p in plugins))")
+AGENT_COUNT=$(python -c "import json; plugins = json.load(open('docs/data.json'))['plugins']; print(sum(len(p['agents']) for p in plugins))")
 
 echo -e "${GREEN}✓${NC}"
 echo ""
 echo "   Found:"
-echo "   - ${PACK_COUNT} agentic collections"
+echo "   - ${PLUGIN_COUNT} agentic collections"
 echo "   - ${SKILL_COUNT} skills"
 echo "   - ${AGENT_COUNT} agents"
 echo "   - ${MCP_COUNT} MCP servers"
@@ -158,4 +158,4 @@ echo "Next steps:"
 echo "  1. Run 'make serve' to start local server"
 echo "  2. Visit http://localhost:8000 in your browser"
 echo "  3. Test search, collapsible sections, and modals"
-echo "  4. Verify pack and MCP server cards display correctly"
+echo "  4. Verify plugin and MCP server cards display correctly"

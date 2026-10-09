@@ -60,24 +60,24 @@ def extract_header_env_vars(headers: Dict[str, str]) -> List[str]:
     return env_vars
 
 
-def parse_mcp_file(pack_dir: str) -> List[Dict[str, Any]]:
+def parse_mcp_file(plugin_dir: str) -> List[Dict[str, Any]]:
     """
-    Parse mcps.json file from a pack directory.
+    Parse mcps.json file from a plugin directory.
     Supports both command-based and HTTP-based MCP servers.
     Errors if deprecated .mcp.json exists (must be renamed to mcps.json).
 
     Args:
-        pack_dir: Name of the pack directory
+        plugin_dir: Name of the plugin directory
 
     Returns:
         List of MCP server configurations
     """
-    pack_path = Path(pack_dir)
-    deprecated_path = pack_path / MCP_DEPRECATED
-    mcp_file = pack_path / MCP_FILENAME
+    plugin_path = Path(plugin_dir)
+    deprecated_path = plugin_path / MCP_DEPRECATED
+    mcp_file = plugin_path / MCP_FILENAME
 
     if deprecated_path.exists():
-        print(f"Warning: {pack_dir}/{MCP_DEPRECATED} is deprecated and will be ignored; rename to {MCP_FILENAME}")
+        print(f"Warning: {plugin_dir}/{MCP_DEPRECATED} is deprecated and will be ignored; rename to {MCP_FILENAME}")
 
     if not mcp_file.exists():
         return []
@@ -96,7 +96,7 @@ def parse_mcp_file(pack_dir: str) -> List[Dict[str, Any]]:
             # Base server configuration
             server = {
                 'name': server_name,
-                'pack': pack_dir,
+                'plugin': plugin_dir,
                 'type': server_type,
                 'description': server_config.get('description', ''),
                 'security': server_config.get('security', {})
@@ -167,13 +167,13 @@ def _merge_custom_data(server: Dict[str, Any], custom_data: Dict[str, Any]) -> N
     server['owner'] = custom.get('owner', 'Red Hat')
 
 
-def generate_mcp_data(pack_data: List[Dict[str, Any]] | None = None) -> List[Dict[str, Any]]:
+def generate_mcp_data(plugin_data: List[Dict[str, Any]] | None = None) -> List[Dict[str, Any]]:
     """
-    Generate MCP server data from pack_data (marketplace packs with mcp_servers_raw)
+    Generate MCP server data from plugin_data (marketplace plugins with mcp_servers_raw)
     merged with custom metadata from docs/mcp.json.
 
     Args:
-        pack_data: List of pack dicts from generate_pack_data(); each may carry
+        plugin_data: List of plugin dicts from generate_plugin_data(); each may carry
                    ``mcp_servers_raw`` parsed during the clone phase.
 
     Returns:
@@ -182,30 +182,30 @@ def generate_mcp_data(pack_data: List[Dict[str, Any]] | None = None) -> List[Dic
     mcp_servers = []
     custom_data = load_custom_mcp_data()
 
-    for pack in (pack_data or []):
-        servers = list(pack.get("mcp_servers_raw") or [])
+    for plugin in (plugin_data or []):
+        servers = list(plugin.get("mcp_servers_raw") or [])
         for server in servers:
             _merge_custom_data(server, custom_data)
         mcp_servers.extend(servers)
         if servers:
-            print(f"✓ {pack.get('name', '?')}: {len(servers)} MCP server(s)")
+            print(f"✓ {plugin.get('name', '?')}: {len(servers)} MCP server(s)")
 
     return mcp_servers
 
 
 if __name__ == '__main__':
-    from generate_pack_data import generate_pack_data
+    from generate_plugin_data import generate_plugin_data
     print("Parsing MCP server configurations...")
     print()
 
-    servers = generate_mcp_data(generate_pack_data())
+    servers = generate_mcp_data(generate_plugin_data())
 
     print()
     print(f"Found {len(servers)} MCP servers total")
     print()
     print("Summary:")
     for server in servers:
-        print(f"  • {server['name']} (from {server['pack']})")
+        print(f"  • {server['name']} (from {server['plugin']})")
         print(f"    Type: {server['type']}")
 
         if server['type'] == 'http':

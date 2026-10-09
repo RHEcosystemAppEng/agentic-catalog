@@ -30,14 +30,14 @@ def _load_marketplace_modules() -> Dict[str, Any]:
 _MARKETPLACE_MODULES: Dict[str, Any] = _load_marketplace_modules()
 
 
-def _pack_blob_base(pack: Dict[str, Any]) -> str:
-    """Return the blob URL base (repo/blob/ref/path) for a pack, supporting GitHub and GitLab."""
-    name = pack.get("name", "")
+def _plugin_blob_base(plugin_entry: Dict[str, Any]) -> str:
+    """Return the blob URL base (repo/blob/ref/path) for a plugin, supporting GitHub and GitLab."""
+    name = plugin_entry.get("name", "")
     mod = _MARKETPLACE_MODULES.get(name, {})
-    repo = (pack.get("repository") or mod.get("repository") or "").rstrip("/")
+    repo = (plugin_entry.get("repository") or mod.get("repository") or "").rstrip("/")
     if not repo:
-        raise ValueError(f"Pack '{name}' has no repository in pack data or marketplace")
-    ref = pack.get("ref") or "main"
+        raise ValueError(f"Plugin '{name}' has no repository in plugin data or marketplace")
+    ref = plugin_entry.get("ref") or "main"
     path = (mod.get("path") if mod else None) or "."
     path = path.strip("/")
     blob_sep = "/-/blob" if "gitlab.com" in repo else "/blob"
@@ -119,7 +119,7 @@ def format_relative_age(iso_value: str) -> str:
 
 
 def _render_eval_skills_banner(es: Dict[str, Any]) -> str:
-    """Pack-level eval summary for the Skills tab (HTML-safe)."""
+    """Plugin-level eval summary for the Skills tab (HTML-safe)."""
     n = int(es.get("evaluated_count") or 0)
     total = int(es.get("catalog_skill_count") or 0)
     if total <= 0:
@@ -129,7 +129,7 @@ def _render_eval_skills_banner(es: Dict[str, Any]) -> str:
     title = f"Evaluation coverage: {n} of {total} skills evaluated ({coverage_pct:.1f}%)"
     if n <= 0:
         note_cls = "muted"
-        note = "No evaluations were executed for this pack yet."
+        note = "No evaluations were executed for this plugin yet."
     else:
         trials = int(es.get("total_trials_treatment") or 0)
         confidence = str(es.get("confidence_level") or "LOW").upper()
@@ -522,11 +522,11 @@ def _render_agents_tab(
             server_type = "HTTP Remote" if server.get("type") == "http" else "Container"
             icon = str(server.get("icon") or "")
             icon_html = f"<span>{html.escape(icon)}</span>" if icon else ""
-            pack = html.escape(str(server.get("pack") or ""))
+            plugin = html.escape(str(server.get("plugin") or ""))
             name = html.escape(str(server.get("name") or ""))
             out.append(
                 '<div class="collection-mcp-card" role="button" tabindex="0" '
-                f'data-mcp-pack="{pack}" data-mcp-name="{name}">'
+                f'data-mcp-plugin="{plugin}" data-mcp-name="{name}">'
                 f'<div class="collection-mcp-card-title">{icon_html}<span>{title}</span></div>'
                 f'<div class="collection-mcp-card-meta">By {owner} - {server_type}</div>'
                 "</div>"
@@ -534,7 +534,7 @@ def _render_agents_tab(
         out.append("</div>")
     else:
         out.append(
-            "<p class=\"collection-missing\">No MCP servers are associated with this pack in the published site data.</p>"
+            "<p class=\"collection-missing\">No MCP servers are associated with this plugin in the published site data.</p>"
         )
 
     out.append("<h2>Sample Workflows</h2>")
@@ -551,9 +551,9 @@ def _render_agents_tab(
     return "".join(out)
 
 
-def _render_lola_install_block(pack_name: str) -> str:
-    """Generate a Lola installation block for packs without catalog deploy_and_use instructions."""
-    name_esc = html.escape(pack_name)
+def _render_lola_install_block(plugin_name: str) -> str:
+    """Generate a Lola installation block for plugins without catalog deploy_and_use instructions."""
+    name_esc = html.escape(plugin_name)
     code = f"lola install -f {name_esc}"
     return (
         "<h2>Quick Start</h2>"
@@ -568,25 +568,25 @@ def _render_lola_install_block(pack_name: str) -> str:
     )
 
 
-def render_collection_page(pack: Dict[str, Any], mcp_data: List[Dict[str, Any]]) -> str:
-    """Render a full static collection page for one pack."""
-    collection = pack.get("collection") or {}
+def render_collection_page(plugin_entry: Dict[str, Any], mcp_data: List[Dict[str, Any]]) -> str:
+    """Render a full static collection page for one plugin."""
+    collection = plugin_entry.get("collection") or {}
     collection_id = (
         collection.get("id")
-        or pack.get("plugin", {}).get("name")
-        or pack.get("name")
+        or plugin_entry.get("plugin", {}).get("name")
+        or plugin_entry.get("name")
     )
-    page_title = collection.get("name") or pack.get("plugin", {}).get("title") or pack.get("name")
+    page_title = collection.get("name") or plugin_entry.get("plugin", {}).get("title") or plugin_entry.get("name")
     description = str(collection.get("description") or "").strip()
     subtitle = html.escape(description[:120].strip() + ("..." if len(description) > 120 else ""))
-    blob_base = _pack_blob_base(pack)
+    blob_base = _plugin_blob_base(plugin_entry)
     has_catalog = bool(collection)
     yaml_link = f"{blob_base}/.catalog/collection.yaml"
     readme_link = f"{blob_base}/README.md"
     categories = collection.get("categories") or []
     personas = collection.get("personas") or []
-    version = pack.get("plugin", {}).get("version")
-    meta_line_parts: List[str] = [f"<strong>Module:</strong> {html.escape(str(pack['name']))}"]
+    version = plugin_entry.get("plugin", {}).get("version")
+    meta_line_parts: List[str] = [f"<strong>Module:</strong> {html.escape(str(plugin_entry['name']))}"]
     if version:
         meta_line_parts.append(html.escape(f"v{version}"))
     if personas:
@@ -634,21 +634,21 @@ def render_collection_page(pack: Dict[str, Any], mcp_data: List[Dict[str, Any]])
 
     # README fallback: no catalog data but a README is available
     if not overview_parts:
-        readme_content = pack.get("readme_content") or ""
+        readme_content = plugin_entry.get("readme_content") or ""
         if readme_content.strip():
             overview_parts.append(f"<div class=\"collection-prose\">{md_to_html(readme_content)}</div>")
         else:
             overview_parts.append("<p class=\"collection-missing\">No overview available.</p>")
 
-    # Inferred Lola install block for packs with no catalog deploy instructions
+    # Inferred Lola install block for plugins with no catalog deploy instructions
     if not has_catalog or not collection.get("deploy_and_use"):
-        overview_parts.append(_render_lola_install_block(pack.get("name", "")))
+        overview_parts.append(_render_lola_install_block(plugin_entry.get("name", "")))
 
     # Skills tab
     contents = collection.get("contents") or {}
-    pack_skills_raw = pack.get("skills") or []
+    plugin_skills_raw = plugin_entry.get("skills") or []
     skills_parts = ["<h2>Skills</h2>"]
-    esum = pack.get("evaluation_summary") or {}
+    esum = plugin_entry.get("evaluation_summary") or {}
     if int(esum.get("catalog_skill_count") or 0) > 0:
         skills_parts.append(_render_eval_skills_banner(esum))
     if contents.get("description"):
@@ -666,8 +666,8 @@ def render_collection_page(pack: Dict[str, Any], mcp_data: List[Dict[str, Any]])
         skills_parts.append("<h2>Skills Decision Guide</h2>")
         skills_parts.append(_render_decision_guide(guide))
     if not orchestration and not catalog_skills and not guide and not contents.get("description"):
-        if pack_skills_raw:
-            skills_parts.append(_render_skills_list(pack_skills_raw, blob_base))
+        if plugin_skills_raw:
+            skills_parts.append(_render_skills_list(plugin_skills_raw, blob_base))
         else:
             skills_parts.append("<p class=\"collection-missing\">No skills content.</p>")
 
@@ -675,8 +675,8 @@ def render_collection_page(pack: Dict[str, Any], mcp_data: List[Dict[str, Any]])
     resources_html = _render_resources(collection.get("resources") or [], blob_base)
 
     # Agents tab
-    pack_mcp = [s for s in mcp_data if s.get("pack") == pack.get("name")]
-    agents_html = _render_agents_tab(collection.get("sample_workflows") or [], pack_mcp)
+    plugin_mcp = [s for s in mcp_data if s.get("plugin") == plugin_entry.get("name")]
+    agents_html = _render_agents_tab(collection.get("sample_workflows") or [], plugin_mcp)
 
     category_line = (
         f'<p class="collection-tags"><strong>Categories:</strong> {html.escape(", ".join(str(c) for c in categories))}</p>'
@@ -694,7 +694,7 @@ def render_collection_page(pack: Dict[str, Any], mcp_data: List[Dict[str, Any]])
     if not license_nav_href:
         license_nav_href = f"{blob_base}/LICENSE"
     license_nav_href_esc = html.escape(license_nav_href, quote=True)
-    license_id = str(pack.get("plugin", {}).get("license") or "").strip()
+    license_id = str(plugin_entry.get("plugin", {}).get("license") or "").strip()
     license_nav_label = f"{license_id} License" if license_id and license_id != "Unknown" else "License"
 
     return f"""<!DOCTYPE html>
@@ -759,25 +759,25 @@ def render_collection_page(pack: Dict[str, Any], mcp_data: List[Dict[str, Any]])
 """
 
 
-def generate_collection_pages(pack_data: List[Dict[str, Any]], mcp_data: List[Dict[str, Any]]) -> int:
+def generate_collection_pages(plugin_data: List[Dict[str, Any]], mcp_data: List[Dict[str, Any]]) -> int:
     """Generate docs/collections/*.html and return generated page count."""
     out_dir = REPO_ROOT / "docs" / "collections"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     generated_files = set()
     count = 0
-    for pack in pack_data:
-        if not pack.get("collection") and not pack.get("readme_content") and not pack.get("skills"):
+    for plugin_entry in plugin_data:
+        if not plugin_entry.get("collection") and not plugin_entry.get("readme_content") and not plugin_entry.get("skills"):
             continue
-        collection = pack.get("collection") or {}
+        collection = plugin_entry.get("collection") or {}
         collection_id = (
             collection.get("id")
-            or pack.get("plugin", {}).get("name")
-            or pack.get("name")
+            or plugin_entry.get("plugin", {}).get("name")
+            or plugin_entry.get("name")
         )
         file_name = f"{collection_id}.html"
         generated_files.add(file_name)
-        page_html = render_collection_page(pack, mcp_data)
+        page_html = render_collection_page(plugin_entry, mcp_data)
         (out_dir / file_name).write_text(page_html, encoding="utf-8")
         count += 1
 
