@@ -19,7 +19,7 @@
         "url": "https://github.com/RHEcosystemAppEng/agentic-catalog.git",
         "path": "plugins/redhat/ocp-admin",
         "ref": "rc/v1.0.0",
-        "sha": "feeb8f54fc8e84b18e933aff9a4a25f8ec6e1388"
+        "sha": "d4bdcad3f39148bad143ddb9d1b25f6bb80bfd3a"
       },
       "homepage": "https://github.com/RHEcosystemAppEng/agentic-catalog.git"
     },
@@ -35,7 +35,7 @@
         "url": "https://github.com/RHEcosystemAppEng/agentic-catalog.git",
         "path": "plugins/redhat/rh-basic",
         "ref": "rc/v1.0.0",
-        "sha": "feeb8f54fc8e84b18e933aff9a4a25f8ec6e1388"
+        "sha": "d4bdcad3f39148bad143ddb9d1b25f6bb80bfd3a"
       },
       "homepage": "https://github.com/RHEcosystemAppEng/agentic-catalog.git"
     },
@@ -51,7 +51,7 @@
         "url": "https://github.com/RHEcosystemAppEng/agentic-catalog.git",
         "path": "plugins/redhat/rh-sre",
         "ref": "rc/v1.0.0",
-        "sha": "feeb8f54fc8e84b18e933aff9a4a25f8ec6e1388"
+        "sha": "d4bdcad3f39148bad143ddb9d1b25f6bb80bfd3a"
       },
       "homepage": "https://github.com/RHEcosystemAppEng/agentic-catalog.git"
     },
@@ -67,7 +67,7 @@
         "url": "https://github.com/RHEcosystemAppEng/agentic-catalog.git",
         "path": "plugins/redhat/rh-virt",
         "ref": "rc/v1.0.0",
-        "sha": "feeb8f54fc8e84b18e933aff9a4a25f8ec6e1388"
+        "sha": "d4bdcad3f39148bad143ddb9d1b25f6bb80bfd3a"
       },
       "homepage": "https://github.com/RHEcosystemAppEng/agentic-catalog.git"
     }
