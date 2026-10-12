@@ -1,0 +1,154 @@
+{
+  "name": "redhat-agentic-catalog",
+  "owner": {
+    "name": "Red Hat",
+    "url": "https://github.com/RHEcosystemAppEng/agentic-catalog"
+  },
+  "description": "Validated Agentic Catalog from Red Hat Ecosystem Engineering",
+  "version": "0.1.0",
+  "plugins": [
+    {
+      "name": "ocp-admin",
+      "displayName": "Agent plugin for Red Hat OpenShift",
+      "description": "Automation capabilities for OpenShift Container Platform cluster management, workload orchestration, security policies, and operational tasks.",
+      "version": "0.1.0",
+      "source": {
+        "source": "git-subdir",
+        "url": "RHEcosystemAppEng/agentic-plugins",
+        "path": "ocp-admin"
+      },
+      "tags": [
+        "red-hat",
+        "openshift",
+        "administration",
+        "management",
+        "security",
+        "cve",
+        "sbom",
+        "vex",
+        "coreos",
+        "container-security",
+        "vulnerability-management"
+      ]
+    },
+    {
+      "name": "rh-developer",
+      "displayName": "Agent plugin for Software Developers",
+      "description": "Plugins for building and deploying applications on Red Hat platforms.",
+      "version": "0.1.0",
+      "source": {
+        "source": "git-subdir",
+        "url": "RHEcosystemAppEng/agentic-plugins",
+        "path": "rh-developer"
+      },
+      "tags": [
+        "developer",
+        "openshift",
+        "rhel",
+        "s2i",
+        "containerization",
+        "deployment",
+        "helm",
+        "podman"
+      ]
+    },
+    {
+      "name": "rh-sre",
+      "displayName": "Agent plugin for Site Reliability Engineers",
+      "description": "Site reliability engineering tools and automation for managing Red Hat platforms and infrastructure.",
+      "version": "0.1.0",
+      "source": {
+        "source": "git-subdir",
+        "url": "RHEcosystemAppEng/agentic-plugins",
+        "path": "rh-sre"
+      },
+      "tags": [
+        "sre",
+        "red-hat",
+        "platforms",
+        "products",
+        "automation"
+      ]
+    },
+    {
+      "name": "rh-ai-engineer",
+      "displayName": "Agent plugin for OpenShift AI Engineers",
+      "description": "Red Hat OpenShift AI Engineering Agentic Collection",
+      "version": "0.1.0",
+      "source": {
+        "source": "git-subdir",
+        "url": "RHEcosystemAppEng/agentic-plugins",
+        "path": "rh-ai-engineer"
+      },
+      "tags": [
+        "ai-engineer",
+        "openshift-ai",
+        "rhoai",
+        "kserve",
+        "vllm",
+        "nvidia-nim",
+        "model-serving",
+        "inference",
+        "gpu"
+      ]
+    },
+    {
+      "name": "rh-virt",
+      "displayName": "Agent plugin for Red Hat OpenShift Virtualization",
+      "description": "Virtual machine management and automation for OpenShift Virtualization and KubeVirt workloads.",
+      "version": "0.1.0",
+      "source": {
+        "source": "git-subdir",
+        "url": "RHEcosystemAppEng/agentic-plugins",
+        "path": "rh-virt"
+      },
+      "tags": [
+        "red-hat",
+        "kubevirt",
+        "openshift",
+        "virtualization",
+        "virt"
+      ]
+    },
+    {
+      "name": "rh-basic",
+      "displayName": "Agent plugin for Red Hat customers",
+      "description": "Essential Red Hat skills for IT professionals: CVE explanation, diagnostics, product lifecycle, RHEL patch planning, and support severity guidance.",
+      "version": "0.1.0",
+      "source": {
+        "source": "git-subdir",
+        "url": "RHEcosystemAppEng/agentic-plugins",
+        "path": "rh-basic"
+      },
+      "tags": [
+        "red-hat",
+        "cve",
+        "rhel",
+        "support",
+        "lifecycle",
+        "diagnostics",
+        "patching"
+      ]
+    },
+    {
+      "name": "rh-automation",
+      "displayName": "Agent plugin for Automation Engineers",
+      "description": "Ansible Automation Platform governance, execution safety, and forensic troubleshooting tools for Red Hat automation engineers.",
+      "version": "0.1.0",
+      "source": {
+        "source": "git-subdir",
+        "url": "RHEcosystemAppEng/agentic-plugins",
+        "path": "rh-automation"
+      },
+      "tags": [
+        "ansible",
+        "aap",
+        "automation",
+        "red-hat",
+        "governance",
+        "troubleshooting",
+        "execution"
+      ]
+    }
+  ]
+}
