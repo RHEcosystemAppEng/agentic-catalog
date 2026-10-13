@@ -1,0 +1,36 @@
+{
+  "name": "ecosystem-plugins",
+  "owner": {
+    "name": "Red Hat",
+    "email": "ai5-marketplace@redhat.com"
+  },
+  "metadata": {
+    "description": "Red Hat AI5 Ecosystem Plugins Marketplace"
+  },
+  "plugins": [
+    {
+      "name": "ocp-admin",
+      "source": "plugins/redhat/ocp-admin",
+      "description": "Points to all AI skill catalog entities in the ocp-admin agentic pack for Red Hat OpenShift administration.",
+      "version": "1.0"
+    },
+    {
+      "name": "rh-basic",
+      "source": "plugins/redhat/rh-basic",
+      "description": "Points to all AI skill catalog entities in the rh-basic agentic pack for Red Hat product exploration and getting started workflows.",
+      "version": "1.0"
+    },
+    {
+      "name": "rh-sre",
+      "source": "plugins/redhat/rh-sre",
+      "description": "Points to all AI skill catalog entities in the rh-sre agentic pack for Red Hat Site Reliability Engineering workflows.",
+      "version": "1.0"
+    },
+    {
+      "name": "rh-virt",
+      "source": "plugins/redhat/rh-virt",
+      "description": "Points to all AI skill catalog entities in the rh-virt agentic pack for Red Hat OpenShift Virtualization management.",
+      "version": "1.0"
+    }
+  ]
+}
