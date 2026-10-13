@@ -1,0 +1,72 @@
+{
+  "name": "ecosystem-plugins",
+  "interface": {
+    "displayName": "Red Hat AI5 Ecosystem Plugins"
+  },
+  "plugins": [
+    {
+      "name": "ocp-admin",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/RHEcosystemAppEng/agentic-catalog.git",
+        "path": "./plugins/redhat/ocp-admin",
+        "ref": "rc/v1.0.0",
+        "sha": "537400fa2cbf3bf7165787baa3ae4f4b25271b52"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools",
+      "description": "Points to all AI skill catalog entities in the ocp-admin agentic pack for Red Hat OpenShift administration."
+    },
+    {
+      "name": "rh-basic",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/RHEcosystemAppEng/agentic-catalog.git",
+        "path": "./plugins/redhat/rh-basic",
+        "ref": "rc/v1.0.0",
+        "sha": "537400fa2cbf3bf7165787baa3ae4f4b25271b52"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools",
+      "description": "Points to all AI skill catalog entities in the rh-basic agentic pack for Red Hat product exploration and getting started workflows."
+    },
+    {
+      "name": "rh-sre",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/RHEcosystemAppEng/agentic-catalog.git",
+        "path": "./plugins/redhat/rh-sre",
+        "ref": "rc/v1.0.0",
+        "sha": "537400fa2cbf3bf7165787baa3ae4f4b25271b52"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools",
+      "description": "Points to all AI skill catalog entities in the rh-sre agentic pack for Red Hat Site Reliability Engineering workflows."
+    },
+    {
+      "name": "rh-virt",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/RHEcosystemAppEng/agentic-catalog.git",
+        "path": "./plugins/redhat/rh-virt",
+        "ref": "rc/v1.0.0",
+        "sha": "537400fa2cbf3bf7165787baa3ae4f4b25271b52"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools",
+      "description": "Points to all AI skill catalog entities in the rh-virt agentic pack for Red Hat OpenShift Virtualization management."
+    }
+  ]
+}

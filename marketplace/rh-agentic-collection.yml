@@ -11,7 +11,7 @@ modules:
   version: '1.0'
   repository: https://github.com/RHEcosystemAppEng/agentic-catalog.git
   path: plugins/redhat/ocp-admin
-  ref: d4bdcad3f39148bad143ddb9d1b25f6bb80bfd3a
+  ref: 537400fa2cbf3bf7165787baa3ae4f4b25271b52
   tags:
   - ai-skill
   - openshift
@@ -25,7 +25,7 @@ modules:
     track_id: mcp-scorecard
     recommendation: pass
     source: soundcheck-api
-    evaluated_at: '2026-10-11T08:50:11.572253Z'
+    evaluated_at: '2026-10-13T07:46:42.491296Z'
     total_checks: 15
     soundcheck_levels_summary:
       Lead:
@@ -50,7 +50,7 @@ modules:
     track_id: mcp-scorecard
     recommendation: pass
     source: soundcheck-api
-    evaluated_at: '2026-10-11T08:50:11.572253Z'
+    evaluated_at: '2026-10-13T07:46:42.491296Z'
     total_checks: 15
     soundcheck_levels_summary:
       Lead:
@@ -76,7 +76,7 @@ modules:
   version: '1.0'
   repository: https://github.com/RHEcosystemAppEng/agentic-catalog.git
   path: plugins/redhat/rh-basic
-  ref: d4bdcad3f39148bad143ddb9d1b25f6bb80bfd3a
+  ref: 537400fa2cbf3bf7165787baa3ae4f4b25271b52
   tags:
   - ai-skill
   - red-hat
@@ -103,7 +103,7 @@ modules:
     track_id: mcp-scorecard
     recommendation: pass
     source: soundcheck-api
-    evaluated_at: '2026-10-11T08:50:11.572253Z'
+    evaluated_at: '2026-10-13T07:46:42.491296Z'
     total_checks: 17
     soundcheck_levels_summary:
       Lead:
@@ -129,13 +129,13 @@ modules:
   version: '1.0'
   repository: https://github.com/RHEcosystemAppEng/agentic-catalog.git
   path: plugins/redhat/rh-sre
-  ref: d4bdcad3f39148bad143ddb9d1b25f6bb80bfd3a
+  ref: 537400fa2cbf3bf7165787baa3ae4f4b25271b52
   tags:
   - ai-skill
   - sre
   - monitoring
   - vulnerability-management
-  content_hash: "sha256:0f6bfb14878ceb11d9f7910eeac4f1d031f7698d571b2270ec03a8c77f11138e"
+  content_hash: "sha256:ed233ead987bc3b5ac339229234a36e32162c8ea415598717a2fbc6aaac9b84a"
   soundcheck_levels_summary:
     Foundational:
       pass: 17
@@ -156,7 +156,7 @@ modules:
     track_id: mcp-scorecard
     recommendation: pass
     source: soundcheck-api
-    evaluated_at: '2026-10-11T08:50:11.572253Z'
+    evaluated_at: '2026-10-13T07:46:42.491296Z'
     total_checks: 0
     soundcheck_levels_summary: {}
   - name: ansible-automation-platform
@@ -165,7 +165,7 @@ modules:
     track_id: mcp-scorecard
     recommendation: pass
     source: soundcheck-api
-    evaluated_at: '2026-10-11T08:50:11.572253Z'
+    evaluated_at: '2026-10-13T07:46:42.491296Z'
     total_checks: 15
     soundcheck_levels_summary:
       Lead:
@@ -191,7 +191,7 @@ modules:
   version: '1.0'
   repository: https://github.com/RHEcosystemAppEng/agentic-catalog.git
   path: plugins/redhat/rh-virt
-  ref: d4bdcad3f39148bad143ddb9d1b25f6bb80bfd3a
+  ref: 537400fa2cbf3bf7165787baa3ae4f4b25271b52
   tags:
   - ai-skill
   - virtualization
@@ -205,7 +205,7 @@ modules:
     track_id: mcp-scorecard
     recommendation: pass
     source: soundcheck-api
-    evaluated_at: '2026-10-11T08:50:11.572253Z'
+    evaluated_at: '2026-10-13T07:46:42.491296Z'
     total_checks: 15
     soundcheck_levels_summary:
       Lead:
