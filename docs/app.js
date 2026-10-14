@@ -300,6 +300,8 @@ function createPluginCard(pluginEntry) {
     addInstallBadge(install.hub_url, 'GitHub');
     addInstallBadge(install.lola && install.lola.marketplace_raw_url, 'Lola');
     addInstallBadge(install.claude && install.claude.marketplace_json_url, 'Claude');
+    addInstallBadge(install.codex && install.codex.marketplace_json_url, 'Codex');
+    addInstallBadge(install.cursor && install.cursor.marketplace_json_url, 'Cursor');
     {
         const badge = document.createElement('span');
         badge.className = 'plugin-eval-badge';
@@ -1889,12 +1891,53 @@ function appendInstallAccordion(panel, pluginEntry) {
             a.href = String(install.claude.marketplace_json_url);
             a.target = '_blank';
             a.rel = 'noopener noreferrer';
-            a.textContent = 'claude-marketplace/marketplace.json';
+            a.textContent = '.claude-plugin/marketplace.json';
             body.appendChild(a);
         }
         const p = document.createElement('p');
         p.textContent = `Install plugin ${pluginEntry.name} from that marketplace (git-subdir on the hub).`;
         body.appendChild(p);
+    });
+    addItem('4. Codex / ChatGPT plugins', false, (body) => {
+        if (install.codex && install.codex.command) {
+            const pre = document.createElement('pre');
+            const code = document.createElement('code');
+            code.textContent = String(install.codex.command);
+            pre.appendChild(code);
+            body.appendChild(pre);
+        }
+        if (install.codex && install.codex.marketplace_json_url) {
+            const p = document.createElement('p');
+            p.textContent = 'Marketplace manifest: ';
+            const a = document.createElement('a');
+            a.className = 'collection-inline-link';
+            a.href = String(install.codex.marketplace_json_url);
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.textContent = '.agents/plugins/marketplace.json';
+            p.appendChild(a);
+            body.appendChild(p);
+        }
+    });
+    addItem('5. Cursor', false, (body) => {
+        if (install.cursor && install.cursor.marketplace_json_url) {
+            const p = document.createElement('p');
+            p.textContent = 'Marketplace manifest: ';
+            const a = document.createElement('a');
+            a.className = 'collection-inline-link';
+            a.href = String(install.cursor.marketplace_json_url);
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.textContent = '.cursor-plugin/marketplace.json';
+            p.appendChild(a);
+            body.appendChild(p);
+        }
+        const sourcePath = (install.cursor && install.cursor.source_path) || '';
+        const p2 = document.createElement('p');
+        p2.textContent = sourcePath
+            ? `Add this repository as a marketplace in Cursor, then install ${pluginEntry.name} (relative source path ${sourcePath}).`
+            : `Add this repository as a marketplace in Cursor, then install ${pluginEntry.name}.`;
+        body.appendChild(p2);
     });
     panel.appendChild(acc);
 }

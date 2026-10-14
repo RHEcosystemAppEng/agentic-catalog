@@ -15,7 +15,7 @@ from typing import Any, Dict, List, Optional, Set
 import yaml
 
 DEFAULT_MARKETPLACE = Path("marketplace/rh-agentic-collection.yml")
-DEFAULT_CLAUDE_MARKETPLACE = Path("claude-marketplace/marketplace.json")
+DEFAULT_CLAUDE_MARKETPLACE = Path(".claude-plugin/marketplace.json")
 # Consumer install / Pages branch. Override with CATALOG_BRANCH (e.g. rc/v1.0.0).
 DEFAULT_CATALOG_BRANCH = "main"
 LOLA_MARKET_ALIAS = "rh-agentic-collections"

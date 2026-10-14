@@ -12,7 +12,13 @@ from typing import Dict, List, Any
 
 import plugin_registry
 from generate_mcp_data import parse_mcp_file
-from install_links import attach_install, load_claude_plugins
+from install_links import (
+    attach_install,
+    load_claude_plugins,
+    load_codex_marketplace_name,
+    load_codex_plugins,
+    load_cursor_plugins,
+)
 from marketplace_eval_enrichment import apply_marketplace_eval
 
 
@@ -124,6 +130,9 @@ def load_hub_plugins() -> List[Dict[str, Any]]:
 
     on_disk_paths = set(plugin_registry.get_union_plugin_dirs(repo_root))
     claude_plugins = load_claude_plugins(repo_root)
+    codex_plugins = load_codex_plugins(repo_root)
+    cursor_plugins = load_cursor_plugins(repo_root)
+    codex_marketplace_name = load_codex_marketplace_name(repo_root)
     plugins: List[Dict[str, Any]] = []
 
     for mod in modules:
@@ -184,7 +193,14 @@ def load_hub_plugins() -> List[Dict[str, Any]]:
             "mcp_servers_raw": mcp_servers,
         }
         apply_marketplace_eval(plugin_entry, mod)
-        attach_install(plugin_entry, mod, claude_plugins)
+        attach_install(
+            plugin_entry,
+            mod,
+            claude_plugins,
+            codex_plugins=codex_plugins,
+            cursor_plugins=cursor_plugins,
+            codex_marketplace_name=codex_marketplace_name,
+        )
         plugins.append(plugin_entry)
         mcp_status = f", {len(mcp_servers)} MCP server(s)" if mcp_servers else ""
         print(f"  ✓ '{name}': {len(skills)} skill(s) from {plugin_path} (README + mcp.json{mcp_status})")

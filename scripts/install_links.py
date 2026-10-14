@@ -9,21 +9,28 @@ from typing import Any, Dict, Optional
 
 import plugin_registry
 
-CLAUDE_MARKETPLACE_REL = "claude-marketplace/marketplace.json"
+CLAUDE_MARKETPLACE_REL = ".claude-plugin/marketplace.json"
+CODEX_MARKETPLACE_REL = ".agents/plugins/marketplace.json"
+CURSOR_MARKETPLACE_REL = ".cursor-plugin/marketplace.json"
 LOLA_MARKETPLACE_REL = "marketplace/rh-agentic-collection.yml"
+DEFAULT_CODEX_MARKETPLACE_NAME = "ecosystem-plugins"
 
 
-def load_claude_plugins(
-    repo_root: Optional[Path] = None,
-) -> Dict[str, Dict[str, Any]]:
+def _load_marketplace_json(
+    rel_path: str, repo_root: Optional[Path] = None
+) -> Dict[str, Any]:
     root = repo_root or Path(__file__).resolve().parent.parent
-    path = root / plugin_registry.DEFAULT_CLAUDE_MARKETPLACE
+    path = root / rel_path
     if not path.is_file():
         return {}
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         return {}
+    return data if isinstance(data, dict) else {}
+
+
+def _index_plugins_by_name(data: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
     plugins = data.get("plugins") or []
     out: Dict[str, Dict[str, Any]] = {}
     for plugin in plugins:
@@ -32,10 +39,39 @@ def load_claude_plugins(
     return out
 
 
+def load_claude_plugins(
+    repo_root: Optional[Path] = None,
+) -> Dict[str, Dict[str, Any]]:
+    data = _load_marketplace_json(str(plugin_registry.DEFAULT_CLAUDE_MARKETPLACE), repo_root)
+    return _index_plugins_by_name(data)
+
+
+def load_codex_plugins(
+    repo_root: Optional[Path] = None,
+) -> Dict[str, Dict[str, Any]]:
+    data = _load_marketplace_json(CODEX_MARKETPLACE_REL, repo_root)
+    return _index_plugins_by_name(data)
+
+
+def load_codex_marketplace_name(repo_root: Optional[Path] = None) -> str:
+    data = _load_marketplace_json(CODEX_MARKETPLACE_REL, repo_root)
+    return str(data.get("name") or "").strip() or DEFAULT_CODEX_MARKETPLACE_NAME
+
+
+def load_cursor_plugins(
+    repo_root: Optional[Path] = None,
+) -> Dict[str, Dict[str, Any]]:
+    data = _load_marketplace_json(CURSOR_MARKETPLACE_REL, repo_root)
+    return _index_plugins_by_name(data)
+
+
 def build_install(
     module: Dict[str, Any],
     claude_plugins: Optional[Dict[str, Dict[str, Any]]] = None,
     catalog_branch: Optional[str] = None,
+    codex_plugins: Optional[Dict[str, Dict[str, Any]]] = None,
+    cursor_plugins: Optional[Dict[str, Dict[str, Any]]] = None,
+    codex_marketplace_name: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Return the ``install`` object stored on each plugin in data.json."""
     name = str(module.get("name") or "")
@@ -49,8 +85,18 @@ def build_install(
     claude_raw = plugin_registry.github_raw_url(
         repository, branch, CLAUDE_MARKETPLACE_REL
     )
+    codex_raw = plugin_registry.github_raw_url(repository, branch, CODEX_MARKETPLACE_REL)
+    cursor_raw = plugin_registry.github_raw_url(repository, branch, CURSOR_MARKETPLACE_REL)
 
     claude_entry = (claude_plugins or {}).get(name) or {}
+    codex_entry = (codex_plugins or {}).get(name) or {}
+    cursor_entry = (cursor_plugins or {}).get(name) or {}
+    codex_name = (codex_marketplace_name or "").strip() or DEFAULT_CODEX_MARKETPLACE_NAME
+    codex_source_path = str(
+        (codex_entry.get("source") or {}).get("path") or hub_path
+    ).lstrip("./")
+    repo_git_url = repository.strip() or plugin_registry.web_repo_url(repository)
+
     marketplace_name = None
     # marketplace.json top-level name is not on the plugin entry; callers may
     # still want the plugin name for Claude Code install.
@@ -71,6 +117,21 @@ def build_install(
             "marketplace_name": marketplace_name,
             "source_path": (claude_entry.get("source") or {}).get("path") or hub_path,
         },
+        "codex": {
+            "marketplace_json_url": codex_raw,
+            "plugin_name": name,
+            "marketplace_name": codex_name,
+            "source_path": codex_source_path,
+            "command": (
+                f"codex plugin marketplace add {repo_git_url} --ref {branch}\n"
+                f"codex plugin add {name}@{codex_name}"
+            ),
+        },
+        "cursor": {
+            "marketplace_json_url": cursor_raw,
+            "plugin_name": name,
+            "source_path": str(cursor_entry.get("source") or hub_path),
+        },
     }
     return install
 
@@ -80,8 +141,18 @@ def attach_install(
     module: Dict[str, Any],
     claude_plugins: Optional[Dict[str, Dict[str, Any]]] = None,
     catalog_branch: Optional[str] = None,
+    codex_plugins: Optional[Dict[str, Dict[str, Any]]] = None,
+    cursor_plugins: Optional[Dict[str, Dict[str, Any]]] = None,
+    codex_marketplace_name: Optional[str] = None,
 ) -> None:
-    plugin_entry["install"] = build_install(module, claude_plugins, catalog_branch)
+    plugin_entry["install"] = build_install(
+        module,
+        claude_plugins,
+        catalog_branch,
+        codex_plugins,
+        cursor_plugins,
+        codex_marketplace_name,
+    )
 
 
 def _self_test() -> None:
@@ -97,7 +168,26 @@ def _self_test() -> None:
             "source": {"path": "plugins/redhat/rh-basic"},
         }
     }
-    inst = build_install(module, claude, catalog_branch="main")
+    codex = {
+        "rh-basic": {
+            "name": "rh-basic",
+            "source": {"path": "./plugins/redhat/rh-basic"},
+        }
+    }
+    cursor = {
+        "rh-basic": {
+            "name": "rh-basic",
+            "source": "plugins/redhat/rh-basic",
+        }
+    }
+    inst = build_install(
+        module,
+        claude,
+        catalog_branch="main",
+        codex_plugins=codex,
+        cursor_plugins=cursor,
+        codex_marketplace_name="ecosystem-plugins",
+    )
     assert "plugins/redhat/rh-basic" in inst["hub_url"]
     assert "/tree/" in inst["hub_url"]
     assert inst["lola"]["plugin_name"] == "rh-basic"
@@ -105,7 +195,19 @@ def _self_test() -> None:
     rc = build_install(module, claude, catalog_branch="rc/v1.0.0")
     assert "rc/v1.0.0" in rc["lola"]["marketplace_raw_url"]
     assert inst["claude"]["plugin_name"] == "rh-basic"
-    assert "claude-marketplace/marketplace.json" in inst["claude"]["marketplace_json_url"]
+    assert ".claude-plugin/marketplace.json" in inst["claude"]["marketplace_json_url"]
+    assert ".agents/plugins/marketplace.json" in inst["codex"]["marketplace_json_url"]
+    assert inst["codex"]["marketplace_name"] == "ecosystem-plugins"
+    assert inst["codex"]["source_path"] == "plugins/redhat/rh-basic"
+    assert "codex plugin marketplace add" in inst["codex"]["command"]
+    assert "codex plugin add rh-basic@ecosystem-plugins" in inst["codex"]["command"]
+    assert ".cursor-plugin/marketplace.json" in inst["cursor"]["marketplace_json_url"]
+    assert inst["cursor"]["source_path"] == "plugins/redhat/rh-basic"
+    # Defaults (no codex/cursor marketplace files loaded) still populate paths.
+    bare = build_install(module, claude, catalog_branch="main")
+    assert bare["codex"]["marketplace_name"] == DEFAULT_CODEX_MARKETPLACE_NAME
+    assert bare["codex"]["source_path"] == "plugins/redhat/rh-basic"
+    assert bare["cursor"]["source_path"] == "plugins/redhat/rh-basic"
     print("install_links self-test OK")
 
 

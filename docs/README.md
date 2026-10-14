@@ -1,6 +1,6 @@
 # Documentation Site
 
-GitHub Pages site for agentic-catalog. Generated from **this hub checkout** (`marketplace/`, `plugins/redhat/`, `claude-marketplace/`).
+GitHub Pages site for agentic-catalog. Generated from **this hub checkout** (`marketplace/`, `plugins/redhat/`, `.claude-plugin/`).
 
 ## Files
 
@@ -34,8 +34,12 @@ Inputs:
 
 - `marketplace/rh-agentic-collection.yml` — discovery, `ref`, Soundcheck, MCP scorecards
 - `plugins/redhat/<plugin>/` — `skills/`, `README.md`, `mcp.json`
-- `claude-marketplace/marketplace.json` — Claude install metadata
+- `.claude-plugin/marketplace.json` — Claude install metadata
+- `.agents/plugins/marketplace.json` — Codex / ChatGPT plugins install metadata
+- `.cursor-plugin/marketplace.json` — Cursor install metadata
 - `docs/mcp.json` — optional titles/tools overlay by **mcp.json server key** (not Compass `mcp_evaluations[].name`)
+
+The Install panel renders five sections per plugin: Direct, Lola, Claude Code, Codex, Cursor.
 
 There is **no** generate-time `git clone` and **no** ABEval `eval/` input. Plugins whose marketplace `path` is not on disk are omitted.
 

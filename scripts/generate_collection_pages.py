@@ -565,13 +565,19 @@ def _render_agents_tab(
 
 
 def _render_install_block(plugin_entry: Dict[str, Any]) -> str:
-    """Hub-native install paths: git tree, Lola, Claude Code marketplace."""
+    """Hub-native install paths: git tree, Lola, Claude Code, Codex, Cursor."""
     install = plugin_entry.get("install") or {}
     hub_url = html.escape(str(install.get("hub_url") or ""), quote=True)
     lola = install.get("lola") or {}
     claude = install.get("claude") or {}
+    codex = install.get("codex") or {}
+    cursor = install.get("cursor") or {}
     lola_cmd = html.escape(str(lola.get("command") or f"lola install -f {plugin_entry.get('name') or ''}"))
     claude_json = html.escape(str(claude.get("marketplace_json_url") or ""), quote=True)
+    codex_json = html.escape(str(codex.get("marketplace_json_url") or ""), quote=True)
+    codex_cmd = html.escape(str(codex.get("command") or ""))
+    cursor_json = html.escape(str(cursor.get("marketplace_json_url") or ""), quote=True)
+    cursor_path = html.escape(str(cursor.get("source_path") or ""))
     plugin_name = html.escape(str(claude.get("plugin_name") or plugin_entry.get("name") or ""))
     parts = [
         "<h2>Install</h2>",
@@ -601,12 +607,45 @@ def _render_install_block(plugin_entry: Dict[str, Any]) -> str:
     if claude_json:
         parts.append(
             f'<p>Marketplace manifest: <a class="collection-inline-link" href="{claude_json}" '
-            'target="_blank" rel="noopener noreferrer">claude-marketplace/marketplace.json</a></p>'
+            'target="_blank" rel="noopener noreferrer">.claude-plugin/marketplace.json</a></p>'
         )
     parts.append(
         f"<p>Install plugin <code>{plugin_name}</code> from that marketplace "
         f"(git-subdir path on the hub).</p>"
     )
+    parts.extend(
+        [
+            "</div></details>",
+            '<details class="install-accordion-item">',
+            '<summary class="install-accordion-header">4. Codex / ChatGPT plugins</summary>',
+            '<div class="install-accordion-body collection-prose">',
+        ]
+    )
+    if codex_cmd:
+        parts.append(f"<pre><code>{codex_cmd}</code></pre>")
+    if codex_json:
+        parts.append(
+            f'<p>Marketplace manifest: <a class="collection-inline-link" href="{codex_json}" '
+            'target="_blank" rel="noopener noreferrer">.agents/plugins/marketplace.json</a></p>'
+        )
+    parts.extend(
+        [
+            "</div></details>",
+            '<details class="install-accordion-item">',
+            '<summary class="install-accordion-header">5. Cursor</summary>',
+            '<div class="install-accordion-body collection-prose">',
+        ]
+    )
+    if cursor_json:
+        parts.append(
+            f'<p>Marketplace manifest: <a class="collection-inline-link" href="{cursor_json}" '
+            'target="_blank" rel="noopener noreferrer">.cursor-plugin/marketplace.json</a></p>'
+        )
+    if cursor_path:
+        parts.append(
+            f"<p>Add this repository as a marketplace in Cursor, then install "
+            f"<code>{plugin_name}</code> (relative source path <code>{cursor_path}</code>).</p>"
+        )
     parts.append("</div></details></div>")
     return "".join(parts)
 
