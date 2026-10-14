@@ -6,12 +6,20 @@ so authenticated or dynamic-URL MCP servers cannot be declared as
 streamable-http. This process speaks MCP stdio to the client and POSTs
 Streamable HTTP upstream.
 
+Accepts both newline-delimited JSON (Claude/Cursor) and MCP Content-Length
+frames (Codex). Replies using the same framing as the inbound message.
+
+If a client copies mcp.json env as the literal ``${AAP_MCP_SERVER}`` (Codex
+plugin spawn), this process treats that as unset and recovers the real
+value from parent ``/proc/<pid>/environ`` when readable (Linux).
+
 Each plugin pack must ship its own copy under scripts/ (PLUGIN_ROOT cannot
 reach another pack). Keep rh-sre, rh-automation, and rh-ai-engineer in sync.
 
 Environment (first non-empty wins):
   URL:   MCP_HTTP_URL | AAP_MCP_SERVER | AI_OBSERVABILITY_MCP_URL
   Token: MCP_HTTP_TOKEN | AAP_API_TOKEN  (optional Bearer; required for AAP)
+  Debug: AAP_PROXY_DEBUG_LOG  (optional path; unset means no debug file)
 """
 from __future__ import annotations
 
@@ -25,6 +33,7 @@ import sys
 import urllib.error
 import urllib.parse
 import urllib.request
+from pathlib import Path
 
 
 _ENDPOINT_PATH = re.compile(r"^[a-zA-Z0-9_\-]+(/[a-zA-Z0-9_\-]+)*$")
@@ -33,10 +42,17 @@ _METADATA_HOSTS = {
     "metadata.goog",
     "metadata.internal",
 }
+_MAX_FRAME_BYTES = 16 * 1024 * 1024
+_DEBUG_LOG = os.environ.get("AAP_PROXY_DEBUG_LOG", "").strip()
+_PLACEHOLDER = re.compile(r"^\$\{([A-Za-z_][A-Za-z0-9_]*)\}$")
 
 
 class SSRFValidationError(Exception):
     """Raised when the configured upstream target fails security checks."""
+
+
+class StdioFrameError(Exception):
+    """Raised when the client sends an invalid stdio MCP frame."""
 
 
 class _NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -45,6 +61,64 @@ class _NoRedirect(urllib.request.HTTPRedirectHandler):
 
 
 _OPENER = urllib.request.build_opener(_NoRedirect())
+
+
+def _debug(message: str) -> None:
+    if not _DEBUG_LOG:
+        return
+    try:
+        parent = os.path.dirname(_DEBUG_LOG)
+        if parent:
+            os.makedirs(parent, exist_ok=True)
+        with open(_DEBUG_LOG, "a", encoding="utf-8") as handle:
+            handle.write(message + "\n")
+    except OSError:
+        pass
+
+
+def _looks_unexpanded(value: str) -> bool:
+    return bool(_PLACEHOLDER.fullmatch(value.strip()))
+
+
+def _parse_proc_environ(pid: int) -> dict[str, str]:
+    raw = Path(f"/proc/{pid}/environ").read_bytes()
+    parsed: dict[str, str] = {}
+    for item in raw.split(b"\0"):
+        if b"=" not in item:
+            continue
+        key, value = item.split(b"=", 1)
+        parsed[key.decode("utf-8", "replace")] = value.decode("utf-8", "replace")
+    return parsed
+
+
+def _env_from_parents(name: str) -> str:
+    """Recover an env var Codex copied as a literal ${NAME} placeholder."""
+    pid = os.getppid()
+    for _ in range(8):
+        if pid <= 1:
+            break
+        try:
+            value = _parse_proc_environ(pid).get(name, "").strip()
+        except OSError:
+            break
+        if value and not _looks_unexpanded(value):
+            return value
+        try:
+            pid = int(Path(f"/proc/{pid}/stat").read_text().split()[3])
+        except (OSError, IndexError, ValueError):
+            break
+    return ""
+
+
+def _resolve_env(name: str) -> str:
+    value = os.environ.get(name, "").strip()
+    if value and not _looks_unexpanded(value):
+        return value
+    recovered = _env_from_parents(name)
+    if recovered:
+        os.environ[name] = recovered
+        return recovered
+    return ""
 
 
 def sanitize_endpoint_path(endpoint_path: str) -> str:
@@ -56,18 +130,19 @@ def sanitize_endpoint_path(endpoint_path: str) -> str:
 
 def resolve_upstream() -> tuple[str, str]:
     url = (
-        os.environ.get("MCP_HTTP_URL", "").strip()
-        or os.environ.get("AAP_MCP_SERVER", "").strip()
-        or os.environ.get("AI_OBSERVABILITY_MCP_URL", "").strip()
+        _resolve_env("MCP_HTTP_URL")
+        or _resolve_env("AAP_MCP_SERVER")
+        or _resolve_env("AI_OBSERVABILITY_MCP_URL")
     )
-    token = (
-        os.environ.get("MCP_HTTP_TOKEN", "").strip()
-        or os.environ.get("AAP_API_TOKEN", "").strip()
-    )
-    using_aap = bool(os.environ.get("AAP_MCP_SERVER", "").strip()) and not os.environ.get(
-        "MCP_HTTP_URL", ""
-    ).strip()
+    token = _resolve_env("MCP_HTTP_TOKEN") or _resolve_env("AAP_API_TOKEN")
+    using_aap = bool(_resolve_env("AAP_MCP_SERVER")) and not _resolve_env("MCP_HTTP_URL")
     if not url:
+        child = os.environ.get("AAP_MCP_SERVER", "")
+        if _looks_unexpanded(child):
+            raise SSRFValidationError(
+                "AAP_MCP_SERVER is the unexpanded placeholder ${AAP_MCP_SERVER}; "
+                "the client did not substitute plugin env and parent env was not readable."
+            )
         raise SSRFValidationError(
             "Set MCP_HTTP_URL (or AAP_MCP_SERVER / AI_OBSERVABILITY_MCP_URL)."
         )
@@ -155,7 +230,7 @@ def assert_host_allowed(host: str, port: int | None, *, allow_cleartext: bool) -
 
 
 def sse_or_json_messages(body: bytes, content_type: str) -> list[bytes]:
-    """Turn an HTTP body into newline-delimited JSON-RPC payloads."""
+    """Turn an HTTP body into JSON-RPC payloads."""
     if not body.strip():
         return []
     ctype = content_type.lower()
@@ -203,22 +278,64 @@ def _jsonrpc_id(payload: bytes) -> object:
     return None
 
 
-def _write_stdout_messages(messages: list[bytes]) -> None:
+def _parse_content_length(header_line: bytes) -> int:
+    try:
+        length = int(header_line.split(b":", 1)[1].strip())
+    except (IndexError, ValueError) as exc:
+        raise StdioFrameError("Invalid Content-Length header.") from exc
+    if length < 0 or length > _MAX_FRAME_BYTES:
+        raise StdioFrameError("Content-Length out of range.")
+    return length
+
+
+async def read_stdio_message(reader: asyncio.StreamReader) -> tuple[bytes, str] | None:
+    """Read one MCP stdio message: Content-Length frame or NDJSON line."""
+    while True:
+        line = await reader.readline()
+        if not line:
+            return None
+        stripped = line.strip()
+        if stripped.lower().startswith(b"content-length:"):
+            length = _parse_content_length(stripped)
+            while True:
+                header = await reader.readline()
+                if not header:
+                    return None
+                if header in (b"\n", b"\r\n", b"\r"):
+                    break
+                if header.strip().lower().startswith(b"content-length:"):
+                    length = _parse_content_length(header)
+            try:
+                body = await reader.readexactly(length)
+            except asyncio.IncompleteReadError as exc:
+                raise StdioFrameError("Incomplete Content-Length body.") from exc
+            return body, "content-length"
+        if stripped:
+            return stripped, "ndjson"
+
+
+def _write_stdout_messages(messages: list[bytes], framing: str) -> None:
     for message in messages:
-        sys.stdout.buffer.write(message)
-        sys.stdout.buffer.write(b"\n")
+        if framing == "content-length":
+            header = f"Content-Length: {len(message)}\r\n\r\n".encode("ascii")
+            sys.stdout.buffer.write(header)
+            sys.stdout.buffer.write(message)
+        else:
+            sys.stdout.buffer.write(message)
+            sys.stdout.buffer.write(b"\n")
     if messages:
         sys.stdout.buffer.flush()
 
 
-def _write_jsonrpc_error(rpc_id: object, message: str) -> None:
+def _write_jsonrpc_error(rpc_id: object, message: str, framing: str) -> None:
     error = {
         "jsonrpc": "2.0",
         "id": rpc_id,
         "error": {"code": -32000, "message": message},
     }
     _write_stdout_messages(
-        [json.dumps(error, separators=(",", ":")).encode("utf-8")]
+        [json.dumps(error, separators=(",", ":")).encode("utf-8")],
+        framing,
     )
 
 
@@ -228,6 +345,7 @@ class HttpMcpProxy:
         self.endpoint_path = sanitize_endpoint_path(endpoint_path)
         self.session_id: str | None = None
         self.protocol_version: str | None = None
+        self.framing = "ndjson"
 
     def validate_and_build_url(self) -> str:
         target_url = compose_upstream_url(self.server_env, self.endpoint_path)
@@ -291,14 +409,20 @@ class HttpMcpProxy:
         reader = asyncio.StreamReader()
         protocol = asyncio.StreamReaderProtocol(reader)
         await loop.connect_read_pipe(lambda: protocol, sys.stdin)
+        _debug(f"proxy start endpoint={self.endpoint_path}")
 
         while True:
-            line = await reader.readline()
-            if not line:
+            try:
+                incoming = await read_stdio_message(reader)
+            except StdioFrameError as err:
+                sys.stderr.write(f"Proxy stdio framing error: {err}\n")
+                _debug(f"framing error: {err}")
                 break
-            payload = line.strip()
-            if not payload:
-                continue
+            if incoming is None:
+                break
+            payload, framing = incoming
+            self.framing = framing
+            _debug(f"frame={framing} bytes={len(payload)}")
             rpc_id = _jsonrpc_id(payload)
             self._note_protocol_version(payload)
             try:
@@ -307,15 +431,15 @@ class HttpMcpProxy:
                 )
             except urllib.error.HTTPError as err:
                 sys.stderr.write(f"Proxy HTTP Error {err.code}: {err.reason}\n")
-                _write_jsonrpc_error(rpc_id, f"HTTP {err.code}: {err.reason}")
+                _write_jsonrpc_error(rpc_id, f"HTTP {err.code}: {err.reason}", framing)
                 continue
             except (urllib.error.URLError, TimeoutError, OSError) as err:
                 sys.stderr.write(f"Proxy Network Error: {err}\n")
-                _write_jsonrpc_error(rpc_id, "Network error contacting upstream MCP")
+                _write_jsonrpc_error(rpc_id, "Network error contacting upstream MCP", framing)
                 continue
             messages = sse_or_json_messages(body, content_type)
             if messages:
-                _write_stdout_messages(messages)
+                _write_stdout_messages(messages, framing)
 
 
 if __name__ == "__main__":
@@ -328,4 +452,5 @@ if __name__ == "__main__":
         asyncio.run(proxy.start())
     except SSRFValidationError as exc:
         sys.stderr.write(f"SSRF Security Error: {exc}\n")
+        _debug(f"ssrf: {exc}")
         sys.exit(1)

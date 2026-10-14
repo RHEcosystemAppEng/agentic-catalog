@@ -1,6 +1,6 @@
 ---
 name: red-hat-security-mcp-setup
-description: Add the Red Hat Security MCP server at the project or user level for the current tool. Configures the HTTP transport endpoint and explains the Red Hat Customer Portal SSO browser login flow.
+description: Add the Red Hat Security MCP server at the project or user level for the current tool. Configures stdio transport via npx mcp-remote and explains the Red Hat Customer Portal SSO browser login flow.
 license: Apache-2.0
 user_invocable: true
 model: inherit
@@ -15,7 +15,9 @@ at either the project or user level.
 
 ## Prerequisites
 
-A Red Hat account at [console.redhat.com](https://console.redhat.com).
+- A Red Hat account at [console.redhat.com](https://console.redhat.com).
+- Node.js with `npx` on PATH (the server is launched as
+  `npx -y mcp-remote https://security-mcp.api.redhat.com/mcp`).
 
 ## When to Use This Skill
 
@@ -47,6 +49,11 @@ Ask the user to choose one:
 - **User-level** — every workspace opened with the current tool gets the
   server.
 
+For **Codex**, project-level `.mcp.json` is not loaded. Use the user-level
+`~/.codex/config.toml` target (or rely on the plugin's own `mcp.json` after
+install). If the user asks for project-level on Codex, explain that and use
+the Codex user-level file instead.
+
 ## Step 2 — Detect the current tool and resolve the target file
 
 Determine which agentic tool is currently executing this skill, then
@@ -58,6 +65,7 @@ skill's `skills/` folder).
 |---|---|---|---|
 | Claude Code | `com.anthropic.claude-code` | `<project>/.mcp.json` | `~/.claude/.mcp.json` |
 | Cursor | `com.cursor.editor` | `<project>/.cursor/mcp.json` | `~/.cursor/mcp.json` |
+| Codex | `com.openai.codex` | *(not used — see Step 1)* | `~/.codex/config.toml` |
 | Other / unknown | *(plugin root)* | `<project>/.mcp.json` | `~/.mcp.json` |
 
 ```
@@ -82,8 +90,9 @@ Look for the `red-hat-security` entry to merge, in this order:
 {
   "mcpServers": {
     "red-hat-security": {
-      "type": "http",
-      "url": "https://security-mcp.api.redhat.com/mcp"
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://security-mcp.api.redhat.com/mcp"]
     }
   }
 }
@@ -94,10 +103,26 @@ edit it in place.
 
 ## Step 4 — Merge the entry into the target file
 
-If `$MCP_FILE` (resolved in Step 2) exists: read it and merge in the
-`red-hat-security` entry found in Step 3, without removing any other
-servers already present.
-If it does not exist: create it, wrapping the entry in `{"mcpServers": {...}}`.
+**JSON targets** (Claude, Cursor, unknown): if `$MCP_FILE` exists, read it
+and merge in the `red-hat-security` stdio entry found in Step 3, without
+removing any other servers already present. If it does not exist, create it,
+wrapping the entry in `{"mcpServers": {...}}`. If an older HTTP /
+`streamable-http` `red-hat-security` entry is present, replace it with the
+stdio `npx` / `mcp-remote` entry.
+
+**Codex `~/.codex/config.toml`:** merge a TOML table (not JSON). If
+`[mcp_servers.red-hat-security]` exists, replace it. Append:
+
+```toml
+[mcp_servers.red-hat-security]
+command = "npx"
+args = ["-y", "mcp-remote", "https://security-mcp.api.redhat.com/mcp"]
+```
+
+Do not set `enabled = false`. Do not add headers, env, or tokens. If a
+user-level Codex server with the same name would shadow the plugin MCP,
+keep this stdio block and tell the user to restart Codex (including the
+app-server daemon) so only one `red-hat-security` is active.
 
 Write the result back to `$MCP_FILE`.
 
@@ -106,7 +131,9 @@ Write the result back to `$MCP_FILE`.
 Tell the user:
 
 ```
-Red Hat Security MCP server added.
+Red Hat Security MCP server added (stdio via npx mcp-remote).
+
+Prerequisite: Node.js with npx on PATH.
 
 Authentication: Red Hat Customer Portal SSO
 
@@ -119,7 +146,8 @@ If the browser does not open automatically, look for an authentication URL
 printed in the MCP server output and open it manually.
 
 Restart the agentic tool (or reload MCP servers) for the new configuration
-to take effect.
+to take effect. On Codex, quit the TUI and ensure the app-server daemon
+restarts if /mcp still shows the old HTTP server.
 ```
 
 ## Notes
@@ -128,8 +156,8 @@ to take effect.
   is the backend used by `/red-hat-cve-explainer` when `get_cve_by_id` and
   related tools are available.
 - An active Red Hat subscription is required to access the full dataset.
-- Do not add `headers` or `env` auth fields to the target MCP config -- the
-  server handles authentication itself via the browser SSO flow.
+- Do not add `headers` or `env` auth fields to the target MCP config --
+  `mcp-remote` handles authentication via the browser SSO flow.
 - The table in Step 2 covers the tools this plugin ships instructions for.
   If a tool's exact config path is unconfirmed, say so explicitly instead
   of guessing silently.

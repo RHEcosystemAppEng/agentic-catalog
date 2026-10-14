@@ -33,7 +33,7 @@ If the request doesn't clearly match one skill, ask the user to clarify.
 
 One MCP server may be available in local runtimes. Skills wrap it — do not call its tools directly.
 
-- **red-hat-security** — Red Hat Security API: CVE metadata, advisories, and errata data. Uses Red Hat Customer Portal browser SSO — no credentials or env vars required.
+- **red-hat-security** — Red Hat Security API: CVE metadata, advisories, and errata data. Stdio via `npx mcp-remote`; Red Hat Customer Portal browser SSO — no credentials or env vars required. Requires Node.js with `npx` on PATH.
 
 Skills fall back to `WebFetch` on public Red Hat documentation when this server is unavailable.
 

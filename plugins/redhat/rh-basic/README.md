@@ -18,6 +18,7 @@ Agentic skill pack for Red Hat customers provides lightweight, self-contained sk
 ### Prerequisites
 
 - Claude Code CLI or IDE extension
+- Node.js with `npx` on PATH (Security MCP is launched via `npx mcp-remote`)
 - A Red Hat account ([console.redhat.com](https://console.redhat.com)) for MCP authentication (optional)
 
 ### Installation (Lola)
@@ -29,7 +30,7 @@ lola install -f rh-basic
 
 ### MCP Setup (optional but recommended)
 
-Skills work without MCP configured, falling back to public Red Hat documentation. To enable live CVE and advisory data, run `/red-hat-security-mcp-setup` after installation — it uses Red Hat Customer Portal browser SSO and requires no API credentials.
+Skills work without MCP configured, falling back to public Red Hat documentation. The plugin ships `red-hat-security` as stdio (`npx -y mcp-remote https://security-mcp.api.redhat.com/mcp`). Agents that load plugin `mcp.json` (including Codex) mount it on install. If your tool does not, run `/red-hat-security-mcp-setup` — SSO is still Red Hat Customer Portal browser login, with no API credentials.
 
 ## Skills
 
@@ -101,17 +102,17 @@ Fetches and installs all skills from Agentic skill pack for Red Hat customers in
 
 ### 6. **red-hat-security-mcp-setup** - Red Hat Security MCP Configuration
 
-Adds the Red Hat Security MCP server to the current project's `.mcp.json` using HTTP transport and browser SSO.
+Adds the Red Hat Security MCP server to the current tool's MCP config using stdio `npx mcp-remote` and browser SSO.
 
 **Use when:**
 - "Set up the Red Hat Security MCP server"
 - "Add red-hat-security to my MCP config"
 
 **What it does:**
-- Locates or creates `.mcp.json` in the project root
-- Merges the `red-hat-security` HTTP transport entry without removing existing servers
+- Locates or creates the tool's MCP config (project `.mcp.json` / `.cursor/mcp.json`, or Codex `~/.codex/config.toml`)
+- Merges the `red-hat-security` stdio `npx mcp-remote` entry without removing existing servers
 - Explains the Red Hat Customer Portal SSO browser login flow
-- Advises the user to restart Claude Code for the new server to take effect
+- Advises the user to restart the agent (Codex: including the app-server daemon) for the new server to take effect
 
 ## Skills Decision Guide
 
@@ -132,8 +133,8 @@ Provides CVE, advisory, and errata data from the Red Hat Security API.
 
 - CVE metadata and severity — used by `red-hat-cve-explainer` and `red-hat-support-severity`
 - Advisory details (RHSA/RHBA/RHEA)
-- **Transport:** HTTP (`https://security-mcp.api.redhat.com/mcp`)
-- **Authentication:** Red Hat Customer Portal SSO (browser login, no env vars required)
+- **Transport:** stdio via `npx -y mcp-remote https://security-mcp.api.redhat.com/mcp` (requires Node.js / `npx`)
+- **Authentication:** Red Hat Customer Portal SSO (browser login on first tool call, no env vars required)
 
 **Skills fall back to `WebFetch` on Red Hat documentation if MCP is unavailable** — you do not need MCP configured to use this pack.
 
