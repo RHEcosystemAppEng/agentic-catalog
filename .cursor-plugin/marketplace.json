@@ -31,6 +31,12 @@
       "source": "plugins/redhat/rh-virt",
       "description": "Points to all AI skill catalog entities in the rh-virt agentic pack for Red Hat OpenShift Virtualization management.",
       "version": "1.0"
+    },
+    {
+      "name": "rh-telco",
+      "source": "plugins/redhat/rh-telco",
+      "description": "Points to all AI skill catalog entities in the rh-telco plugin.",
+      "version": "0.0.1"
     }
   ]
 }

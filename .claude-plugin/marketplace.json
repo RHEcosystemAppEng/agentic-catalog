@@ -19,7 +19,7 @@
         "url": "https://github.com/RHEcosystemAppEng/agentic-catalog.git",
         "path": "plugins/redhat/ocp-admin",
         "ref": "rc/v1.0.0",
-        "sha": "8a4b521140df5eb3ba967f5b85dfb0ddea05ec57"
+        "sha": "65ed65d378d128e0018f6680ff6a44a1bb00431c"
       },
       "homepage": "https://github.com/RHEcosystemAppEng/agentic-catalog.git"
     },
@@ -35,7 +35,7 @@
         "url": "https://github.com/RHEcosystemAppEng/agentic-catalog.git",
         "path": "plugins/redhat/rh-basic",
         "ref": "rc/v1.0.0",
-        "sha": "8a4b521140df5eb3ba967f5b85dfb0ddea05ec57"
+        "sha": "65ed65d378d128e0018f6680ff6a44a1bb00431c"
       },
       "homepage": "https://github.com/RHEcosystemAppEng/agentic-catalog.git"
     },
@@ -51,7 +51,7 @@
         "url": "https://github.com/RHEcosystemAppEng/agentic-catalog.git",
         "path": "plugins/redhat/rh-sre",
         "ref": "rc/v1.0.0",
-        "sha": "8a4b521140df5eb3ba967f5b85dfb0ddea05ec57"
+        "sha": "65ed65d378d128e0018f6680ff6a44a1bb00431c"
       },
       "homepage": "https://github.com/RHEcosystemAppEng/agentic-catalog.git"
     },
@@ -67,7 +67,23 @@
         "url": "https://github.com/RHEcosystemAppEng/agentic-catalog.git",
         "path": "plugins/redhat/rh-virt",
         "ref": "rc/v1.0.0",
-        "sha": "8a4b521140df5eb3ba967f5b85dfb0ddea05ec57"
+        "sha": "65ed65d378d128e0018f6680ff6a44a1bb00431c"
+      },
+      "homepage": "https://github.com/RHEcosystemAppEng/agentic-catalog.git"
+    },
+    {
+      "name": "rh-telco",
+      "description": "Points to all AI skill catalog entities in the rh-telco plugin.\n",
+      "author": {
+        "name": "Red Hat"
+      },
+      "category": "development",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/RHEcosystemAppEng/agentic-catalog.git",
+        "path": "plugins/redhat/rh-telco",
+        "ref": "rc/v1.0.0",
+        "sha": "65ed65d378d128e0018f6680ff6a44a1bb00431c"
       },
       "homepage": "https://github.com/RHEcosystemAppEng/agentic-catalog.git"
     }
