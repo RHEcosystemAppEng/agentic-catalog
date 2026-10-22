@@ -12,6 +12,7 @@ modules:
   repository: https://github.com/RHEcosystemAppEng/agentic-catalog.git
   path: plugins/redhat/ocp-admin
   ref: cafbf3251623dda9c737e805e4d31249bf9cbef1
+  icon: "☸️"
   tags:
   - ai-skill
   - openshift
@@ -77,6 +78,7 @@ modules:
   repository: https://github.com/RHEcosystemAppEng/agentic-catalog.git
   path: plugins/redhat/rh-basic
   ref: cafbf3251623dda9c737e805e4d31249bf9cbef1
+  icon: "https://static.redhat.com/libs/redhat/brand-assets/latest/corp/logo--hat-only.svg"
   tags:
   - ai-skill
   - red-hat
@@ -130,6 +132,7 @@ modules:
   repository: https://github.com/RHEcosystemAppEng/agentic-catalog.git
   path: plugins/redhat/rh-sre
   ref: cafbf3251623dda9c737e805e4d31249bf9cbef1
+  icon: "🔧"
   tags:
   - ai-skill
   - sre
@@ -192,6 +195,7 @@ modules:
   repository: https://github.com/RHEcosystemAppEng/agentic-catalog.git
   path: plugins/redhat/rh-virt
   ref: cafbf3251623dda9c737e805e4d31249bf9cbef1
+  icon: "🖥️"
   tags:
   - ai-skill
   - virtualization
@@ -231,6 +235,7 @@ modules:
   repository: https://github.com/RHEcosystemAppEng/agentic-catalog.git
   path: plugins/redhat/rh-telco
   ref: cafbf3251623dda9c737e805e4d31249bf9cbef1
+  icon: "📡"
   tags:
   - ai-skill
   - telco

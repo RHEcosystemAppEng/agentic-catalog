@@ -262,7 +262,6 @@ function createPluginCard(pluginEntry) {
     const es = pluginEntry.evaluation_summary && typeof pluginEntry.evaluation_summary === 'object'
         ? pluginEntry.evaluation_summary
         : null;
-    const isSoundcheck = Boolean(es && es.evaluation_source === 'soundcheck');
     const install = pluginEntry.install && typeof pluginEntry.install === 'object' ? pluginEntry.install : {};
 
     // Header row (title + eval badge)
@@ -286,22 +285,6 @@ function createPluginCard(pluginEntry) {
 
     const badges = document.createElement('div');
     badges.className = 'plugin-card-badges';
-    const addInstallBadge = (href, label) => {
-        if (!href) return;
-        const link = document.createElement('a');
-        link.className = 'plugin-eval-badge is-install';
-        link.href = String(href);
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
-        link.textContent = label;
-        link.addEventListener('click', (event) => event.stopPropagation());
-        badges.appendChild(link);
-    };
-    addInstallBadge(install.hub_url, 'GitHub');
-    addInstallBadge(install.lola && install.lola.marketplace_raw_url, 'Lola');
-    addInstallBadge(install.claude && install.claude.marketplace_json_url, 'Claude');
-    addInstallBadge(install.codex && install.codex.marketplace_json_url, 'Codex');
-    addInstallBadge(install.cursor && install.cursor.marketplace_json_url, 'Cursor');
     {
         const badge = document.createElement('span');
         badge.className = 'plugin-eval-badge';
@@ -324,6 +307,29 @@ function createPluginCard(pluginEntry) {
         headerRow.appendChild(badges);
     }
     div.appendChild(headerRow);
+
+    // Install links: their own full-width row, not fighting the title for space.
+    const installRow = document.createElement('div');
+    installRow.className = 'plugin-card-install-row';
+    const addInstallBadge = (href, label) => {
+        if (!href) return;
+        const link = document.createElement('a');
+        link.className = 'plugin-eval-badge is-install';
+        link.href = String(href);
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.textContent = label;
+        link.addEventListener('click', (event) => event.stopPropagation());
+        installRow.appendChild(link);
+    };
+    addInstallBadge(install.hub_url, 'GitHub');
+    addInstallBadge(install.lola && install.lola.marketplace_raw_url, 'Lola');
+    addInstallBadge(install.claude && install.claude.marketplace_json_url, 'Claude');
+    addInstallBadge(install.codex && install.codex.marketplace_json_url, 'Codex');
+    addInstallBadge(install.cursor && install.cursor.marketplace_json_url, 'Cursor');
+    if (installRow.childNodes.length > 0) {
+        div.appendChild(installRow);
+    }
 
     const meta = document.createElement('p');
     meta.className = 'plugin-meta';
@@ -374,19 +380,21 @@ function createPluginCard(pluginEntry) {
     addChip('mcp', `${mcpCount} MCP`);
     div.appendChild(chips);
 
-    if (isSoundcheck && (Number(es.total_checks || 0) > 0 || Number(es.mcp_evaluation_count || 0) > 0)) {
+    {
         const divider = document.createElement('div');
         divider.className = 'plugin-eval-divider';
         div.appendChild(divider);
 
         const evidenceLine = document.createElement('p');
         evidenceLine.className = 'plugin-eval-evidence';
-        if (Number(es.total_checks || 0) > 0) {
+        if (Number(es?.total_checks || 0) > 0) {
             evidenceLine.textContent =
                 `Soundcheck ${es.passed_count || 0} pass · ${es.failed_count || 0} fail (${es.total_checks} checks)`;
-        } else {
+        } else if (Number(es?.mcp_evaluation_count || 0) > 0) {
             evidenceLine.textContent =
                 `MCP scorecards: ${es.mcp_evaluation_count} (no skill-track Soundcheck on this plugin)`;
+        } else {
+            evidenceLine.textContent = 'No evaluation data yet';
         }
         div.appendChild(evidenceLine);
 

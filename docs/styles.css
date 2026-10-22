@@ -500,6 +500,13 @@ section.collapsed .grid {
     white-space: nowrap;
 }
 
+.plugin-card-install-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.2rem;
+}
+
 .plugin-card-title {
     display: flex;
     align-items: flex-start;
@@ -593,6 +600,10 @@ section.collapsed .grid {
     color: #4a7fd7;
     background: #ffffff;
     border-color: #a4c2f4;
+    border-width: 1px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.3rem 0.65rem;
     text-decoration: none;
     cursor: pointer;
 }
