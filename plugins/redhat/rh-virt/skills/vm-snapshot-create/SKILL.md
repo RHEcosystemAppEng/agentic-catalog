@@ -487,3 +487,4 @@ Agent: [Step 8: Creates snapshot]
 
 You can now safely upgrade the database. If the upgrade fails, restore using the command above.
 ```
+

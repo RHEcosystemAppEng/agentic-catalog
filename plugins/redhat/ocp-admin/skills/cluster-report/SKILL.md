@@ -16,7 +16,7 @@ description: |
 license: Apache-2.0
 model: inherit
 color: cyan
-allowed-tools: configuration_contexts_list resources_get nodes_top resources_list namespaces_list pods_list
+allowed-tools: Bash configuration_contexts_list resources_get nodes_top resources_list namespaces_list pods_list
 metadata:
   mcp_server: openshift-administration
   mcp_tools_priority: true
@@ -441,3 +441,4 @@ Would you like to:
 8. Write manifest; dev-k8s has `cluster_type: "kubernetes"`, `openshift_version: null`
 9. Run pipeline, render report
 10. dev-k8s shown as "K8s" in version column
+

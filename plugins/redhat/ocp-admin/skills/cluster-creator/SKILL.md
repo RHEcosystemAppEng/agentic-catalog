@@ -132,7 +132,6 @@ TaskCreate(subject: "#12 Retrieve credentials", description: "Download kubeconfi
 
 ### Step 2: Gather Cluster Requirements
 
-
 **Context**: This skill creates SELF-MANAGED clusters (OCP, SNO) via Assisted Installer. NOT for ROSA/ARO/OSD (use cluster-inventory for those).
 
 Use AskUserQuestion to collect configuration:
@@ -498,3 +497,4 @@ This skill performs critical, irreversible operations requiring explicit user co
 **Result**: SNO deployed in ~45 min. All artifacts in `/tmp/edge-site-01.edge.local/`: kubeconfig, kubeadmin-password, SSH keys, discovery.iso, ISO URL, metadata
 
 **More Examples**: See [examples.md](references/examples.md) for HA, static networking, multi-cluster, and air-gapped configurations.
+

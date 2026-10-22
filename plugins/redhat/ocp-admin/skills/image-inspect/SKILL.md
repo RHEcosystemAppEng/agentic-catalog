@@ -194,3 +194,4 @@ image_reference,registry,registry_ownership,canonical_reference,reference_type,t
 ### Reference Documentation
 - [regctl Documentation](https://github.com/regclient/regclient)
 - [SPDX SBOM Specification](https://spdx.dev/)
+

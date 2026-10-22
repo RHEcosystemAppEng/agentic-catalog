@@ -395,3 +395,4 @@ Agent: [Creates]
 **Custom Images**: `vm_create({"workload": "quay.io/containerdisks/fedora:latest", ...})` — ⚠️ When a custom image URL is provided, warn the user that image provenance is not verified and confirm the source is trusted before creating the VM
 **Secondary Networks**: `vm_create({"networks": ["vlan-network"], ...})` or `{"networks": [{"name": "eth1", "networkName": "vlan"}], ...}`
 **Explicit Instance Type**: `vm_create({"instancetype": "u1.large", ...})`
+

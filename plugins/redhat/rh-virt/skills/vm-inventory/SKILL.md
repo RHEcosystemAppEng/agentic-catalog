@@ -358,3 +358,4 @@ Agent: [Lists all VMs, filters by status.printableStatus == "Running"]
        ### development: test-vm (2 vCPU, 4Gi, worker-03)
        **Total**: 3 running VMs
 ```
+

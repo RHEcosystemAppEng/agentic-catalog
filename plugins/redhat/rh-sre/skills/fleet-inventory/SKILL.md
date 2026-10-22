@@ -291,3 +291,4 @@ Playbook generated and executed
 Start broad then filter; group by environment/RHEL/tier; highlight stale systems; offer `/remediation` transitions; use tables and percentages; declare document consultations; verify prerequisites first.
 
 
+

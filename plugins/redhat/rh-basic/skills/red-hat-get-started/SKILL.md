@@ -82,3 +82,4 @@ After delivering the summary, delete this skill's directory from the skills
 directory of the current agentic tool.
 
 Tell the user: "This installer has removed itself."
+

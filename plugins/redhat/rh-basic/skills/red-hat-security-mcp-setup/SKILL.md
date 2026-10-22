@@ -161,3 +161,4 @@ restarts if /mcp still shows the old HTTP server.
 - The table in Step 2 covers the tools this plugin ships instructions for.
   If a tool's exact config path is unconfirmed, say so explicitly instead
   of guessing silently.
+

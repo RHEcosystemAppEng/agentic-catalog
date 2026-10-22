@@ -68,3 +68,4 @@ Use ✅ for success, ❌ for failure, ⚠️ for partial (e.g. connected but err
 
 ### Reference Documentation
 - [Red Hat Lightspeed Documentation Overview](references/insights/README.md) - Lightspeed setup, CVE assessment, vulnerability logic
+

@@ -130,7 +130,8 @@ VALIDATE), always end with this notice on its own line:
   Read the matching reference guide, `cr-matching-heuristics.md`,
   `merge-conflict-resolution.md`, and `hub-template-handling.md`. For
   each CR type with a file in `cr-guidance/`, read it when processing
-  that CR.
+  that CR. Keep the partner's MachineConfigPool layout -- never adopt the
+  reference's example pools (see `cr-matching-heuristics.md`).
 - **VALIDATE** -- dry-run merged policies against hub.
   Read `references/validate-phases.md` before starting.
 

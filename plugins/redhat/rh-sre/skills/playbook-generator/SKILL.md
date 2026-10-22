@@ -384,3 +384,4 @@ All MCP tools are provided by the lightspeed-mcp server configured in `mcps.json
 3. Agent invokes playbook-generator skill → Generates production-ready playbook
 4. Agent provides execution guidance → User deploys playbook
 5. Agent invokes remediation-verifier skill → Confirms success
+

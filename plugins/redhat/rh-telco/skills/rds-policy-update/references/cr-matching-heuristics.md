@@ -27,6 +27,26 @@ One reference CR may map to multiple partner CRs (e.g. partner has 3
 SriovNetworkNodePolicy variants for different node types). A reference change
 may need to be replicated across all matches. Present all candidates to the user.
 
+## MachineConfigPool Layout
+
+The partner owns the MachineConfigPool layout: how many pools exist,
+their names, and the node selectors that bind per-pool CRs to them
+(PerformanceProfile `nodeSelector`, Tuned `machineConfigLabels`, NROP
+`machineConfigPoolSelector`). These come from the partner's policies,
+never from the reference, which ships only an *example* layout (Core
+ships `worker-1/2/3`). When the partner's layout differs, keep it and
+do not add the reference's example pools. Unlike a wave/policy move,
+this is deterministic -- do NOT ask which layout to use.
+
+Each partner pool still follows a reference pool configuration. Match
+each pool's per-pool CRs to a reference pool by role/intent (see
+PerformanceProfile below) and apply that reference pool's changes to
+them like any other matched CR, keeping them bound to the partner's
+pool name. A per-pool CR change is not N/A just because the reference
+binds it to its own example pools. If a partner pool matches no
+reference pool configuration, warn about it as a deviation -- do not
+create per-pool CRs to fill the gap.
+
 ## Per-GVK Matching Fields
 
 These per-GVK rules take precedence over the generic "same GVK + same

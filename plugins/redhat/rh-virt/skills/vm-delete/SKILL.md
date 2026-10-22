@@ -402,3 +402,4 @@ Show deletion scope without executing: Execute Step 1-2, skip Steps 3-4. User re
 
 ### Protected VM Label
 Automatic enforcement: If VM has `protected: "true"` label, refuse deletion in Step 1.2. Example YAML: `metadata.labels.protected: "true"`
+

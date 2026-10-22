@@ -492,3 +492,4 @@ Type `pre-upgrade-snapshot` to confirm: _____"
 - ⚠️ All changes after 2026-02-18 10:00 have been lost
 
 To start: 'Start VM database-01 in namespace production'"
+

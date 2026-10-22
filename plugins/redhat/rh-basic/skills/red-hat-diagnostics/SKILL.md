@@ -103,3 +103,4 @@ Attach archives at [access.redhat.com/support](https://access.redhat.com/support
 - AAP troubleshooting: `WebFetch` -> `https://docs.redhat.com/en/documentation/red_hat_ansible_automation_platform/2.6/html/troubleshooting_ansible_automation_platform/diagnosing-the-problem`
 - OCP must-gather: `WebFetch` -> `https://docs.redhat.com/en/documentation/openshift_container_platform/4.17/html/support/gathering-cluster-data`
 - sos tool: `WebFetch` -> `https://access.redhat.com/solutions/3592`
+

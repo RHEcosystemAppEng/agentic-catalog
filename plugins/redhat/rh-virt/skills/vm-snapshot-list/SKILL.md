@@ -402,3 +402,4 @@ No snapshots exist for VM `test-vm` in namespace `dev`.
 **To create a snapshot:**
 "Create snapshot of VM test-vm"
 ```
+

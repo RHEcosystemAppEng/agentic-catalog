@@ -367,3 +367,4 @@ The summary output format is designed to be:
 - **Compact**: Minimal token usage
 - **Complete**: All resource categories represented
 - **Auditable**: Chronological order preserved
+

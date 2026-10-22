@@ -99,3 +99,4 @@ Applies to all Red Hat products (RHEL, OpenShift, Ansible, JBoss, Satellite, etc
 
 Use today's date from context to determine if support has already ended. State dates concretely ("ends May 31, 2025"), never relatively. If a version has no data, say so and list what versions do. For inventory queries, report per-system phase when possible.
 
+

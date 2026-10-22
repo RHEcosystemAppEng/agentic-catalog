@@ -414,3 +414,4 @@ To fix: AAP Web UI → Templates → [Template] → Edit → Options → ✓ Ena
 3. **Project sync** - Ensure project status is "successful" before execution
 4. **Credential types** - Template should have Machine (SSH) credential; Vault optional for encrypted playbooks
 5. **Naming convention** - Use descriptive names like "Remediate CVE-YYYY-NNNNN" for auditability
+

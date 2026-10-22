@@ -457,3 +457,4 @@ This skill performs operations that modify cluster state, requiring explicit use
 2. Presents communication map and draft rules for user review.
 3. Tier 2: Connects to the cluster via MCP, verifies pod labels, services, and existing policies. Temporarily applies draft policies, verifies all pods healthy, routes respond, and logs show no errors, then removes verification policies.
 4. Produces the final implementation plan with default-deny, per-pod rules, exceptions, verification results, and NIST alignment.
+

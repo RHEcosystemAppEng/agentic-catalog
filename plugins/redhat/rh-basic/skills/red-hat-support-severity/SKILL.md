@@ -80,3 +80,4 @@ SLAs are measured from case submission. For Sev 1/2, following up with a phone c
 ```
 
 Write for a sysadmin who needs to act now. If CVE lookup returns a severity, state it briefly ("Red Hat rates this CVE as Critical") and explain how it factored into the recommendation. Do not reproduce the full CVE explainer output.
+

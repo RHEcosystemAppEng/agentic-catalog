@@ -19,7 +19,6 @@ allowed-tools: job_templates_list job_templates_retrieve projects_list job_templ
 ---
 
 # AAP Playbook Executor Skill
-
 This skill executes Ansible remediation playbooks through AAP (Ansible Automation Platform) with full job management capabilities.
 
 **Integration with Remediation Skill**: The `/remediation` skill orchestrates this skill as part of its Step 5 (Execute Playbook) workflow. For standalone playbook execution, you can invoke this skill directly.
@@ -498,3 +497,4 @@ This skill executes code on production systems. **Explicit user confirmation is 
 - playbook-executor: Confirms execution on production systems is approved
 
 This two-step approval ensures user control over both what to run and when to run it.
+

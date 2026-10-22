@@ -278,3 +278,4 @@ Total Fixes: X package updates
 - **Orchestrate skills, don't call MCP tools directly**—skills handle docs and tools.
 - **Always ask for execution confirmation** before Step 5.
 - **Safety**: Test in non-prod first, back up systems, schedule maintenance windows, verify after execution.
+
