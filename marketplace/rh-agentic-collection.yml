@@ -11,13 +11,13 @@ modules:
   version: '1.0'
   repository: https://github.com/RHEcosystemAppEng/agentic-catalog.git
   path: plugins/redhat/ocp-admin
-  ref: 65ed65d378d128e0018f6680ff6a44a1bb00431c
+  ref: cafbf3251623dda9c737e805e4d31249bf9cbef1
   tags:
   - ai-skill
   - openshift
   - cluster-management
   - administration
-  content_hash: "sha256:546134e310cff2d0c7bfba9cb6f61eb51fdbc25390086046b059fd52a7bce434"
+  content_hash: "sha256:8fd4247ce55dfeca87be8dc15cbdf73da816b753adbc1bbd016b0875e136bfb1"
   mcp_evaluations:
   - name: assisted-installer
     entity_ref: mcpserver:ai5-marketplace/assisted-installer
@@ -25,7 +25,7 @@ modules:
     track_id: mcp-scorecard
     recommendation: pass
     source: soundcheck-api
-    evaluated_at: '2026-10-18T07:05:13.216526Z'
+    evaluated_at: '2026-10-22T08:46:51.829718Z'
     total_checks: 15
     soundcheck_levels_summary:
       Lead:
@@ -50,7 +50,7 @@ modules:
     track_id: mcp-scorecard
     recommendation: pass
     source: soundcheck-api
-    evaluated_at: '2026-10-18T07:05:13.216526Z'
+    evaluated_at: '2026-10-22T08:46:51.829718Z'
     total_checks: 15
     soundcheck_levels_summary:
       Lead:
@@ -76,13 +76,13 @@ modules:
   version: '1.0'
   repository: https://github.com/RHEcosystemAppEng/agentic-catalog.git
   path: plugins/redhat/rh-basic
-  ref: 65ed65d378d128e0018f6680ff6a44a1bb00431c
+  ref: cafbf3251623dda9c737e805e4d31249bf9cbef1
   tags:
   - ai-skill
   - red-hat
   - getting-started
   - support
-  content_hash: "sha256:bd1a26a38d77322c5773eaa7186a6fdb17788b2a58e94b2fcc00ae048235002b"
+  content_hash: "sha256:a506ad23266ed3647143d59e3d917d61c2fba95d3b7c446d214350ee1dd6710a"
   soundcheck_levels_summary:
     Foundational:
       pass: 2
@@ -103,7 +103,7 @@ modules:
     track_id: mcp-scorecard
     recommendation: pass
     source: soundcheck-api
-    evaluated_at: '2026-10-18T07:05:13.216526Z'
+    evaluated_at: '2026-10-22T08:46:51.829718Z'
     total_checks: 17
     soundcheck_levels_summary:
       Lead:
@@ -129,26 +129,26 @@ modules:
   version: '1.0'
   repository: https://github.com/RHEcosystemAppEng/agentic-catalog.git
   path: plugins/redhat/rh-sre
-  ref: 65ed65d378d128e0018f6680ff6a44a1bb00431c
+  ref: cafbf3251623dda9c737e805e4d31249bf9cbef1
   tags:
   - ai-skill
   - sre
   - monitoring
   - vulnerability-management
-  content_hash: "sha256:81f9430e5e30d83ec22ef03aee49634a8f2000d9828d2cb395ec2130a13f26f5"
+  content_hash: "sha256:2a507c2305d06c034aaf7c9c0569e8c83474cec31988b44ef3ce85e07678433a"
   soundcheck_levels_summary:
     Foundational:
-      pass: 16
-      fail: 3
-      total: 19
+      pass: 26
+      fail: 1
+      total: 27
     Trusted:
-      pass: 9
+      pass: 13
       fail: 0
-      total: 9
+      total: 13
     Certified:
-      pass: 14
-      fail: 4
-      total: 18
+      pass: 13
+      fail: 13
+      total: 26
   mcp_evaluations:
   - name: red-hat-lightspeed-mcp-server
     entity_ref: mcpserver:redhat/red-hat-lightspeed-mcp-server
@@ -156,7 +156,7 @@ modules:
     track_id: mcp-scorecard
     recommendation: pass
     source: soundcheck-api
-    evaluated_at: '2026-10-18T07:05:13.216526Z'
+    evaluated_at: '2026-10-22T08:46:51.829718Z'
     total_checks: 0
     soundcheck_levels_summary: {}
   - name: ansible-automation-platform
@@ -165,7 +165,7 @@ modules:
     track_id: mcp-scorecard
     recommendation: pass
     source: soundcheck-api
-    evaluated_at: '2026-10-18T07:05:13.216526Z'
+    evaluated_at: '2026-10-22T08:46:51.829718Z'
     total_checks: 15
     soundcheck_levels_summary:
       Lead:
@@ -191,13 +191,13 @@ modules:
   version: '1.0'
   repository: https://github.com/RHEcosystemAppEng/agentic-catalog.git
   path: plugins/redhat/rh-virt
-  ref: 65ed65d378d128e0018f6680ff6a44a1bb00431c
+  ref: cafbf3251623dda9c737e805e4d31249bf9cbef1
   tags:
   - ai-skill
   - virtualization
   - kubevirt
   - openshift
-  content_hash: "sha256:9f1f517c2c01983d174a5d3b83fb37b077934f4bf8feb72d80b8a09776c8f58e"
+  content_hash: "sha256:e9916b8467726e2589b6021f786266e9137d15128fc4a27829c35aef2b50185c"
   mcp_evaluations:
   - name: openshift-mcp-server
     entity_ref: mcpserver:ai5-marketplace/openshift-mcp-server
@@ -205,7 +205,7 @@ modules:
     track_id: mcp-scorecard
     recommendation: pass
     source: soundcheck-api
-    evaluated_at: '2026-10-18T07:05:13.216526Z'
+    evaluated_at: '2026-10-22T08:46:51.829718Z'
     total_checks: 15
     soundcheck_levels_summary:
       Lead:
@@ -230,10 +230,10 @@ modules:
   version: 0.0.1
   repository: https://github.com/RHEcosystemAppEng/agentic-catalog.git
   path: plugins/redhat/rh-telco
-  ref: 65ed65d378d128e0018f6680ff6a44a1bb00431c
+  ref: cafbf3251623dda9c737e805e4d31249bf9cbef1
   tags:
   - ai-skill
   - telco
   - openshift
   - policygenerator
-  content_hash: "sha256:a905bd99ea6e1b04260f55db849e4d31c664ff75b31ed6685a2fcddac603e54f"
+  content_hash: "sha256:f1e481ad26d6c9688ee4cbfed91101a4f3a608fa4a9195fef0696b3aefc8f4de"

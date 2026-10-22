@@ -11,7 +11,7 @@
         "url": "https://github.com/RHEcosystemAppEng/agentic-catalog.git",
         "path": "./plugins/redhat/ocp-admin",
         "ref": "rc/v1.0.0",
-        "sha": "65ed65d378d128e0018f6680ff6a44a1bb00431c"
+        "sha": "cafbf3251623dda9c737e805e4d31249bf9cbef1"
       },
       "policy": {
         "installation": "AVAILABLE",
@@ -27,7 +27,7 @@
         "url": "https://github.com/RHEcosystemAppEng/agentic-catalog.git",
         "path": "./plugins/redhat/rh-basic",
         "ref": "rc/v1.0.0",
-        "sha": "65ed65d378d128e0018f6680ff6a44a1bb00431c"
+        "sha": "cafbf3251623dda9c737e805e4d31249bf9cbef1"
       },
       "policy": {
         "installation": "AVAILABLE",
@@ -43,7 +43,7 @@
         "url": "https://github.com/RHEcosystemAppEng/agentic-catalog.git",
         "path": "./plugins/redhat/rh-sre",
         "ref": "rc/v1.0.0",
-        "sha": "65ed65d378d128e0018f6680ff6a44a1bb00431c"
+        "sha": "cafbf3251623dda9c737e805e4d31249bf9cbef1"
       },
       "policy": {
         "installation": "AVAILABLE",
@@ -59,7 +59,7 @@
         "url": "https://github.com/RHEcosystemAppEng/agentic-catalog.git",
         "path": "./plugins/redhat/rh-virt",
         "ref": "rc/v1.0.0",
-        "sha": "65ed65d378d128e0018f6680ff6a44a1bb00431c"
+        "sha": "cafbf3251623dda9c737e805e4d31249bf9cbef1"
       },
       "policy": {
         "installation": "AVAILABLE",
@@ -75,7 +75,7 @@
         "url": "https://github.com/RHEcosystemAppEng/agentic-catalog.git",
         "path": "./plugins/redhat/rh-telco",
         "ref": "rc/v1.0.0",
-        "sha": "65ed65d378d128e0018f6680ff6a44a1bb00431c"
+        "sha": "cafbf3251623dda9c737e805e4d31249bf9cbef1"
       },
       "policy": {
         "installation": "AVAILABLE",
