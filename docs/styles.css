@@ -500,6 +500,13 @@ section.collapsed .grid {
     white-space: nowrap;
 }
 
+.plugin-card-install-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.2rem;
+}
+
 .plugin-card-title {
     display: flex;
     align-items: flex-start;
@@ -589,15 +596,19 @@ section.collapsed .grid {
     border-color: #d1d5db;
 }
 
-.plugin-eval-badge.is-zip {
+.plugin-eval-badge.is-install {
     color: #4a7fd7;
     background: #ffffff;
     border-color: #a4c2f4;
+    border-width: 1px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.3rem 0.65rem;
     text-decoration: none;
     cursor: pointer;
 }
 
-.plugin-eval-badge.is-zip:hover {
+.plugin-eval-badge.is-install:hover {
     background: #eef4fc;
 }
 

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "openshift-virtualization": {
+      "type": "stdio",
+      "command": "podman",
+      "args": [
+        "run",
+        "--rm",
+        "-i",
+        "--network=host",
+        "--userns=keep-id:uid=65532,gid=65532",
+        "-v",
+        "${KUBECONFIG}:/kubeconfig:ro,Z",
+        "--entrypoint",
+        "/app/kubernetes-mcp-server",
+        "quay.io/ecosystem-appeng/openshift-mcp-server@sha256:3531cb78f51f8c7ebcdb21adc21358ab8924116994848a3ce1ff542b3fc23742",
+        "--kubeconfig",
+        "/kubeconfig",
+        "--toolsets",
+        "core,kubevirt"
+      ],
+      "env": {
+        "KUBECONFIG": "${KUBECONFIG}"
+      }
+    }
+  }
+}

@@ -6,6 +6,10 @@ on:
     branches: [main]
     paths:
       - 'marketplace/**'
+      - 'plugins/**'
+      - '.claude-plugin/**'
+      - '.agents/**'
+      - '.cursor-plugin/**'
       - 'scripts/**'
       - 'docs/**'
       - '.github/workflows/deploy-pages.yml'
