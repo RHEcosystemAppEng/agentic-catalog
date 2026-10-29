@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Red+Hat+Text:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=73">
+    <link rel="stylesheet" href="styles.css?v=75">
 </head>
 <body>
     <header>
@@ -48,18 +48,41 @@
         </div>
     </header>
 
-    <div class="install-callout collapsed" id="install-callout">
-        <div class="install-callout-toggle" onclick="toggleInstallCallout()" onkeydown="if(event.key==='Enter'||event.key===' ') { event.preventDefault(); toggleInstallCallout(); }" role="button" tabindex="0" aria-expanded="false" aria-controls="install-callout-body" title="Click to expand installation instructions">
+    <div class="install-callout collapsed" id="install-callouts">
+        <div class="install-callout-toggle" onclick="toggleInstallCallout(event)" onkeydown="if(event.key==='Enter'||event.key===' ') { event.preventDefault(); toggleInstallCallout(event); }" role="button" tabindex="0" aria-expanded="false" aria-controls="install-callout-body" title="Click to expand installation instructions">
             <span class="install-callout-arrow">▶</span>
-            <span class="install-callout-label">Install with <a href="https://github.com/LobsterTrap/lola" target="_blank" onclick="event.stopPropagation()">Lola</a></span>
-            <a href="https://github.com/RHEcosystemAppEng/agentic-catalog/blob/main/README.md#install" target="_blank" class="install-callout-link" onclick="event.stopPropagation()">Full instructions →</a>
+            <span class="install-callout-label">Install collections — Lola, Claude Code, or Codex</span>
+            <a href="https://github.com/RHEcosystemAppEng/agentic-catalog/blob/main/README.md#install" target="_blank" rel="noopener noreferrer" class="install-callout-link" onclick="event.stopPropagation()">Full instructions →</a>
         </div>
         <div class="install-callout-body" id="install-callout-body">
-            <div class="install-callout-command">
-                <pre><code id="install-command">lola market add rh-agentic-collections https://raw.githubusercontent.com/RHEcosystemAppEng/agentic-catalog/main/marketplace/rh-agentic-collection.yml</code></pre>
-                <button type="button" class="copy-button" id="install-copy-btn" aria-label="Copy command">Copy</button>
-            </div>
-            <p class="install-callout-note">Then <code>lola install -f &lt;module&gt;</code> — applies to current folder only.</p>
+            <p class="install-callout-intro">Replace <code>&lt;plugin-name&gt;</code> with a collection from this catalog (e.g. <code>rh-basic</code>, <code>ocp-admin</code>).</p>
+
+            <section class="install-method">
+                <h3 class="install-method-title"><a href="https://github.com/LobsterTrap/lola" target="_blank" rel="noopener noreferrer">Lola</a></h3>
+                <div class="install-callout-command">
+                    <pre><code>lola market add rh-agentic-collections https://raw.githubusercontent.com/RHEcosystemAppEng/agentic-catalog/main/marketplace/rh-agentic-collection.yml
+lola install -f &lt;plugin-name&gt;</code></pre>
+                    <button type="button" class="copy-button install-copy-btn" aria-label="Copy Lola commands">Copy</button>
+                </div>
+            </section>
+
+            <section class="install-method">
+                <h3 class="install-method-title">Claude Code</h3>
+                <div class="install-callout-command">
+                    <pre><code>claude plugin marketplace add https://github.com/RHEcosystemAppEng/agentic-catalog.git --scope project
+claude plugin install &lt;plugin-name&gt;@ecosystem-plugins --scope project</code></pre>
+                    <button type="button" class="copy-button install-copy-btn" aria-label="Copy Claude Code commands">Copy</button>
+                </div>
+            </section>
+
+            <section class="install-method">
+                <h3 class="install-method-title">Codex</h3>
+                <div class="install-callout-command">
+                    <pre><code>codex plugin marketplace add https://github.com/RHEcosystemAppEng/agentic-catalog.git --ref main
+codex plugin add &lt;plugin-name&gt;@ecosystem-plugins</code></pre>
+                    <button type="button" class="copy-button install-copy-btn" aria-label="Copy Codex commands">Copy</button>
+                </div>
+            </section>
         </div>
     </div>
 
@@ -120,6 +143,6 @@
         <div class="modal-content" id="mcp-details"></div>
     </div>
 
-    <script src="app.js?v=73"></script>
+    <script src="app.js?v=75"></script>
 </body>
 </html>

@@ -78,12 +78,7 @@ async function init() {
         // Setup search
         document.getElementById('searchInput').addEventListener('input', handleSearch);
 
-        // Setup install banner copy button
-        const installCopyBtn = document.getElementById('install-copy-btn');
-        const installCommand = document.getElementById('install-command');
-        if (installCopyBtn && installCommand) {
-            installCopyBtn.addEventListener('click', () => copyToClipboard(installCommand.textContent, installCopyBtn));
-        }
+        setupInstallCalloutCopyButtons();
 
         // Setup modal close handlers
         setupModals();
@@ -695,11 +690,19 @@ function toggleSection(sectionId) {
     section.classList.toggle('collapsed');
 }
 
-function toggleInstallCallout() {
-    const callout = document.getElementById('install-callout');
-    const toggle = callout?.querySelector('.install-callout-toggle');
-    const body = document.getElementById('install-callout-body');
-    if (!callout || !toggle || !body) return;
+function setupInstallCalloutCopyButtons() {
+    document.querySelectorAll('.install-callout-command').forEach((block) => {
+        const btn = block.querySelector('.install-copy-btn');
+        const code = block.querySelector('code');
+        if (!btn || !code) return;
+        btn.addEventListener('click', () => copyToClipboard(code.textContent, btn));
+    });
+}
+
+function toggleInstallCallout(event) {
+    const toggle = event?.currentTarget;
+    const callout = toggle?.closest?.('.install-callout');
+    if (!callout || !toggle) return;
     callout.classList.toggle('collapsed');
     toggle.setAttribute('aria-expanded', callout.classList.contains('collapsed') ? 'false' : 'true');
 }
@@ -1202,9 +1205,9 @@ function hideCollectionView() {
             el.removeAttribute('aria-hidden');
         }
     });
-    const installCallout = document.getElementById('install-callout');
-    if (installCallout) {
-        installCallout.removeAttribute('hidden');
+    const installCallouts = document.getElementById('install-callouts');
+    if (installCallouts) {
+        installCallouts.removeAttribute('hidden');
     }
 }
 
@@ -1221,9 +1224,9 @@ function showCollectionView(pluginName) {
             el.setAttribute('aria-hidden', 'true');
         }
     });
-    const installCallout = document.getElementById('install-callout');
-    if (installCallout) {
-        installCallout.setAttribute('hidden', '');
+    const installCallouts = document.getElementById('install-callouts');
+    if (installCallouts) {
+        installCallouts.setAttribute('hidden', '');
     }
 
     if (!pluginEntry) {
@@ -1893,18 +1896,25 @@ function appendInstallAccordion(panel, pluginEntry) {
         body.appendChild(pre);
     });
     addItem('3. Claude Code marketplace', false, (body) => {
+        if (install.claude && install.claude.command) {
+            const pre = document.createElement('pre');
+            const code = document.createElement('code');
+            code.textContent = String(install.claude.command);
+            pre.appendChild(code);
+            body.appendChild(pre);
+        }
         if (install.claude && install.claude.marketplace_json_url) {
+            const p = document.createElement('p');
+            p.textContent = 'Marketplace manifest: ';
             const a = document.createElement('a');
             a.className = 'collection-inline-link';
             a.href = String(install.claude.marketplace_json_url);
             a.target = '_blank';
             a.rel = 'noopener noreferrer';
             a.textContent = '.claude-plugin/marketplace.json';
-            body.appendChild(a);
+            p.appendChild(a);
+            body.appendChild(p);
         }
-        const p = document.createElement('p');
-        p.textContent = `Install plugin ${pluginEntry.name} from that marketplace (git-subdir on the hub).`;
-        body.appendChild(p);
     });
     addItem('4. Codex / ChatGPT plugins', false, (body) => {
         if (install.codex && install.codex.command) {
@@ -1928,6 +1938,13 @@ function appendInstallAccordion(panel, pluginEntry) {
         }
     });
     addItem('5. Cursor', false, (body) => {
+        if (install.cursor && install.cursor.command) {
+            const pre = document.createElement('pre');
+            const code = document.createElement('code');
+            code.textContent = String(install.cursor.command);
+            pre.appendChild(code);
+            body.appendChild(pre);
+        }
         if (install.cursor && install.cursor.marketplace_json_url) {
             const p = document.createElement('p');
             p.textContent = 'Marketplace manifest: ';
@@ -1940,12 +1957,6 @@ function appendInstallAccordion(panel, pluginEntry) {
             p.appendChild(a);
             body.appendChild(p);
         }
-        const sourcePath = (install.cursor && install.cursor.source_path) || '';
-        const p2 = document.createElement('p');
-        p2.textContent = sourcePath
-            ? `Add this repository as a marketplace in Cursor, then install ${pluginEntry.name} (relative source path ${sourcePath}).`
-            : `Add this repository as a marketplace in Cursor, then install ${pluginEntry.name}.`;
-        body.appendChild(p2);
     });
     panel.appendChild(acc);
 }

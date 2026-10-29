@@ -14,6 +14,7 @@ import plugin_registry
 from generate_mcp_data import parse_mcp_file
 from install_links import (
     attach_install,
+    load_claude_marketplace_name,
     load_claude_plugins,
     load_codex_marketplace_name,
     load_codex_plugins,
@@ -133,6 +134,7 @@ def load_hub_plugins() -> List[Dict[str, Any]]:
     codex_plugins = load_codex_plugins(repo_root)
     cursor_plugins = load_cursor_plugins(repo_root)
     codex_marketplace_name = load_codex_marketplace_name(repo_root)
+    claude_marketplace_name = load_claude_marketplace_name(repo_root)
     plugins: List[Dict[str, Any]] = []
 
     for mod in modules:
@@ -200,6 +202,7 @@ def load_hub_plugins() -> List[Dict[str, Any]]:
             codex_plugins=codex_plugins,
             cursor_plugins=cursor_plugins,
             codex_marketplace_name=codex_marketplace_name,
+            claude_marketplace_name=claude_marketplace_name,
         )
         plugins.append(plugin_entry)
         mcp_status = f", {len(mcp_servers)} MCP server(s)" if mcp_servers else ""
