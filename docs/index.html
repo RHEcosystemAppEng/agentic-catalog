@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Red+Hat+Text:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=75">
+    <link rel="stylesheet" href="styles.css?v=76">
 </head>
 <body>
     <header>
@@ -51,7 +51,7 @@
     <div class="install-callout collapsed" id="install-callouts">
         <div class="install-callout-toggle" onclick="toggleInstallCallout(event)" onkeydown="if(event.key==='Enter'||event.key===' ') { event.preventDefault(); toggleInstallCallout(event); }" role="button" tabindex="0" aria-expanded="false" aria-controls="install-callout-body" title="Click to expand installation instructions">
             <span class="install-callout-arrow">▶</span>
-            <span class="install-callout-label">Install collections — Lola, Claude Code, or Codex</span>
+            <span class="install-callout-label">Install collections — Lola, Claude Code, Codex, or Cursor</span>
             <a href="https://github.com/RHEcosystemAppEng/agentic-catalog/blob/main/README.md#install" target="_blank" rel="noopener noreferrer" class="install-callout-link" onclick="event.stopPropagation()">Full instructions →</a>
         </div>
         <div class="install-callout-body" id="install-callout-body">
@@ -81,6 +81,17 @@ claude plugin install &lt;plugin-name&gt;@ecosystem-plugins --scope project</cod
                     <pre><code>codex plugin marketplace add https://github.com/RHEcosystemAppEng/agentic-catalog.git --ref main
 codex plugin add &lt;plugin-name&gt;@ecosystem-plugins</code></pre>
                     <button type="button" class="copy-button install-copy-btn" aria-label="Copy Codex commands">Copy</button>
+                </div>
+            </section>
+
+            <section class="install-method">
+                <h3 class="install-method-title"><a href="https://cursor.com/docs/plugins" target="_blank" rel="noopener noreferrer">Cursor</a></h3>
+                <div class="install-callout-command">
+                    <pre><code>cursor-agent plugin marketplace add https://github.com/RHEcosystemAppEng/agentic-catalog.git --git-ref main
+# Install &lt;plugin-name&gt; via UI (no cursor-agent plugin install yet):
+# IDE: Customize → marketplace → &lt;plugin-name&gt;
+# CLI: cursor-agent → /plugin → Marketplace → &lt;plugin-name&gt;</code></pre>
+                    <button type="button" class="copy-button install-copy-btn" aria-label="Copy Cursor commands">Copy</button>
                 </div>
             </section>
         </div>
@@ -143,6 +154,6 @@ codex plugin add &lt;plugin-name&gt;@ecosystem-plugins</code></pre>
         <div class="modal-content" id="mcp-details"></div>
     </div>
 
-    <script src="app.js?v=75"></script>
+    <script src="app.js?v=76"></script>
 </body>
 </html>

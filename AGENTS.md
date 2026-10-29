@@ -9,7 +9,7 @@ This is the **published catalog hub** for Red Hat agentic collections. It is not
 1. **Lola marketplace** — `marketplace/rh-agentic-collection.yml` lists plugins with hub `repository`, `path` (`plugins/redhat/<plugin>`), and pinned `ref` (hub commit SHA). Users: `lola market add` the raw YAML, then `lola install -f <plugin-name>`.
 2. **Claude Code marketplace** — `.claude-plugin/marketplace.json` lists the same plugins as `git-subdir` sources.
 3. **Codex / ChatGPT plugins marketplace** — `.agents/plugins/marketplace.json` lists the same plugins in Codex's schema (`./`-prefixed `git-subdir` paths, `policy`, `category`).
-4. **Cursor marketplace** — `.cursor-plugin/marketplace.json` lists the same plugins with **relative** `source` paths (not `git-subdir`).
+4. **Cursor marketplace** — `.cursor-plugin/marketplace.json` lists the same plugins with **relative** `source` paths (not `git-subdir`). Register the repo with `cursor-agent plugin marketplace add`; install plugins via Customize or `/plugin` (no `plugin install` CLI yet).
 5. **Website** — `docs/` is the static site. `make generate` reads **this checkout only** (no `git clone`).
 
 Authoring stays in source repos (e.g. [agentic-plugins](https://github.com/RHEcosystemAppEng/agentic-plugins)). The catalog publish automation copies plugin trees here and writes Soundcheck fields onto Lola modules.

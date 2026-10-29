@@ -66,9 +66,20 @@ def load_claude_marketplace_name(repo_root: Optional[Path] = None) -> str:
     return str(data.get("name") or "").strip() or DEFAULT_HUB_MARKETPLACE_NAME
 
 
-def _repo_clone_dir(repository: str) -> str:
-    slug = plugin_registry.web_repo_url(repository)
-    return slug.rsplit("/", 1)[-1] if slug else "agentic-catalog"
+def build_cursor_install_command(
+    repository: str,
+    plugin_name: str,
+    branch: str,
+) -> str:
+    """Cursor: CLI can register the hub marketplace; plugin install is UI-only today."""
+    repo_git_url = repository.strip() or plugin_registry.web_repo_url(repository)
+    ref_flag = f" --git-ref {branch}" if branch else ""
+    return (
+        f"cursor-agent plugin marketplace add {repo_git_url}{ref_flag}\n"
+        f"# Install \"{plugin_name}\" via UI (no cursor-agent plugin install command yet):\n"
+        f"# IDE: Customize → marketplace → {plugin_name}\n"
+        f"# CLI: cursor-agent → /plugin → Marketplace → {plugin_name} → User or Project scope"
+    )
 
 
 def load_cursor_plugins(
@@ -111,7 +122,6 @@ def build_install(
         (codex_entry.get("source") or {}).get("path") or hub_path
     ).lstrip("./")
     repo_git_url = repository.strip() or plugin_registry.web_repo_url(repository)
-    clone_dir = _repo_clone_dir(repository)
     scope = DEFAULT_CLAUDE_INSTALL_SCOPE
 
     install: Dict[str, Any] = {
@@ -149,13 +159,7 @@ def build_install(
             "marketplace_json_url": cursor_raw,
             "plugin_name": name,
             "source_path": str(cursor_entry.get("source") or hub_path),
-            "command": (
-                f"git clone {repo_git_url}\n"
-                f"cd {clone_dir} && git checkout {branch}\n"
-                "# In Cursor: add this repo root as a plugin marketplace\n"
-                "# (reads .cursor-plugin/marketplace.json)\n"
-                f"# Install plugin: {name}"
-            ),
+            "command": build_cursor_install_command(repository, name, branch),
         },
     }
     return install
@@ -234,8 +238,8 @@ def _self_test() -> None:
     assert "codex plugin add rh-basic@ecosystem-plugins" in inst["codex"]["command"]
     assert ".cursor-plugin/marketplace.json" in inst["cursor"]["marketplace_json_url"]
     assert inst["cursor"]["source_path"] == "plugins/redhat/rh-basic"
-    assert "git clone" in inst["cursor"]["command"]
-    assert "Install plugin: rh-basic" in inst["cursor"]["command"]
+    assert "cursor-agent plugin marketplace add" in inst["cursor"]["command"]
+    assert "rh-basic" in inst["cursor"]["command"]
     # Defaults (no codex/cursor marketplace files loaded) still populate paths.
     bare = build_install(module, claude, catalog_branch="main")
     assert bare["codex"]["marketplace_name"] == DEFAULT_HUB_MARKETPLACE_NAME

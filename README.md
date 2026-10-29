@@ -76,15 +76,18 @@ The Codex index lives at `.agents/plugins/marketplace.json` — same packs as Cl
 
 ### 5. Cursor
 
-Cursor installs from a local checkout (no marketplace CLI documented today):
+Register the hub marketplace from the [Cursor CLI](https://cursor.com/docs/cli/overview) (`cursor-agent`). **Plugin install is UI-only** today — there is no `cursor-agent plugin install` command.
 
 ```bash
-git clone https://github.com/RHEcosystemAppEng/agentic-catalog.git
-cd agentic-catalog && git checkout main
-# In Cursor: add this repo root as a plugin marketplace
-# (reads .cursor-plugin/marketplace.json)
-# Install plugin: <plugin-name>
+cursor-agent plugin marketplace add https://github.com/RHEcosystemAppEng/agentic-catalog.git --git-ref main
 ```
+
+Then install `<plugin-name>` using one of:
+
+- **IDE:** **Customize** in the sidebar → find the plugin from your marketplace → Install (User or Project scope).
+- **CLI (interactive):** run `cursor-agent`, type `/plugin`, open **Marketplace**, select the plugin, choose scope.
+
+Manifest: `.cursor-plugin/marketplace.json` on branch **`main`**. See [Cursor plugins docs](https://cursor.com/docs/plugins).
 
 ---
 
