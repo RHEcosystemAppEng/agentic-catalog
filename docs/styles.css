@@ -291,19 +291,6 @@ header {
     word-break: break-all;
 }
 
-.install-callout-note {
-    margin: 0;
-    font-size: 0.85rem;
-    color: var(--text-muted);
-}
-
-.install-callout-note code {
-    padding: 0.15rem 0.4rem;
-    background: var(--bg-code);
-    border-radius: 4px;
-    font-size: 0.8rem;
-}
-
 .install-callout a {
     color: var(--primary);
     text-decoration: none;
@@ -316,6 +303,52 @@ header {
 .install-callout .copy-button {
     position: static;
     flex-shrink: 0;
+}
+
+.install-callout-intro {
+    margin: 0 0 1rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.install-callout-intro code {
+    padding: 0.15rem 0.4rem;
+    background: var(--bg-code);
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+
+.install-method {
+    margin-bottom: 1.25rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.install-method:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.install-method-title {
+    margin: 0 0 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    font-family: var(--font-body);
+    color: var(--text-primary);
+}
+
+.install-method-title a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.install-method-title a:hover {
+    text-decoration: underline;
+}
+
+.install-method .install-callout-command {
+    margin-bottom: 0;
 }
 
 #searchInput {

@@ -2,7 +2,7 @@
 
 Published **hub** for Red Hat agentic skill collections: plugin trees under `plugins/redhat/`, marketplace listings for Lola, Claude Code, Codex, and Cursor, and the GitHub Pages website.
 
-Skills are **authored** in source repositories such as [agentic-plugins](https://github.com/RHEcosystemAppEng/agentic-plugins). An automated catalog publish process evaluates plugins and pushes them onto this hub (`rc/v1.0.0` for the ecosystem channel, pending merge to `main`). The live website deploys from **`main`** after merge.
+Skills are **authored** in source repositories such as [agentic-plugins](https://github.com/RHEcosystemAppEng/agentic-plugins). An automated catalog publish process evaluates plugins and pushes them onto this hub. The live website and all consumer install URLs use the **`main`** branch.
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Validate Catalog](https://github.com/RHEcosystemAppEng/agentic-catalog/actions/workflows/validate.yml/badge.svg)](https://github.com/RHEcosystemAppEng/agentic-catalog/actions/workflows/validate.yml)
@@ -38,38 +38,37 @@ agentic-catalog/
 
 ## Install
 
-Four ways to consume a plugin from this hub (no ZIP releases on the ecosystem channel). Each catalog lists the same packs (e.g. `rh-basic`, `rh-sre`, `rh-virt`, `ocp-admin`); only the wire format and install UX differ.
-
-> **Branch note:** this README and the marketplace files below live on **`rc/v1.0.0`** until that branch is merged to `main`. Use `rc/v1.0.0` in every URL and `--ref` flag until then. After merge, drop `--ref` and swap `rc/v1.0.0` for `main` in raw URLs.
+Five ways to consume a plugin from this hub (no ZIP releases on the ecosystem channel). Each catalog lists the same packs (e.g. `rh-basic`, `rh-sre`, `rh-virt`, `ocp-admin`); only the wire format and install UX differ. Use branch **`main`** in every URL and `--ref` below.
 
 ### 1. Direct (GitHub)
 
 Open the plugin directory at the commit pinned in the marketplace `ref`, for example:
 
-`https://github.com/RHEcosystemAppEng/agentic-catalog/tree/rc/v1.0.0/plugins/redhat/<plugin>`
+`https://github.com/RHEcosystemAppEng/agentic-catalog/tree/main/plugins/redhat/<plugin>`
 
-Clone this repository and use the same subdirectory.
+Clone this repository on `main` and use the same subdirectory.
 
 ### 2. Lola
 
 ```bash
 lola market add rh-agentic-collections \
-  https://raw.githubusercontent.com/RHEcosystemAppEng/agentic-catalog/rc/v1.0.0/marketplace/rh-agentic-collection.yml
+  https://raw.githubusercontent.com/RHEcosystemAppEng/agentic-catalog/main/marketplace/rh-agentic-collection.yml
 lola install -f <plugin-name>
 ```
 
-### 3. Claude Code marketplace
+### 3. Claude Code
 
-Marketplace file:
+```bash
+claude plugin marketplace add https://github.com/RHEcosystemAppEng/agentic-catalog.git --scope project
+claude plugin install <plugin-name>@ecosystem-plugins --scope project
+```
 
-`https://raw.githubusercontent.com/RHEcosystemAppEng/agentic-catalog/rc/v1.0.0/.claude-plugin/marketplace.json`
-
-Add that marketplace in Claude Code, then install the plugin by name (each entry is a `git-subdir` of `plugins/redhat/<plugin>`).
+Marketplace manifest: `https://raw.githubusercontent.com/RHEcosystemAppEng/agentic-catalog/main/.claude-plugin/marketplace.json`
 
 ### 4. Codex / ChatGPT plugins
 
 ```bash
-codex plugin marketplace add https://github.com/RHEcosystemAppEng/agentic-catalog.git --ref rc/v1.0.0
+codex plugin marketplace add https://github.com/RHEcosystemAppEng/agentic-catalog.git --ref main
 codex plugin add <plugin-name>@ecosystem-plugins
 ```
 
@@ -77,7 +76,18 @@ The Codex index lives at `.agents/plugins/marketplace.json` — same packs as Cl
 
 ### 5. Cursor
 
-Add this repository (or a local clone on `rc/v1.0.0`) as a marketplace in Cursor. It reads `.cursor-plugin/marketplace.json`, which uses **relative** `source` paths (e.g. `plugins/redhat/rh-basic`) rather than `git-subdir`. Install a plugin by name from that marketplace.
+Register the hub marketplace from the [Cursor CLI](https://cursor.com/docs/cli/overview) (`cursor-agent`). **Plugin install is UI-only** today — there is no `cursor-agent plugin install` command.
+
+```bash
+cursor-agent plugin marketplace add https://github.com/RHEcosystemAppEng/agentic-catalog.git --git-ref main
+```
+
+Then install `<plugin-name>` using one of:
+
+- **IDE:** **Customize** in the sidebar → find the plugin from your marketplace → Install (User or Project scope).
+- **CLI (interactive):** run `cursor-agent`, type `/plugin`, open **Marketplace**, select the plugin, choose scope.
+
+Manifest: `.cursor-plugin/marketplace.json` on branch **`main`**. See [Cursor plugins docs](https://cursor.com/docs/plugins).
 
 ---
 
@@ -117,7 +127,7 @@ Authoring                        Catalog publish                This hub
                                                            └──────────────────────┘
 ```
 
-GitHub Pages: develop and validate on `rc/v1.0.0`; merge into `main` to publish the site.
+GitHub Pages deploys from **`main`**.
 
 ---
 

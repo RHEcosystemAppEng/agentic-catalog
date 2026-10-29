@@ -4,7 +4,7 @@ GitHub Pages site for agentic-catalog. Generated from **this hub checkout** (`ma
 
 ## Files
 
-- [`index.html`](index.html) - Catalog home (Lola install uses `main` raw marketplace URL)
+- [`index.html`](index.html) - Catalog home (one expandable install strip: Lola, Claude Code, Codex, or Cursor)
 - [`styles.css`](styles.css) - Red Hat-themed styling
 - [`app.js`](app.js) - Rendering and search (XSS-safe; no ZIP badges)
 - `data.json` - Generated plugin + MCP + Soundcheck + install metadata
@@ -39,7 +39,7 @@ Inputs:
 - `.cursor-plugin/marketplace.json` — Cursor install metadata
 - `docs/mcp.json` — optional titles/tools overlay by **mcp.json server key** (not Compass `mcp_evaluations[].name`)
 
-The Install panel renders five sections per plugin: Direct, Lola, Claude Code, Codex, Cursor.
+The Install panel renders five sections per plugin: Direct, Lola, Claude Code, Codex, Cursor. Lola, Claude, Codex, and Cursor include copy-paste commands generated from `install_links.py` (consumer branch **`main`**).
 
 There is **no** generate-time `git clone` and **no** ABEval `eval/` input. Plugins whose marketplace `path` is not on disk are omitted.
 
