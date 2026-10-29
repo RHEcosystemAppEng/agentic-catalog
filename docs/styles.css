@@ -291,19 +291,6 @@ header {
     word-break: break-all;
 }
 
-.install-callout-note {
-    margin: 0;
-    font-size: 0.85rem;
-    color: var(--text-muted);
-}
-
-.install-callout-note code {
-    padding: 0.15rem 0.4rem;
-    background: var(--bg-code);
-    border-radius: 4px;
-    font-size: 0.8rem;
-}
-
 .install-callout a {
     color: var(--primary);
     text-decoration: none;

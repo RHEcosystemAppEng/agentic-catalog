@@ -4,7 +4,7 @@ GitHub Pages site for agentic-catalog. Generated from **this hub checkout** (`ma
 
 ## Files
 
-- [`index.html`](index.html) - Catalog home (one expandable install strip: Lola, Claude Code, Codex)
+- [`index.html`](index.html) - Catalog home (one expandable install strip: Lola, Claude Code, Codex, or Cursor)
 - [`styles.css`](styles.css) - Red Hat-themed styling
 - [`app.js`](app.js) - Rendering and search (XSS-safe; no ZIP badges)
 - `data.json` - Generated plugin + MCP + Soundcheck + install metadata
